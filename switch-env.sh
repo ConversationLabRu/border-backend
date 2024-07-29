@@ -9,3 +9,4 @@ elif [ "$1" == "development" ]; then
 else
     echo "Usage: ./switch-env.sh [production|development]"
 fi
+#cat .env.dev .env2 .env3 > .env

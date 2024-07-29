@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::disableForeignKeyConstraints();
 
-        Schema::create('border_сrossings', function (Blueprint $table) {
+        Schema::create('directions', function (Blueprint $table) {
             $table->id();
-            $table->text('from');
-            $table->text('to');
-            $table->bigInteger('direction_id');
-            $table->foreign('direction_id')->references('id')->on('directions');
+            $table->text('name');
+            $table->text('logo');
+            $table->text('image');
+            $table->json('info');
         });
 
         Schema::enableForeignKeyConstraints();
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('border_сrossings');
+        Schema::dropIfExists('directions');
     }
 };

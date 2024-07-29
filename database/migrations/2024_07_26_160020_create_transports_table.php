@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('transports', function (Blueprint $table) {
-            $table->id();
-            $table->bigInteger('name');
+            $table->bigIncrements('id'); // Убедитесь, что это bigIncrements
+            $table->text('name');
             $table->text('icon');
         });
     }

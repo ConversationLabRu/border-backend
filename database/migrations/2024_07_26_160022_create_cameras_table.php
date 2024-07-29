@@ -15,9 +15,9 @@ return new class extends Migration
 
         Schema::create('cameras', function (Blueprint $table) {
             $table->id();
-            $table->text('path_to_camera');
-            $table->bigInteger('direction_id');
-            $table->foreign('direction_id')->references('id')->on('directions');
+            $table->bigInteger('border_crossing_id');
+            $table->foreign('border_crossing_id')->references('id')->on('borderсrossings');
+            $table->text('url');
             $table->text('description');
         });
 

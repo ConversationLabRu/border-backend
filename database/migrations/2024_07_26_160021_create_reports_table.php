@@ -15,16 +15,16 @@ return new class extends Migration
 
         Schema::create('reports', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('border_crossing_id');
-            $table->foreign('border_crossing_id')->references('id')->on('border_сrossings');
-            $table->bigInteger('transport_id');
+            $table->bigInteger('border_crossing_id')->unsigned();
+            $table->foreign('border_crossing_id')->references('id')->on('border_crossings');
+            $table->bigInteger('transport_id')->unsigned(); // Добавьте unsigned()
             $table->foreign('transport_id')->references('id')->on('transports');
+            $table->bigInteger('user_id')->unsigned();
+            $table->foreign('user_id')->references('id')->on('users');
             $table->dateTime('checkpoint_queue')->nullable();
             $table->dateTime('checkpoint_entry');
             $table->dateTime('checkpoint_exit');
-            $table->text('сomment')->nullable();
-            $table->bigInteger('user_id');
-            $table->foreign('user_id')->references('id')->on('users');
+            $table->text('comment')->nullable(); // Исправлена опечатка
         });
 
         Schema::enableForeignKeyConstraints();
