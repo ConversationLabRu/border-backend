@@ -13,12 +13,10 @@ return new class extends Migration
     {
         Schema::disableForeignKeyConstraints();
 
-        Schema::create('cameras', function (Blueprint $table) {
+        Schema::create('countries', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('border_crossing_id');
-            $table->foreign('border_crossing_id')->references('id')->on('borderсrossings');
-            $table->text('url');
-            $table->text('description');
+            $table->text('name');
+            $table->text('logo');
         });
 
         Schema::enableForeignKeyConstraints();
@@ -29,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('cameras');
+        Schema::dropIfExists('countries');
     }
 };

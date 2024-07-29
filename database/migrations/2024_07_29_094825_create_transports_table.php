@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('transports', function (Blueprint $table) {
-            $table->bigIncrements('id'); // Убедитесь, что это bigIncrements
+            $table->id();
             $table->text('name');
             $table->text('icon');
         });
