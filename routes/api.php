@@ -24,7 +24,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('/test/testMethod', [TestController::class, 'testMethod']);
 Route::get('/directions/all', [DirectionController::class, 'getAll']);
 Route::get('/directions/borderCrossing', [BorderCrossingController::class, 'getAll']);
 Route::get('/directions/borderCrossing/cameras', [CameraController::class, 'getAll']);
@@ -32,11 +31,6 @@ Route::get('/directions/borderCrossing/reports/getLastReports', [ReportControlle
 Route::get('/directions/borderCrossing/reports/getAll', [ReportController::class, 'getAll']);
 Route::post('/directions/borderCrossing/reports/createReport', [ReportController::class, 'createReport']);
 
-Route::get("/", function () {
-    return response()->json([
-        'message' => 'Hello World!'
-    ]);
-});
 
 //Route::middleware('auth.api')->group(function () {
 //    Route::get('/test/testMethod', [TestController::class, 'testMethod']);

@@ -5,6 +5,8 @@ namespace App\Http\directions\borderCrossings\Controllers;
 use App\Http\Controllers\Controller;
 use App\Http\directions\borderCrossings\Services\BorderCrossingService;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Http;
 
 
 class BorderCrossingController extends Controller
@@ -21,9 +23,11 @@ class BorderCrossingController extends Controller
 
     public function getAll(Request $request)
     {
-        $directionId = (int) $request->query('directionId');
-
-        return response()->json($this->borderCrossingService->getAllBorderCrossings($directionId));
+        try {
+            return response()->json($this->borderCrossingService->getAllBorderCrossings($request));
+        } catch (\ArgumentCountError $e) {
+            return response()->json(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
     }
 
 }

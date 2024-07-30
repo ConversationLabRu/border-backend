@@ -34,7 +34,7 @@ class AuthorizationAPI
         return $next($request);
     }
 
-    private function checkSecurityTGBot(String $authHeader)
+    public function checkSecurityTGBot(String $authHeader)
     {
         $rawData = trim($authHeader[1]);
 

@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\directions\borderCrossings\reports\Entities\Report;
 use App\Http\directions\borderCrossings\reports\Services\ReportService;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Nette\Schema\ValidationException;
 
 class ReportController extends Controller
 {
@@ -21,47 +23,29 @@ class ReportController extends Controller
 
     public function getLastReports(Request $request)
     {
-        $borderCrossingId = (int) $request->query("borderCrossingId");
-
-        return response()->json($this->reportService->getLastReportByBorderCrossing($borderCrossingId));
+        try {
+            return response()->json($this->reportService->getLastReportByBorderCrossing($request));
+        } catch (\ArgumentCountError $e) {
+            return response()->json(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
     }
 
     public function getAll(Request $request)
     {
-        $borderCrossingId = (int) $request->query("borderCrossingId");
-
-        return response()->json($this->reportService->getAllReportByBorderCrossing($borderCrossingId));
+        try {
+            return response()->json($this->reportService->getAllReportByBorderCrossing($request));
+        } catch (\ArgumentCountError $e) {
+            return response()->json(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
     }
 
 
     public function createReport(Request $request)
     {
-        // Валидация данных
-        $request->validate([
-            'border_crossing_id' => 'required|exists:borderсrossings,id',
-            'transport_id' => 'required|exists:transports,id',
-            'user_id' => 'required|exists:users,id',
-            'checkpoint_queue' => 'nullable|date',
-            'checkpoint_entry' => 'required|date',
-            'checkpoint_exit' => 'required|date',
-            'comment' => 'nullable|string',
-        ]);
-
-        // Создание экземпляра модели
-        $report = new Report();
-
-        // Заполнение модели данными из запроса
-        $report->fill($request->only([
-            'border_crossing_id',
-            'transport_id',
-            'user_id',
-            'checkpoint_queue',
-            'checkpoint_entry',
-            'checkpoint_exit',
-            'comment'
-        ]));
-
-        // Возвращение ответа
-        return response()->json($this->reportService->createReport($report), 201); // Возвращает созданную запись с кодом ответа 201
+        try {
+            return response()->json($this->reportService->createReport($request), 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['message' => $e->getMessage()], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
     }
 }
