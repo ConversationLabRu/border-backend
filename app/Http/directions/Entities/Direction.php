@@ -4,6 +4,7 @@ namespace App\Http\directions\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 
+
 class Direction extends Model
 {
     // Указываем, что таблица называется 'directions'

@@ -9,6 +9,58 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Nette\Schema\ValidationException;
 
+
+/**
+ * @OA\Schema(
+ *     schema="Report",
+ *     type="object",
+ *     required={"id", "name"},
+ *     @OA\Property(
+ *         property="id",
+ *         type="integer",
+ *         format="int64",
+ *         example=1
+ *     ),
+ *     @OA\Property(
+ *         property="border_crossing_id",
+ *         type="integer",
+ *         format="int64",
+ *         example=1
+ *     ),
+ *     @OA\Property(
+ *          property="transport_id",
+ *          type="integer",
+ *          format="int64",
+ *          example=1
+ *      ),
+ *     @OA\Property(
+ *          property="user_id",
+ *          type="integer",
+ *          format="int64",
+ *          example=1
+ *      ),
+ *     @OA\Property(
+ *         property="checkpoint_queue",
+ *         type="timestamp",
+ *         example="2024-07-01 08:00:00"
+ *     ),
+ *     @OA\Property(
+ *          property="checkpoint_entry",
+ *          type="timestamp",
+ *          example="2024-07-01 08:00:00"
+ *      ),
+ *     @OA\Property(
+ *          property="checkpoint_exit",
+ *          type="timestamp",
+ *          example="2024-07-01 08:00:00"
+ *      ),
+ *     @OA\Property(
+ *          property="comment",
+ *          type="string",
+ *          example="comment"
+ *      )
+ * )
+ */
 class ReportController extends Controller
 {
     private ReportService $reportService;
@@ -21,6 +73,28 @@ class ReportController extends Controller
         $this->reportService = $reportService;
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/directions/borderCrossing/reports/getLastReports",
+     *     tags={"Report"},
+     *     summary="Получение последних 6-и отчетов погран-перехода",
+     *     @OA\Response(
+     *       response="200",
+     *       description="Request Successful",
+     *       @OA\JsonContent(
+     *           type="array",
+     *           @OA\Items(ref="#/components/schemas/Report")
+     *       )
+     *     ),
+     *     @OA\Response(
+     *        response="400",
+     *        description="Ошибка при не переданном GET парметре",
+     *        @OA\JsonContent(
+     *            @OA\Property(property="message", type="string", example="Не передан borderCrossingId")
+     *        )
+     *      )
+     * )
+     */
     public function getLastReports(Request $request)
     {
         try {
@@ -30,6 +104,28 @@ class ReportController extends Controller
         }
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/directions/borderCrossing/reports/getAll",
+     *     tags={"Report"},
+     *     summary="Получение всех отчетов погран-перехода",
+     *     @OA\Response(
+     *       response="200",
+     *       description="Request Successful",
+     *       @OA\JsonContent(
+     *           type="array",
+     *           @OA\Items(ref="#/components/schemas/Report")
+     *       )
+     *     ),
+     *     @OA\Response(
+     *        response="400",
+     *        description="Ошибка при не переданном GET парметре",
+     *        @OA\JsonContent(
+     *            @OA\Property(property="message", type="string", example="Не передан borderCrossingId")
+     *        )
+     *      )
+     * )
+     */
     public function getAll(Request $request)
     {
         try {
@@ -39,7 +135,116 @@ class ReportController extends Controller
         }
     }
 
-
+    /**
+     * @OA\Post(
+     *     path="/api/directions/borderCrossing/reports/createReport",
+     *     tags={"Report"},
+     *     summary="Создать новый отчет",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             type="object",
+     *             required={"border_crossing_id", "transport_id", "user_id", "checkpoint_entry", "checkpoint_exit"},
+     *             @OA\Property(
+     *                 property="border_crossing_id",
+     *                 type="integer",
+     *                 example=1
+     *             ),
+     *             @OA\Property(
+     *                 property="transport_id",
+     *                 type="integer",
+     *                 example=2
+     *             ),
+     *             @OA\Property(
+     *                 property="user_id",
+     *                 type="integer",
+     *                 example=3
+     *             ),
+     *             @OA\Property(
+     *                 property="checkpoint_queue",
+     *                 type="string",
+     *                 format="date-time",
+     *                 example="2024-07-01T08:00:00Z"
+     *             ),
+     *             @OA\Property(
+     *                 property="checkpoint_entry",
+     *                 type="string",
+     *                 format="date-time",
+     *                 example="2024-07-01T09:00:00Z"
+     *             ),
+     *             @OA\Property(
+     *                 property="checkpoint_exit",
+     *                 type="string",
+     *                 format="date-time",
+     *                 example="2024-07-01T10:00:00Z"
+     *             ),
+     *             @OA\Property(
+     *                 property="comment",
+     *                 type="string",
+     *                 example="Sample comment"
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response="201",
+     *         description="Report Created Successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *          @OA\Property(
+     *                   property="id",
+     *                   type="integer",
+     *                   example=1
+     *               ),
+     *             @OA\Property(
+     *                  property="border_crossing_id",
+     *                  type="integer",
+     *                  example=1
+     *              ),
+     *              @OA\Property(
+     *                  property="transport_id",
+     *                  type="integer",
+     *                  example=2
+     *              ),
+     *              @OA\Property(
+     *                  property="user_id",
+     *                  type="integer",
+     *                  example=3
+     *              ),
+     *              @OA\Property(
+     *                  property="checkpoint_queue",
+     *                  type="string",
+     *                  format="date-time",
+     *                  example="2024-07-01T08:00:00Z"
+     *              ),
+     *              @OA\Property(
+     *                  property="checkpoint_entry",
+     *                  type="string",
+     *                  format="date-time",
+     *                  example="2024-07-01T09:00:00Z"
+     *              ),
+     *              @OA\Property(
+     *                  property="checkpoint_exit",
+     *                  type="string",
+     *                  format="date-time",
+     *                  example="2024-07-01T10:00:00Z"
+     *              ),
+     *              @OA\Property(
+     *                  property="comment",
+     *                  type="string",
+     *                  example="Sample comment"
+     *              )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response="422",
+     *         description="Ошибка если Entity не прошел валидацию",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="message", type="string", example="The transport id field is required.")
+     *         )
+     *     ),
+     * )
+     */
     public function createReport(Request $request)
     {
         try {

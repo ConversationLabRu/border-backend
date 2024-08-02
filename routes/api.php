@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\TestController;
+use App\Http\directions\borderCrossings\reports\transports\Controllers\TransportController;
 use App\Http\directions\Controllers\DirectionController;
 use App\Http\directions\borderCrossings\Controllers\BorderCrossingController;
 use App\Http\directions\borderCrossings\cameras\Controllers\CameraController;
@@ -30,6 +31,7 @@ Route::get('/directions/borderCrossing/cameras', [CameraController::class, 'getA
 Route::get('/directions/borderCrossing/reports/getLastReports', [ReportController::class, 'getLastReports']);
 Route::get('/directions/borderCrossing/reports/getAll', [ReportController::class, 'getAll']);
 Route::post('/directions/borderCrossing/reports/createReport', [ReportController::class, 'createReport']);
+Route::get('/directions/borderCrossing/reports/transports', [TransportController::class, 'getAll']);
 
 
 //Route::middleware('auth.api')->group(function () {

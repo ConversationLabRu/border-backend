@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\directions\borderCrossings\reports\Entities;
+namespace App\Http\directions\borderCrossings\reports\transports\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 

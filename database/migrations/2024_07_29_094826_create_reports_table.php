@@ -21,10 +21,10 @@ return new class extends Migration
             $table->foreign('transport_id')->references('id')->on('transports');
             $table->bigInteger('user_id')->unsigned();
             $table->foreign('user_id')->references('id')->on('users');
-            $table->dateTime('checkpoint_queue')->nullable();
-            $table->dateTime('checkpoint_entry');
-            $table->dateTime('checkpoint_exit');
-            $table->text('сomment')->nullable();
+            $table->timestamp('checkpoint_queue')->nullable();
+            $table->timestamp('checkpoint_entry');
+            $table->timestamp('checkpoint_exit');
+            $table->text('comment')->nullable();
         });
 
         Schema::enableForeignKeyConstraints();
