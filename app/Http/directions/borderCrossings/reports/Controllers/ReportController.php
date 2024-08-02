@@ -75,7 +75,7 @@ class ReportController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/directions/borderCrossing/reports/getLastReports",
+     *     path="/api/directions/borderCrossing/reports/last",
      *     tags={"Report"},
      *     summary="Получение последних 6-и отчетов погран-перехода",
      *     @OA\Response(
@@ -106,7 +106,7 @@ class ReportController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/directions/borderCrossing/reports/getAll",
+     *     path="/api/directions/borderCrossing/reports",
      *     tags={"Report"},
      *     summary="Получение всех отчетов погран-перехода",
      *     @OA\Response(
@@ -126,7 +126,7 @@ class ReportController extends Controller
      *      )
      * )
      */
-    public function getAll(Request $request)
+    public function index(Request $request)
     {
         try {
             return response()->json($this->reportService->getAllReportByBorderCrossing($request));
@@ -137,7 +137,7 @@ class ReportController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/api/directions/borderCrossing/reports/createReport",
+     *     path="/api/directions/borderCrossing/reports",
      *     tags={"Report"},
      *     summary="Создать новый отчет",
      *     @OA\RequestBody(
@@ -245,7 +245,7 @@ class ReportController extends Controller
      *     ),
      * )
      */
-    public function createReport(Request $request)
+    public function store(Request $request)
     {
         try {
             return response()->json($this->reportService->createReport($request), 201);

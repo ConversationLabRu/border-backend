@@ -5,13 +5,13 @@
         "version": "1.0.0"
     },
     "paths": {
-        "/api/directions/all": {
+        "/api/directions": {
             "get": {
                 "tags": [
                     "Direction"
                 ],
                 "summary": "Получение всех направлений",
-                "operationId": "434ea51607a73b975c2067e4e9e350f7",
+                "operationId": "a6ce81d165ecb953dda16b03c6722076",
                 "responses": {
                     "200": {
                         "description": "Request Successful",
@@ -35,7 +35,7 @@
                     "BorderCrossing"
                 ],
                 "summary": "Получение всех погран-переходов по направлению",
-                "operationId": "8358bae8f635e2f3b1911c34c7461add",
+                "operationId": "a866e3b9e43b2e8ee5ae78242f05a9e1",
                 "responses": {
                     "200": {
                         "description": "Request Successful",
@@ -75,7 +75,7 @@
                     "Cameras"
                 ],
                 "summary": "Получение всех камер по погран-переходу",
-                "operationId": "0fe77c4f054cf612e22ddc75cfd83d2f",
+                "operationId": "43cae11791cb64c7042abed8a634bba3",
                 "responses": {
                     "200": {
                         "description": "Request Successful",
@@ -109,13 +109,13 @@
                 }
             }
         },
-        "/api/directions/borderCrossing/reports/getLastReports": {
+        "/api/directions/borderCrossing/reports/last": {
             "get": {
                 "tags": [
                     "Report"
                 ],
                 "summary": "Получение последних 6-и отчетов погран-перехода",
-                "operationId": "6264486168552aaec5d0c13229959281",
+                "operationId": "bd5975c8693ec3b89b12a950f94c2474",
                 "responses": {
                     "200": {
                         "description": "Request Successful",
@@ -149,13 +149,13 @@
                 }
             }
         },
-        "/api/directions/borderCrossing/reports/getAll": {
+        "/api/directions/borderCrossing/reports": {
             "get": {
                 "tags": [
                     "Report"
                 ],
                 "summary": "Получение всех отчетов погран-перехода",
-                "operationId": "42dee709f199f2a42572d9fc08772777",
+                "operationId": "650562ca1644f2c5585234f6f270dcc6",
                 "responses": {
                     "200": {
                         "description": "Request Successful",
@@ -187,15 +187,13 @@
                         }
                     }
                 }
-            }
-        },
-        "/api/directions/borderCrossing/reports/createReport": {
+            },
             "post": {
                 "tags": [
                     "Report"
                 ],
                 "summary": "Создать новый отчет",
-                "operationId": "111376099aac28ce42a996d2a02a77fc",
+                "operationId": "2fa6b45bbd6bc7430bf030cae4c41696",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -319,7 +317,7 @@
                     "Transport"
                 ],
                 "summary": "Получение всех видов ТС",
-                "operationId": "6c3759a0c020b2b96682e062fc0f3978",
+                "operationId": "ee8bff5a672458a4ed2482a8bcd0e905",
                 "responses": {
                     "200": {
                         "description": "Request Successful",

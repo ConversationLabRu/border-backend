@@ -79,7 +79,7 @@ class BorderCrossingController extends Controller
      *      )
      * )
      */
-    public function getAll(Request $request)
+    public function index(Request $request)
     {
         try {
             return response()->json($this->borderCrossingService->getAllBorderCrossings($request));

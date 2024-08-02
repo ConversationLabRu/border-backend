@@ -58,7 +58,7 @@ class ReportsAPITest extends TestCase
         $this->app->instance(ReportService::class, $mockBorderCrossingService);
 
         // Send a GET request to the endpoint
-        $response = $this->get('/api/directions/borderCrossing/reports/getLastReports?borderCrossingId=1');
+        $response = $this->get('/api/directions/borderCrossing/reports/last?borderCrossingId=1');
 
         // Assert that the response status is 200
         $response->assertStatus(200);
@@ -75,7 +75,7 @@ class ReportsAPITest extends TestCase
     public function test_get_last_report_without_get_parametr(): void
     {
         // Отправка GET запроса без параметра
-        $response = $this->get('/api/directions/borderCrossing/reports/getLastReports');
+        $response = $this->get('/api/directions/borderCrossing/reports/last');
 
         // Проверка, что статус ответа 400
         $response->assertStatus(400);
@@ -128,7 +128,7 @@ class ReportsAPITest extends TestCase
         $this->app->instance(ReportService::class, $mockBorderCrossingService);
 
         // Send a GET request to the endpoint
-        $response = $this->get('/api/directions/borderCrossing/reports/getAll?borderCrossingId=1');
+        $response = $this->get('/api/directions/borderCrossing/reports?borderCrossingId=1');
 
         // Assert that the response status is 200
         $response->assertStatus(200);
@@ -143,7 +143,7 @@ class ReportsAPITest extends TestCase
     public function test_get_all_report_without_get_parametr(): void
     {
         // Отправка GET запроса без параметра
-        $response = $this->get('/api/directions/borderCrossing/reports/getAll');
+        $response = $this->get('/api/directions/borderCrossing/reports');
 
         // Проверка, что статус ответа 400
         $response->assertStatus(400);
@@ -188,7 +188,7 @@ class ReportsAPITest extends TestCase
         $this->app->instance(ReportService::class, $mockReportService);
 
         // Подготовка запроса
-        $response = $this->postJson('/api/directions/borderCrossing/reports/createReport', $data);
+        $response = $this->postJson('/api/directions/borderCrossing/reports', $data);
 
         // Проверка, что статус ответа 201
         $response->assertStatus(Response::HTTP_CREATED);
@@ -213,7 +213,7 @@ class ReportsAPITest extends TestCase
         ];
 
         // Подготовка запроса
-        $response = $this->postJson('/api/directions/borderCrossing/reports/createReport', $data);
+        $response = $this->postJson('/api/directions/borderCrossing/reports', $data);
 
         // Проверка, что статус ответа 201
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -241,7 +241,7 @@ class ReportsAPITest extends TestCase
         ];
 
         // Подготовка запроса
-        $response = $this->postJson('/api/directions/borderCrossing/reports/createReport', $data);
+        $response = $this->postJson('/api/directions/borderCrossing/reports', $data);
 
         // Проверка, что статус ответа 201
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);

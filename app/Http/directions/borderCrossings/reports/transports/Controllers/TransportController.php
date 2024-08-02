@@ -61,7 +61,7 @@ class TransportController extends Controller
      *     )
      * )
      */
-    public function getAll()
+    public function index()
     {
         return response()->json($this->transportService->getAllTransport());
     }

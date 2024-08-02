@@ -53,7 +53,7 @@ class DirectionController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/directions/all",
+     *     path="/api/directions",
      *     tags={"Direction"},
      *     summary="Получение всех направлений",
      *     @OA\Response(
@@ -66,7 +66,7 @@ class DirectionController extends Controller
      *     )
      * )
      */
-    public function getAll()
+    public function index()
     {
         return response()->json($this->directionService->getAllDirections());
     }

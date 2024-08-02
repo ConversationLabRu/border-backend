@@ -25,13 +25,28 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('/directions/all', [DirectionController::class, 'getAll']);
-Route::get('/directions/borderCrossing', [BorderCrossingController::class, 'getAll']);
-Route::get('/directions/borderCrossing/cameras', [CameraController::class, 'getAll']);
-Route::get('/directions/borderCrossing/reports/getLastReports', [ReportController::class, 'getLastReports']);
-Route::get('/directions/borderCrossing/reports/getAll', [ReportController::class, 'getAll']);
-Route::post('/directions/borderCrossing/reports/createReport', [ReportController::class, 'createReport']);
-Route::get('/directions/borderCrossing/reports/transports', [TransportController::class, 'getAll']);
+Route::prefix('directions')->group(function () {
+    Route::get('/', [DirectionController::class, 'index']); // GET /directions
+});
+
+Route::prefix('directions/borderCrossing')->group(function () {
+    Route::get('/', [BorderCrossingController::class, 'index']); // GET /directions/borderCrossing
+});
+
+Route::prefix('directions/borderCrossing')->group(function () {
+    Route::get('/cameras', [CameraController::class, 'index']); // GET /directions/borderCrossing/cameras
+});
+
+Route::prefix('directions/borderCrossing/reports')->group(function () {
+    Route::get('/last', [ReportController::class, 'getLastReports']); // GET /directions/borderCrossing/reports/last
+    Route::get('/', [ReportController::class, 'index']); // GET /directions/borderCrossing/reports
+    Route::post('/', [ReportController::class, 'store']); // POST /directions/borderCrossing/reports
+});
+
+Route::prefix('directions/borderCrossing/reports')->group(function () {
+    Route::get('/transports', [TransportController::class, 'index']); // GET /directions/borderCrossing/reports/transports
+});
+
 
 
 //Route::middleware('auth.api')->group(function () {

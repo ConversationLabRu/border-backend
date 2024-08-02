@@ -40,7 +40,7 @@ class DirectionAPITest extends TestCase
         $this->app->instance(DirectionService::class, $mockDirectionService);
 
         // Send a GET request to the endpoint
-        $response = $this->get('/api/directions/all');
+        $response = $this->get('/api/directions');
 
         // Assert that the response status is 200
         $response->assertStatus(200);
@@ -72,7 +72,7 @@ class DirectionAPITest extends TestCase
         $this->app->instance(DirectionService::class, $mockDirectionService);
 
         // Send a GET request to the endpoint
-        $response = $this->get('/api/directions/all');
+        $response = $this->get('/api/directions');
 
         // Assert that the response status is 200
         $response->assertStatus(200);
