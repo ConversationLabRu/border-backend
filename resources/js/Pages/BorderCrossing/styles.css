@@ -1,6 +1,19 @@
+.image-container {
+    position: relative;
+}
+
 .header-image {
-    width: 100%;
-    height: 5%;
+    width: 100%; /* Или установите нужную ширину */
+    height: 5%; /* Или установите нужную высоту */
+}
+
+.overlay-text {
+    position: absolute;
+    top: 70%;
+    left: 0;
+    margin-left: 4%;
+    color: white;
+    font-weight: bold;
 }
 
 .container {
@@ -9,8 +22,98 @@
     margin: 5%;
 }
 
+.img-text {
+    font-size: 24px;
+}
+
 .header-text {
     margin-bottom: 5%;
     font-size: 14px;
     color: var(--tg-theme-text-color);
+}
+
+.tgui-1191c597a64dbd25 {
+    width: 100%;
+    height: 100%;
+}
+
+.tgui-389a43acd684137a {
+    padding: 15px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px 10px rgba(0, 0, 10, .2);
+    margin-bottom: 5%;
+}
+
+.tgui-28e0a2576155be01 {
+    display: flex;
+    flex-direction: row;
+    position: relative;
+    margin-right: 45%;
+}
+
+.border-info-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.avatar-country {
+    position: absolute;
+    left: 90%;
+}
+
+.text-card {
+    font-size: 16px;
+    white-space: nowrap; /* Не переносить текст на новую строку */
+}
+
+.loader-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.7); /* полупрозрачный белый цвет */
+    z-index: 9999; /* высокий z-index, чтобы оверлей был поверх всех элементов */
+}
+
+.border-crossing-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 5%;
+    border-bottom: 0.5px rgba(0, 0, 0, 0.2) solid;
+}
+
+.border-crossing-info {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 5%;
+    border-bottom: 0.5px rgba(0, 0, 0, 0.2) solid;
+}
+
+.non-margin {
+    margin-bottom: 0;
+}
+
+.title-info {
+    font-weight: bolder;
+}
+
+.desc-info {
+    font-size: 14px;
+    color: #000000c4;
+}
+
+.text-container {
+    display: flex;
+    flex-direction: column;
 }

@@ -5,6 +5,7 @@ import { useFetching } from "@/hooks/useFetching.js";
 import DirectionService from "@/API/DirectionService.js";
 import { useState, useEffect } from "react";
 import {useNavigate} from "react-router-dom";
+import {DirectionCard} from "@/Pages/Directions/Components/card.jsx";
 
 export default function Directions() {
     const [directions, setDirections] = useState([]);
@@ -43,7 +44,7 @@ export default function Directions() {
                             key={direction.id}
                             direction={direction.name}
                             pathImg={direction.logo}
-                            onClick={() => {navigate(`/borderCrossing/${id}`);}}
+                            onClick={() => {navigate(`/borderCrossing/${direction.id}`);}}
                         />
                     ))
                 ) : (

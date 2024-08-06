@@ -1,5 +1,5 @@
-import {Image} from "@telegram-apps/telegram-ui";
 import "./styles.css"
+import {Image} from "@telegram-apps/telegram-ui";
 
 export function DirectionCard({direction, pathImg, onClick}) {
     return (
@@ -9,6 +9,7 @@ export function DirectionCard({direction, pathImg, onClick}) {
                   className={"border-radius-icon"}
                   size={40}
                   src={`${pathImg}`}
+                  alt={'logo'}
               />
 
               <div className="text-container">

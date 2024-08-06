@@ -1,24 +1,32 @@
 const path = require('path');
 
 module.exports = {
-    entry: './resources/js/app.jsx',
+    entry: './resources/js/app.js',
     output: {
-        path: path.resolve(__dirname, 'dist'),
         filename: 'bundle.js',
+        path: path.resolve(__dirname, 'public/js'),
+        publicPath: '/js/'
     },
     module: {
         rules: [
             {
-                test: /\.jsx?$/, // Обрабатываем файлы .js и .jsx
+                test: /\.js$/,
                 exclude: /node_modules/,
                 use: {
                     loader: 'babel-loader',
-                },
-            },
-            // Другие правила
-        ],
+                    options: {
+                        presets: ['@babel/preset-env', '@babel/preset-react']
+                    }
+                }
+            }
+        ]
     },
-    resolve: {
-        extensions: ['.js', '.jsx'], // Разрешаем расширения .js и .jsx
-    },
+    plugins: [
+
+    ],
+    devServer: {
+        contentBase: path.join(__dirname, 'public'),
+        compress: true,
+        port: 9000
+    }
 };
