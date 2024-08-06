@@ -30,11 +30,11 @@ class BorderCrossing extends Model
 
     public function fromCity()
     {
-        return $this->belongsTo(City::class, 'from');
+        return $this->belongsTo(City::class, 'from_id');
     }
 
     public function toCity()
     {
-        return $this->belongsTo(City::class, 'to');
+        return $this->belongsTo(City::class, 'to_id');
     }
 }

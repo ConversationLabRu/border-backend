@@ -15,6 +15,8 @@ class BorderCrossingService
 
         if ($directionId == 0) throw new \ArgumentCountError("Не передан directionId");
 
-        return BorderCrossing::all()->where("direction_id", $directionId);
+        return BorderCrossing::with('direction', 'fromCity.country', 'toCity.country')
+            ->where("direction_id", $directionId)
+            ->get();
     }
 }
