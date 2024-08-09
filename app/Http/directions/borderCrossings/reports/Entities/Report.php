@@ -3,6 +3,7 @@
 namespace App\Http\directions\borderCrossings\reports\Entities;
 
 use App\Http\directions\borderCrossings\Entities\BorderCrossing;
+use App\Http\directions\borderCrossings\reports\transports\Entities\Transport;
 use App\Http\directions\Entities\User;
 use Illuminate\Database\Eloquent\Model;
 
@@ -19,7 +20,8 @@ class Report extends Model
         'checkpoint_queue',
         'checkpoint_entry',
         'checkpoint_exit',
-        'comment'
+        'comment',
+        'is_flipped_direction'
     ];
 
     // Если не используете timestamps, укажите это

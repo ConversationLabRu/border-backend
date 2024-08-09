@@ -20,3 +20,19 @@
     color: #000000c4;
     font-weight: 700;
 }
+
+.title-crossing-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.time-desc-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-between;
+    color: #585858;
+    margin-bottom: 3%;
+}

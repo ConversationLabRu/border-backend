@@ -5,13 +5,15 @@ import { useFetching } from "@/hooks/useFetching.js";
 import DirectionService from "@/API/DirectionService.js";
 import React, { useState, useEffect } from "react";
 import BorderCrossingService from "@/API/BorderCrossingService.js";
-import { useParams } from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import { ThreeDots } from "react-loader-spinner";
 import { ServerURL } from "@/API/ServerConst.js";
 
 export default function BorderCrossing() {
     const [directionCrossings, setDirectionCrossings] = useState([]);
     const { id } = useParams();
+    const navigate = useNavigate();
+
 
     useEffect(() => {
         console.log(id);
@@ -22,7 +24,7 @@ export default function BorderCrossing() {
                 // Handle error
             } else {
                 setDirectionCrossings(r);
-                console.log(r[0]?.direction?.info); // Используйте console.log для отладки
+                console.log(r); // Используйте console.log для отладки
             }
         }).catch((r) => {
             // Handle error
@@ -65,9 +67,20 @@ export default function BorderCrossing() {
 
                             <List>
                                 {directionCrossings.map((direction, index) => (
-                                    <div className="border-crossing-container" key={index}>
+                                    <div className="border-crossing-container"
+                                         key={index}
+                                         onClick={() => {
+                                             navigate(`/borderCrossing/info/${direction.id}`,
+                                                 {
+                                                     state: {
+                                                         directionCrossing: directionCrossings[index]
+                                                     }
+                                                 }
+                                             );
+                                         }
+                                    }>
                                         <div className={"border-info-container"}>
-                                            <AvatarStack className={"avatar-container"}>
+                                            <AvatarStack>
                                                 <React.Fragment>
                                                     <Avatar
                                                         size={40}

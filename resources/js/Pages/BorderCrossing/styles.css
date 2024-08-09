@@ -117,3 +117,55 @@
     display: flex;
     flex-direction: column;
 }
+
+.btn-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.btn {
+    box-shadow: 0px 0px 10px 5px rgba(0, 0, 50, .2);
+    width: 20%;
+    height: fit-content;
+    padding: 3% 10%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 10px;
+}
+
+.btn img {
+    width: 40%;
+    margin-bottom: 10%;
+}
+
+.report-container-title {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    margin-top: 5%;
+    margin-bottom: 5%;
+}
+
+.link-report {
+    color: #0228d9;
+}
+
+.avatar-container {
+    display: flex;
+    flex-direction: row;
+}
+
+.avatar-stack-report {
+    margin-right: 5%;
+}
+
+.report-elem-logo-container {
+    display: flex;
+    flex-direction: row;
+}
+
+.date-create-report-text {
+    color: rgb(88, 88, 88);
+}

@@ -22,6 +22,7 @@ return new class extends Migration
             $table->bigInteger('to_id')->unsigned();
             $table->foreign('to_id')->references('id')->on('cities');
             $table->boolean('is_quque');
+            $table->text('header_image');
         });
 
         Schema::enableForeignKeyConstraints();

@@ -1,0 +1,48 @@
+/* RadioButton.css */
+.radio-button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Распределяет пространство между текстом и кружком */
+    cursor: pointer;
+    font-family: Arial, sans-serif;
+    position: relative;
+    margin-bottom: 2%;
+}
+
+.radio-button .radio-input {
+    opacity: 0;
+    position: absolute;
+    cursor: pointer;
+}
+
+.radio-button .radio-custom {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid #007aff;
+    display: inline-block;
+    position: relative;
+    background-color: #fff;
+}
+
+.radio-button .radio-input:checked + .radio-custom {
+    border-color: #007aff;
+    background-color: #007aff;
+}
+
+.radio-button .radio-input:checked + .radio-custom::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #fff;
+    top: 4px;
+    left: 4px;
+}
+
+.radio-button .radio-label {
+    font-size: 14px;
+    color: #333;
+    margin-right: 15px;
+}

@@ -27,7 +27,8 @@ class ReportService
 
         if ($borderCrossingId == 0) throw new \ArgumentCountError("Не передан borderCrossingId");
 
-        return Report::where("border_crossing_id", $borderCrossingId)
+        return Report::with('transport')
+            ->where("border_crossing_id", $borderCrossingId)
             ->orderBy('checkpoint_exit', 'desc')
             ->get();
     }
@@ -43,6 +44,7 @@ class ReportService
             'checkpoint_entry' => 'required|date',
             'checkpoint_exit' => 'required|date',
             'comment' => 'nullable|string',
+            'is_flipped_direction' => 'nullable|boolean'
         ]);
 
         // Создание экземпляра модели
@@ -56,7 +58,8 @@ class ReportService
             'checkpoint_queue',
             'checkpoint_entry',
             'checkpoint_exit',
-            'comment'
+            'comment',
+            'is_flipped_direction'
         ]));
 
         $report->save();

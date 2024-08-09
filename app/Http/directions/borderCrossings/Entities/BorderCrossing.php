@@ -15,7 +15,8 @@ class BorderCrossing extends Model
         'direction_id',
         'from',
         'to',
-        'is_queue'
+        'is_queue',
+        'header_image'
     ];
 
     // Если не используете timestamps, укажите это
