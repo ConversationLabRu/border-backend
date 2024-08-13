@@ -5,7 +5,7 @@ import { useFetching } from "@/hooks/useFetching.js";
 import DirectionService from "@/API/DirectionService.js";
 import React, { useState, useEffect } from "react";
 import BorderCrossingService from "@/API/BorderCrossingService.js";
-import {useNavigate, useParams} from "react-router-dom";
+import {useLocation, useNavigate, useParams} from "react-router-dom";
 import { ThreeDots } from "react-loader-spinner";
 import { ServerURL } from "@/API/ServerConst.js";
 
@@ -13,6 +13,11 @@ export default function BorderCrossing() {
     const [directionCrossings, setDirectionCrossings] = useState([]);
     const { id } = useParams();
     const navigate = useNavigate();
+
+    const location = useLocation();
+
+    const direction = location.state?.direction;
+
 
 
     useEffect(() => {
@@ -48,14 +53,14 @@ export default function BorderCrossing() {
                         <div className="image-container">
                             {/* Основное изображение */}
                             <img
-                                src={`${ServerURL.URL_STATIC}/${directionCrossings[0]?.direction?.image}`}
+                                src={`${ServerURL.URL_STATIC}/${direction.image}`}
                                 alt={"header"}
                                 className="header-image"
                             />
                             {/* Текст поверх изображения */}
                             <div className="overlay-text">
                                 <Text weight="1" className="img-text">
-                                    {directionCrossings[0]?.direction?.name}
+                                    {direction.name}
                                 </Text>
                             </div>
                         </div>
@@ -66,11 +71,11 @@ export default function BorderCrossing() {
                             </Text>
 
                             <List>
-                                {directionCrossings.map((direction, index) => (
+                                {directionCrossings.map((directionCros, index) => (
                                     <div className="border-crossing-container"
                                          key={index}
                                          onClick={() => {
-                                             navigate(`/borderCrossing/info/${direction.id}`,
+                                             navigate(`/borderCrossing/info/${directionCros.id}`,
                                                  {
                                                      state: {
                                                          directionCrossing: directionCrossings[index]
@@ -84,18 +89,18 @@ export default function BorderCrossing() {
                                                 <React.Fragment>
                                                     <Avatar
                                                         size={40}
-                                                        src={`${ServerURL.URL_STATIC}/${direction.from_city.country.logo}`}
+                                                        src={`${ServerURL.URL_STATIC}/${directionCros.from_city.country.logo}`}
                                                     />
                                                     <Avatar
                                                         className={"avatar-country"}
                                                         size={40}
-                                                        src={`${ServerURL.URL_STATIC}/${direction.to_city.country.logo}`}
+                                                        src={`${ServerURL.URL_STATIC}/${directionCros.to_city.country.logo}`}
                                                     />
                                                 </React.Fragment>
                                             </AvatarStack>
 
                                             <Text weight="3" className={"text-card"}>
-                                                {`${direction.from_city.name} - ${direction.to_city.name}`}
+                                                {`${directionCros.from_city.name} - ${directionCros.to_city.name}`}
                                             </Text>
                                         </div>
 
@@ -111,9 +116,9 @@ export default function BorderCrossing() {
                                 Информация
                             </Text>
 
-                            {directionCrossings[0]?.direction?.info !== undefined && (
+                            {direction.info !== undefined && (
                                 <List>
-                                    {directionCrossings[0]?.direction?.info.map((doc, index) => {
+                                    {direction.info.map((doc, index) => {
                                         if (doc.type === "document") {
                                             return (
                                                 <div className={"border-crossing-info"}>

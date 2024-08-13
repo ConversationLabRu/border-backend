@@ -248,7 +248,18 @@ class ReportController extends Controller
     public function store(Request $request)
     {
         try {
-            return response()->json($this->reportService->createReport($request), 201);
+            $this->reportService->createReport($request);
+            return response(status: 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['message' => $e->getMessage()], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+    }
+
+    public function destroy(Request $request)
+    {
+        try {
+            $this->reportService->deleteReportById($request);
+            return response(status: 204);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['message' => $e->getMessage()], Response::HTTP_UNPROCESSABLE_ENTITY);
         }

@@ -44,7 +44,12 @@ export default function Directions() {
                             key={direction.id}
                             direction={direction.name}
                             pathImg={direction.logo}
-                            onClick={() => {navigate(`/borderCrossing/${direction.id}`);}}
+                            onClick={() => {navigate(`/borderCrossing/${direction.id}`,
+                                {
+                                    state: {
+                                        direction: direction
+                                    }
+                                });}}
                         />
                     ))
                 ) : (

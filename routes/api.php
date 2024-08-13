@@ -41,6 +41,7 @@ Route::prefix('directions/borderCrossing/reports')->group(function () {
     Route::get('/last', [ReportController::class, 'getLastReports']); // GET /directions/borderCrossing/reports/last
     Route::get('/', [ReportController::class, 'index']); // GET /directions/borderCrossing/reports
     Route::post('/', [ReportController::class, 'store']); // POST /directions/borderCrossing/reports
+    Route::delete('/', [ReportController::class, 'destroy']); // Delete /directions/borderCrossing/reports
 });
 
 Route::prefix('directions/borderCrossing/reports')->group(function () {

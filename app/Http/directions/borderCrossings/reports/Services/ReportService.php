@@ -2,8 +2,16 @@
 
 namespace App\Http\directions\borderCrossings\reports\Services;
 
+use App\Http\directions\borderCrossings\Dto\CityDTO;
+use App\Http\directions\borderCrossings\Dto\CountryDTO;
+use App\Http\directions\borderCrossings\Dto\DirectionCrossingDTO;
+use App\Http\directions\borderCrossings\Entities\BorderCrossing;
+use App\Http\directions\borderCrossings\reports\DTO\AllReportDTO;
+use App\Http\directions\borderCrossings\reports\DTO\LastReportDTO;
 use App\Http\directions\borderCrossings\reports\Entities\Report;
+use App\Http\directions\borderCrossings\reports\transports\DTO\TransportDTO;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Nette\Schema\ValidationException;
 
 class ReportService
@@ -15,10 +23,26 @@ class ReportService
         if ($borderCrossingId == 0) throw new \ArgumentCountError("Не передан borderCrossingId");
 
 
-        return Report::where('border_crossing_id', $borderCrossingId)
+        $reports = Report::where('border_crossing_id', $borderCrossingId)
             ->orderBy('checkpoint_exit', 'desc') // Сортировка по дате в порядке убывания
             ->limit(6) // Ограничение результата до 6 записей
             ->get(); // Получение результата
+
+        $result = $reports->map(function (Report $report) {
+
+            $reportDTO = new LastReportDTO(
+                $report->getAttributeValue("checkpoint_entry"),
+                $report->getAttributeValue("checkpoint_exit"),
+                $report->getAttributeValue("checkpoint_queue"),
+                $report->getAttributeValue("comment"),
+                $report->getAttributeValue("is_flipped_direction")
+            );
+
+            return $reportDTO->toArray();
+
+        });
+
+        return $result;
     }
 
     public function getAllReportByBorderCrossing(Request $request)
@@ -27,10 +51,48 @@ class ReportService
 
         if ($borderCrossingId == 0) throw new \ArgumentCountError("Не передан borderCrossingId");
 
-        return Report::with('transport')
+        $reports = Report::with('transport')
             ->where("border_crossing_id", $borderCrossingId)
-            ->orderBy('checkpoint_exit', 'desc')
+            ->orderBy('id', 'desc')
             ->get();
+
+        $result = $reports->map(function (Report $report) {
+
+            $transportDTO = new TransportDTO(
+                $report->transport->icon
+            );
+
+            $reportDTO = new AllReportDTO(
+                $report->getAttributeValue("checkpoint_entry"),
+                $report->getAttributeValue("checkpoint_exit"),
+                $report->getAttributeValue("checkpoint_queue"),
+                $report->getAttributeValue("comment"),
+                $report->getAttributeValue("is_flipped_direction"),
+                $report->getAttributeValue("id"),
+                $transportDTO,
+            );
+
+            return $reportDTO->toArray();
+
+        });
+
+        return $result;
+    }
+
+    public function deleteReportById(Request $request)
+    {
+        $validatedData = $request->validate([
+            'id' => 'required|integer|exists:reports,id',
+        ]);
+
+        $id = $validatedData['id'];
+
+        $report = Report::find($id);
+
+        if ($report) {
+            $report->delete();
+        }
+
     }
 
     public function createReport(Request $request)
