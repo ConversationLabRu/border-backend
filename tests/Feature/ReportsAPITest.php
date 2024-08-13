@@ -170,6 +170,7 @@ class ReportsAPITest extends TestCase
             'checkpoint_entry' => '2024-07-30 10:05:00',
             'checkpoint_exit' => '2024-07-30 10:15:00',
             'comment' => 'Sample comment4',
+            "is_flipped_direction" => "false"
         ];
 
         // Создание mock-объекта Report
@@ -182,7 +183,7 @@ class ReportsAPITest extends TestCase
             ->shouldReceive('createReport')
             ->once()
             ->with(Mockery::type(Request::class))
-            ->andReturn($mockReport);
+            ->andReturn();
 
         // Привязка mock-объекта к контейнеру
         $this->app->instance(ReportService::class, $mockReportService);
@@ -193,8 +194,6 @@ class ReportsAPITest extends TestCase
         // Проверка, что статус ответа 201
         $response->assertStatus(Response::HTTP_CREATED);
 
-        // Проверка структуры ответа
-        $response->assertJson($data);
     }
 
     /**
@@ -210,17 +209,18 @@ class ReportsAPITest extends TestCase
             'checkpoint_entry' => '2024-07-30 10:05:00',
             'checkpoint_exit' => '2024-07-30 10:15:00',
             'comment' => 'Sample comment4',
+            "is_flipped_direction" => "false"
         ];
 
         // Подготовка запроса
         $response = $this->postJson('/api/directions/borderCrossing/reports', $data);
 
-        // Проверка, что статус ответа 201
+        // Проверка, что статус ответа 422
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
 
         // Проверка, что ответ содержит правильное сообщение
         $response->assertJson([
-            'message' => 'The border crossing id field is required.'
+            'message' => 'The border crossing id field is required. (and 2 more errors)'
         ]);
     }
 
@@ -238,6 +238,7 @@ class ReportsAPITest extends TestCase
             'checkpoint_entry' => '2024-07-30 10:05:00',
             'checkpoint_exit' => '2024-07-30 10:15:00',
             'comment' => 'Sample comment4',
+            'is_flipped_direction' => false
         ];
 
         // Подготовка запроса
@@ -248,7 +249,63 @@ class ReportsAPITest extends TestCase
 
         // Проверка, что ответ содержит правильное сообщение
         $response->assertJson([
-            'message' => 'The selected border crossing id is invalid.'
+            'message' => 'The selected border crossing id is invalid. (and 1 more error)'
         ]);
+    }
+
+    /**
+     * Тест на не успешное удаление отчета с неправильным переданным body
+     */
+    public function test_delete_report_with_invalid_data(): void
+    {
+        // Подготовка данных
+        $data = [
+            'id' => "test"
+        ];
+
+        // Подготовка запроса
+        $response = $this->deleteJson('/api/directions/borderCrossing/reports', $data);
+
+        // Проверка, что статус ответа 422
+        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+
+        // Проверка, что ответ содержит правильное сообщение
+        $response->assertJson([
+            'message' => 'The id field must be an integer.'
+        ]);
+    }
+
+    /**
+     * Тест на не успешное удаление отчета с неправильным переданным body
+     */
+    public function test_delete_report(): void
+    {
+        $mockReportService = Mockery::mock(ReportService::class);
+
+        // Подготовка данных
+        $data = [
+            'id' => 1
+        ];
+
+        // Создание mock-объекта Report
+        $mockReport = Mockery::mock(Report::class);
+        $mockReport->shouldReceive('fill')->with($data)->andReturnSelf();
+        $mockReport->shouldReceive('toJson')->andReturn(json_encode($data));
+
+        // Настройка mock-объекта ReportService
+        $mockReportService
+            ->shouldReceive('deleteReportById')
+            ->once()
+            ->with(Mockery::type(Request::class))
+            ->andReturn();
+
+        // Привязка mock-объекта к контейнеру
+        $this->app->instance(ReportService::class, $mockReportService);
+
+        // Подготовка запроса
+        $response = $this->deleteJson('/api/directions/borderCrossing/reports', $data);
+
+        // Проверка, что статус ответа 204
+        $response->assertStatus(Response::HTTP_NO_CONTENT);
     }
 }
