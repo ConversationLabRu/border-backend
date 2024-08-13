@@ -1,14 +1,14 @@
 import axios from "axios";
 
-export default class TransportService {
+export default class CameraService {
 
-    static async getAll() {
+    static async getAllByDirectionId(borderCrossingId) {
         let attempt = 0;
 
         while (attempt < 5) {
             try {
-                const response = await axios.get(`/api/directions/borderCrossing/reports/transports`);
-                return response.data; // Успешный ответ, возвращаем данные
+                const response = await axios.get(`/api/directions/borderCrossing/cameras?borderCrossingId=${borderCrossingId}`);
+                return response.data;
             } catch (error) {
                 attempt += 1;
                 console.error(`Attempt ${attempt} failed: ${error.message}`);

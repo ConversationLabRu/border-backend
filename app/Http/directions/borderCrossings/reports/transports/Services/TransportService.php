@@ -14,7 +14,8 @@ class TransportService
 
         $result = $transports->map(function (Transport $transport) {
                 $transportDTO = new TransportDTO(
-                    $transport->getAttributeValue("icon")
+                    $transport->getAttributeValue("icon"),
+                    $transport->getAttributeValue("id"),
                 );
 
                 return $transportDTO->toArray();

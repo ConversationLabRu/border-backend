@@ -14,7 +14,8 @@ class Camera extends Model
     protected $fillable = [
         'border_crossing_id',
         'url',
-        'description'
+        'description',
+        'photo'
     ];
 
     // Если не используете timestamps, укажите это

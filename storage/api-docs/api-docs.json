@@ -396,16 +396,6 @@
                     "name"
                 ],
                 "properties": {
-                    "id": {
-                        "type": "integer",
-                        "format": "int64",
-                        "example": 1
-                    },
-                    "border_crossing_id": {
-                        "type": "integer",
-                        "format": "int64",
-                        "example": 1
-                    },
                     "url": {
                         "type": "string",
                         "example": "https://www.camera.ru"
@@ -413,6 +403,10 @@
                     "description": {
                         "type": "string",
                         "example": "Desc"
+                    },
+                    "photo": {
+                        "type": "string",
+                        "example": "photo.png"
                     }
                 },
                 "type": "object"

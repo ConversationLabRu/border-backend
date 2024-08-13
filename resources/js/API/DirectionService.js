@@ -8,7 +8,6 @@ export default class DirectionService {
         while (attempt < 5) {
             try {
                 const response = await axios.get(`/api/directions`);
-                console.log(response.data)
                 return response.data; // Успешный ответ, возвращаем данные
             } catch (error) {
                 attempt += 1;

@@ -8,7 +8,6 @@ export default class BorderCrossingService {
         while (attempt < 5) {
             try {
                 const response = await axios.get(`/api/directions/borderCrossing?directionId=${directionId}`);
-                console.log(response.data[0].direction)
                 return response.data; // Успешный ответ, возвращаем данные
             } catch (error) {
                 attempt += 1;

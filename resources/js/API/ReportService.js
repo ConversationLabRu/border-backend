@@ -9,7 +9,6 @@ export default class ReportService {
         while (attempt < 5) {
             try {
                 const response = await axios.get(`/api/directions/borderCrossing/reports/last?borderCrossingId=${borderCrossingId}`);
-                console.log(response.data[0].direction)
                 return response.data; // Успешный ответ, возвращаем данные
             } catch (error) {
                 attempt += 1;
@@ -30,7 +29,6 @@ export default class ReportService {
         while (attempt < 5) {
             try {
                 const response = await axios.get(`/api/directions/borderCrossing/reports?borderCrossingId=${borderCrossingId}`);
-                console.log(response.data[0].direction)
                 return response.data; // Успешный ответ, возвращаем данные
             } catch (error) {
                 attempt += 1;

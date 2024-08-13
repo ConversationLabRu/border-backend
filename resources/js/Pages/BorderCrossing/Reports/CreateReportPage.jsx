@@ -32,13 +32,12 @@ import {
     AccordionContent
 } from "@telegram-apps/telegram-ui/dist/components/Blocks/Accordion/components/AccordionContent/AccordionContent.js";
 import CommentAccordion from "@/Pages/BorderCrossing/Reports/CommentAccrodion.jsx";
-import { useMainButton } from "@tma.js/sdk-react";
+import {useBackButton, useMainButton} from "@tma.js/sdk-react";
 import RadioButton from "@/Pages/BorderCrossing/Reports/RadioButton.jsx";
 import TransportService from "@/API/TransportService.js";
 
 export default function CreateReportPage() {
     const location = useLocation();
-    const directionCrossing = location.state?.directionCrossing;
     const [transports, setTransports] = useState([]);
     const [selectedDirection, setSelectedDirection] = useState('');
     const [selectedTransport, setSelectedTransport] = useState('');
@@ -46,8 +45,51 @@ export default function CreateReportPage() {
     const [checkpointEntry, setCheckpointEntry] = useState('');
     const [checkpointExit, setCheckpointExit] = useState('');
     const [comment, setComment] = useState('');
+    const [isFlippedDirection, setIsFlippedDirection] = useState(false);
+
     const { id } = useParams();
     const navigate = useNavigate();
+
+    const directionCrossing = location.state?.directionCrossing;
+    const direction = location.state?.direction;
+
+    const backButton = useBackButton();
+    const mainButton = useMainButton();
+
+    useEffect(() => {
+
+        if ( (selectedTransport !== "") && (checkpointEntry !== "") && (checkpointExit !== "") && (selectedDirection !== "")) {
+            mainButton.setText("Отправить данные").setBgColor("#007aff").show().enable();
+        } else {
+            mainButton.setText("Заполните обязательные поля").setBgColor("#808080").show().disable();
+        }
+
+        console.log(selectedTransport)
+
+    }, [selectedTransport, checkpointEntry, checkpointExit, selectedDirection])
+
+    useEffect(() => {
+        backButton.show()
+    }, []);
+
+    useEffect(() => {
+        const handleBackButtonClick = () => {
+            navigate(`/borderCrossing/${directionCrossing.id}/reports`,
+                {
+                    state: {
+                        direction: direction,
+                        directionCrossing: directionCrossing
+                    }
+                });
+            backButton.hide();
+        };
+
+        backButton.on("click", handleBackButtonClick);
+
+        return () => {
+            backButton.off("click", handleBackButtonClick);
+        }
+    }, [backButton]);
 
     useEffect(() => {
         TransportService.getAll().then((r) => {
@@ -60,8 +102,6 @@ export default function CreateReportPage() {
             // Handle error
         });
     }, [id]);
-
-    const [isFlippedDirection, setIsFlippedDirection] = useState(false);
 
     const handleDirectionChange = (event) => {
         setSelectedDirection(event.target.value);
@@ -94,35 +134,48 @@ export default function CreateReportPage() {
         setComment(event.target.value);
     };
 
-    const handleSubmit = () => {
-        // Prepare data to send
-        const reportData = {
-            border_crossing_id: id,  // Adjust this if needed
-            transport_id: selectedTransport,  // Map transport name to ID if necessary
-            user_id: 1,  // Adjust according to your user data
-            checkpoint_queue: checkpointQueue,
-            checkpoint_entry: checkpointEntry,
-            checkpoint_exit: checkpointExit,
-            comment: comment,
-            is_flipped_direction: isFlippedDirection
+    useEffect(() => {
+        const handleMainButtonClick = () => {
+            // Prepare data to send
+            const reportData = {
+                border_crossing_id: id,  // Adjust this if needed
+                transport_id: selectedTransport,  // Map transport name to ID if necessary
+                user_id: 1,  // Adjust according to your user data
+                checkpoint_queue: checkpointQueue,
+                checkpoint_entry: checkpointEntry,
+                checkpoint_exit: checkpointExit,
+                comment: comment,
+                is_flipped_direction: isFlippedDirection
 
+            };
+
+            console.log(reportData)
+
+            // Send data to API
+            ReportService.createReport(reportData).then(response => {
+                navigate(`/borderCrossing/${id}/reports`,
+                    {
+                        state: {
+                            directionCrossing: directionCrossing
+                        }
+                    }
+                )
+                console.log('Report created successfully:', response);
+            }).catch(error => {
+                // Handle error
+                console.error('Error creating report:', error);
+            });
+
+            backButton.hide();
+            mainButton.hide();
         };
 
-        // Send data to API
-        ReportService.createReport(reportData).then(response => {
-            navigate(`/borderCrossing/${id}/reports`,
-                {
-                    state: {
-                        directionCrossing: directionCrossing
-                    }
-                }
-            )
-            console.log('Report created successfully:', response);
-        }).catch(error => {
-            // Handle error
-            console.error('Error creating report:', error);
-        });
-    };
+        mainButton.on("click", handleMainButtonClick);
+
+        return () => {
+            mainButton.off("click", handleMainButtonClick);
+        }
+    }, [mainButton, selectedTransport, checkpointEntry, checkpointExit, selectedDirection]);
 
     return (
         <AppRoot>
@@ -149,22 +202,6 @@ export default function CreateReportPage() {
                         </Text>
 
                         <form>
-                            {/*<RadioButton*/}
-                            {/*    id="direction1"*/}
-                            {/*    name="direction"*/}
-                            {/*    value={`${directionCrossing.from_city.country.name} ${directionCrossing.to_city.country.name}`}*/}
-                            {/*    checked={selectedDirection === `${directionCrossing.from_city.country.name} ${directionCrossing.to_city.country.name}`}*/}
-                            {/*    onChange={handleDirectionChange}*/}
-                            {/*    label={`${directionCrossing.from_city.country.name} -> ${directionCrossing.to_city.country.name}`}*/}
-                            {/*/>*/}
-                            {/*<RadioButton*/}
-                            {/*    id="direction2"*/}
-                            {/*    name="direction"*/}
-                            {/*    value={`${directionCrossing.to_city.country.name} ${directionCrossing.from_city.country.name}`}*/}
-                            {/*    checked={selectedDirection === `${directionCrossing.to_city.country.name} ${directionCrossing.from_city.country.name}`}*/}
-                            {/*    onChange={handleDirectionChange}*/}
-                            {/*    label={`${directionCrossing.to_city.country.name} -> ${directionCrossing.from_city.country.name}`}*/}
-                            {/*/>*/}
 
                             <Cell
                                 Component="label"
@@ -262,10 +299,6 @@ export default function CreateReportPage() {
                             value={comment}
                             onChange={handleCommentChange}
                         />
-
-                        <Button mode="filled" size="l" onClick={handleSubmit}>
-                            Создать отчет
-                        </Button>
 
                     </div>
                 )}

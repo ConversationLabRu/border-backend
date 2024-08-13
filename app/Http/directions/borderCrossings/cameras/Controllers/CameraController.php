@@ -14,18 +14,6 @@ use Illuminate\Http\Response;
  *     type="object",
  *     required={"id", "name"},
  *     @OA\Property(
- *         property="id",
- *         type="integer",
- *         format="int64",
- *         example=1
- *     ),
- *     @OA\Property(
- *         property="border_crossing_id",
- *         type="integer",
- *         format="int64",
- *         example=1
- *     ),
- *     @OA\Property(
  *         property="url",
  *         type="string",
  *         example="https://www.camera.ru"
@@ -34,7 +22,12 @@ use Illuminate\Http\Response;
  *          property="description",
  *          type="string",
  *          example="Desc"
- *      )
+ *      ),
+ *     @OA\Property(
+ *           property="photo",
+ *           type="string",
+ *           example="photo.png"
+ *       )
  * )
  */
 class CameraController extends Controller

@@ -19,12 +19,64 @@ import {
     AccordionContent
 } from "@telegram-apps/telegram-ui/dist/components/Blocks/Accordion/components/AccordionContent/AccordionContent.js";
 import CommentAccordion from "@/Pages/BorderCrossing/Reports/CommentAccrodion.jsx";
-import {useMainButton} from "@tma.js/sdk-react";
+import {useBackButton, useMainButton} from "@tma.js/sdk-react";
 
 export default function ReportsPage() {
     const location = useLocation();
 
+
     const directionCrossing = location.state?.directionCrossing;
+    const direction = location.state?.direction;
+
+    const backButton = useBackButton();
+    const mainButton = useMainButton();
+
+
+    useEffect(() => {
+        backButton.show()
+        mainButton.setText("Создать отчет").setBgColor("#007aff").show().enable();
+    }, []);
+
+    useEffect(() => {
+        const handleMainButtonClick = () => {
+            navigate(`/borderCrossing/${id}/reports/create`,
+                {
+                    state: {
+                        directionCrossing: directionCrossing,
+                        direction: direction
+                    }
+                }
+            );
+
+            mainButton.hide();
+        };
+
+        mainButton.on("click", handleMainButtonClick);
+
+        return () => {
+            mainButton.off("click", handleMainButtonClick);
+        }
+    }, [mainButton]);
+
+    useEffect(() => {
+        const handleBackButtonClick = () => {
+            navigate(`/borderCrossing/info/${directionCrossing.id}`,
+                {
+                    state: {
+                        direction: direction,
+                        directionCrossing: directionCrossing
+                    }
+                });
+            backButton.hide();
+            mainButton.hide();
+        };
+
+        backButton.on("click", handleBackButtonClick);
+
+        return () => {
+            backButton.off("click", handleBackButtonClick);
+        }
+    }, [backButton]);
 
     const [reports, setReports] = useState([])
 
@@ -41,7 +93,6 @@ export default function ReportsPage() {
 
 
     useEffect(() => {
-        console.log(id);
         const directionIdNumber = Number(id);
 
         ReportService.getAll(directionIdNumber).then((r) => {
@@ -137,9 +188,6 @@ export default function ReportsPage() {
 
                                 // Форматируем разницу во времени
                                 const timeDifference = `${declensionHours(hours)} ${declensionMinutes(minutes)}`;
-
-                                console.log(52)
-                                console.log(report)
 
                                 return (
                                     <div className={"report-container"}>
@@ -242,18 +290,18 @@ export default function ReportsPage() {
                         </div>
                 )}
 
-                <div className="footer">
-                    <Button mode="filled" size="l"
-                    onClick={() => {navigate(`/borderCrossing/${id}/reports/create`,
-                        {
-                            state: {
-                                directionCrossing: directionCrossing
-                            }
-                        }
-                    );}}>
-                        Action
-                    </Button>
-                </div>
+                {/*<div className="footer">*/}
+                {/*    <Button mode="filled" size="l"*/}
+                {/*    onClick={() => {navigate(`/borderCrossing/${id}/reports/create`,*/}
+                {/*        {*/}
+                {/*            state: {*/}
+                {/*                directionCrossing: directionCrossing*/}
+                {/*            }*/}
+                {/*        }*/}
+                {/*    );}}>*/}
+                {/*        Action*/}
+                {/*    </Button>*/}
+                {/*</div>*/}
             </div>
         </AppRoot>
     );

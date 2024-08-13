@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreign('border_crossing_id')->references('id')->on('borderсrossings');
             $table->text('url');
             $table->text('description');
+            $table->text('photo');
         });
 
         Schema::enableForeignKeyConstraints();

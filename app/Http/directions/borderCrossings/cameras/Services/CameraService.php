@@ -2,6 +2,7 @@
 
 namespace App\Http\directions\borderCrossings\cameras\Services;
 
+use App\Http\directions\borderCrossings\cameras\Dto\CameraDTO;
 use App\Http\directions\borderCrossings\cameras\Entities\Camera;
 use Illuminate\Http\Request;
 
@@ -13,6 +14,18 @@ class CameraService
 
         if ($borderCrossingId == 0) throw new \ArgumentCountError("Не передан borderCrossingId");
 
-        return Camera::all()->where("border_crossing_id", $borderCrossingId);
+        $cameras = Camera::all()->where("border_crossing_id", $borderCrossingId);
+
+        $result = $cameras->map(function (Camera $camera) {
+            $cameraDTO = new CameraDTO(
+                $camera->getAttributeValue("url"),
+                $camera->getAttributeValue("description"),
+                $camera->getAttributeValue("photo"),
+            );
+
+            return $cameraDTO->toArray();
+        });
+
+        return $result;
     }
 }

@@ -59,7 +59,8 @@ class ReportService
         $result = $reports->map(function (Report $report) {
 
             $transportDTO = new TransportDTO(
-                $report->transport->icon
+                $report->transport->icon,
+                $report->transport->id
             );
 
             $reportDTO = new AllReportDTO(

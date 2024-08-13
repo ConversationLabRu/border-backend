@@ -8,6 +8,7 @@ import BorderCrossingService from "@/API/BorderCrossingService.js";
 import {useLocation, useNavigate, useParams} from "react-router-dom";
 import { ThreeDots } from "react-loader-spinner";
 import { ServerURL } from "@/API/ServerConst.js";
+import {useBackButton} from "@tma.js/sdk-react";
 
 export default function BorderCrossing() {
     const [directionCrossings, setDirectionCrossings] = useState([]);
@@ -18,10 +19,26 @@ export default function BorderCrossing() {
 
     const direction = location.state?.direction;
 
-
+    const backButton = useBackButton();
 
     useEffect(() => {
-        console.log(id);
+        backButton.show()
+    }, []);
+
+    useEffect(() => {
+        const handleBackButtonClick = () => {
+            navigate(`/`);
+            backButton.hide();
+        };
+
+        backButton.on("click", handleBackButtonClick);
+
+        return () => {
+            backButton.off("click", handleBackButtonClick);
+        }
+    }, [backButton]);
+
+    useEffect(() => {
         const directionIdNumber = Number(id);
 
         BorderCrossingService.getAllById(directionIdNumber).then((r) => {
@@ -29,12 +46,18 @@ export default function BorderCrossing() {
                 // Handle error
             } else {
                 setDirectionCrossings(r);
-                console.log(r); // Используйте console.log для отладки
             }
         }).catch((r) => {
             // Handle error
         });
     }, [id]);
+
+    const openUrlInNewTab = (url) => {
+        if (url) {
+            console.log(url)
+            window.open(url, '_blank', 'noopener,noreferrer');
+        }
+    };
 
     return (
         <AppRoot>
@@ -78,7 +101,8 @@ export default function BorderCrossing() {
                                              navigate(`/borderCrossing/info/${directionCros.id}`,
                                                  {
                                                      state: {
-                                                         directionCrossing: directionCrossings[index]
+                                                         directionCrossing: directionCrossings[index],
+                                                         direction: direction
                                                      }
                                                  }
                                              );
@@ -92,7 +116,6 @@ export default function BorderCrossing() {
                                                         src={`${ServerURL.URL_STATIC}/${directionCros.from_city.country.logo}`}
                                                     />
                                                     <Avatar
-                                                        className={"avatar-country"}
                                                         size={40}
                                                         src={`${ServerURL.URL_STATIC}/${directionCros.to_city.country.logo}`}
                                                     />
@@ -121,7 +144,7 @@ export default function BorderCrossing() {
                                     {direction.info.map((doc, index) => {
                                         if (doc.type === "document") {
                                             return (
-                                                <div className={"border-crossing-info"}>
+                                                <div className={"border-crossing-info"} onClick={() => openUrlInNewTab(doc.url)}>
 
                                                     <div className={"border-info-container"}>
                                                         <img
@@ -148,7 +171,7 @@ export default function BorderCrossing() {
                                             );
                                         } else if (doc.type === "import-export-standart") {
                                             return (
-                                                <div className={"border-crossing-info"}>
+                                                <div className={"border-crossing-info"} onClick={() => openUrlInNewTab(doc.url)}>
 
                                                     <div className={"border-info-container"}>
                                                         <img
@@ -175,7 +198,7 @@ export default function BorderCrossing() {
                                             );
                                         } else {
                                             return (
-                                                <div className={"border-crossing-info non-margin"}>
+                                                <div className={"border-crossing-info non-margin"} onClick={() => openUrlInNewTab(doc.url)}>
 
                                                     <div className={"border-info-container"}>
                                                         <img

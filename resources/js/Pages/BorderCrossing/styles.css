@@ -4,7 +4,7 @@
 
 .header-image {
     width: 100%; /* Или установите нужную ширину */
-    height: 5%; /* Или установите нужную высоту */
+    height: 200px; /* Или установите нужную высоту */
 }
 
 .overlay-text {
@@ -57,11 +57,6 @@
     flex-direction: row;
     align-items: center;
     margin-bottom: 10px;
-}
-
-.avatar-country {
-    position: absolute;
-    left: 90%;
 }
 
 .text-card {

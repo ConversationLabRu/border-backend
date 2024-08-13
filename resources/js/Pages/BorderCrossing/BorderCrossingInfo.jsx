@@ -10,11 +10,13 @@ import {useLocation, useNavigate, useParams} from "react-router-dom";
 import { ThreeDots } from "react-loader-spinner";
 import { ServerURL } from "@/API/ServerConst.js";
 import ReportService from "@/API/ReportService.js";
+import {useBackButton} from "@tma.js/sdk-react";
 
 export default function BorderCrossingInfo() {
     const location = useLocation();
 
     const directionCrossing = location.state?.directionCrossing;
+    const direction = location.state?.direction;
 
     const [reports, setReports] = useState([])
 
@@ -22,17 +24,40 @@ export default function BorderCrossingInfo() {
 
     const navigate = useNavigate();
 
+    const backButton = useBackButton();
 
     useEffect(() => {
-        console.log(id);
+        backButton.show()
+    }, []);
+
+    useEffect(() => {
+        const handleBackButtonClick = () => {
+            navigate(`/borderCrossing/${directionCrossing.id}`,
+                {
+                    state: {
+                        direction: direction
+                    }
+                });
+            backButton.hide();
+        };
+
+        backButton.on("click", handleBackButtonClick);
+
+        return () => {
+            backButton.off("click", handleBackButtonClick);
+        }
+    }, [backButton]);
+
+
+    useEffect(() => {
         const directionIdNumber = Number(id);
 
         ReportService.getLast(directionIdNumber).then((r) => {
             if (r instanceof Error) {
                 // Handle error
             } else {
+                console.log(directionCrossing)
                 setReports(r);
-                console.log(r[0].checkpoint_entry)
             }
         }).catch((r) => {
             // Handle error
@@ -70,7 +95,16 @@ export default function BorderCrossingInfo() {
 
                         <div className="container">
                             <div className="btn-container">
-                                <div className="btn">
+                                <div className="btn" onClick={() => {
+                                    navigate(`/borderCrossing/${id}/cameras`,
+                                        {
+                                            state: {
+                                                directionCrossing: directionCrossing,
+                                                direction: direction
+
+                                            }
+                                        })
+                                }}>
                                     <img
                                         src={`${ServerURL.URL_STATIC}/camera-logo.svg`}
                                         alt={"logo-btn"}
@@ -81,7 +115,17 @@ export default function BorderCrossingInfo() {
                                     </Text>
                                 </div>
 
-                                <div className="btn">
+                                <div className="btn" onClick={() => {
+                                    navigate(`/borderCrossing/${id}/info`,
+                                        {
+                                            state: {
+                                                directionCrossing: directionCrossing,
+                                                direction: direction
+
+                                            }
+                                        }
+                                    )
+                                }}>
                                     <img
                                         src={`${ServerURL.URL_STATIC}/info-logo.svg`}
                                         alt={"logo-btn"}
@@ -103,7 +147,9 @@ export default function BorderCrossingInfo() {
                                     navigate(`/borderCrossing/${id}/reports`,
                                         {
                                             state: {
-                                                directionCrossing: directionCrossing
+                                                directionCrossing: directionCrossing,
+                                                direction: direction
+
                                             }
                                         }
                                     );
@@ -148,15 +194,12 @@ export default function BorderCrossingInfo() {
                                     // Форматируем разницу во времени
                                     const timeDifference = `${declensionHours(hours)} ${declensionMinutes(minutes)}`;
 
-                                    console.log(52)
-                                    console.log(report)
-
                                     return (
                                         <div className="border-crossing-container" key={index}>
                                             <div className={"border-info-container"}>
                                                 <AvatarStack className={"avatar-stack-report"}>
                                                     <React.Fragment>
-                                                        {report.is_flipped_direction ? (
+                                                        {!report.is_flipped_direction ? (
                                                             <div className={"report-elem-logo-container"}>
                                                                 <Avatar
                                                                     size={20}
