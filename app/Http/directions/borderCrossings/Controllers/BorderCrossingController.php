@@ -21,30 +21,64 @@ use Illuminate\Support\Facades\Http;
  *         example=1
  *     ),
  *     @OA\Property(
- *         property="direction_id",
- *         type="integer",
- *         format="int64",
- *         example=1
+ *         property="is_queue",
+ *         type="boolean",
+ *         example=true
  *     ),
  *     @OA\Property(
- *         property="from",
- *         type="integer",
- *         format="int64",
- *         example="2"
+ *         property="header_image",
+ *         type="string",
+ *         example="test.png"
  *     ),
  *     @OA\Property(
- *          property="to",
- *          type="integer",
- *          format="int64",
- *          example="1"
- *      ),
+ *         property="from_city",
+ *         type="object",
+ *         @OA\Property(
+ *             property="name",
+ *             type="string",
+ *             example="City1"
+ *         ),
+ *         @OA\Property(
+ *             property="country",
+ *             type="object",
+ *             @OA\Property(
+ *                 property="name",
+ *                 type="string",
+ *                 example="Country1"
+ *             ),
+ *             @OA\Property(
+ *                 property="logo",
+ *                 type="string",
+ *                 example="img.png"
+ *             )
+ *         )
+ *     ),
  *     @OA\Property(
- *           property="is_queue",
- *           type="boolean",
- *           example="true"
- *       )
+ *         property="to_city",
+ *         type="object",
+ *         @OA\Property(
+ *             property="name",
+ *             type="string",
+ *             example="City2"
+ *         ),
+ *         @OA\Property(
+ *             property="country",
+ *             type="object",
+ *             @OA\Property(
+ *                 property="name",
+ *                 type="string",
+ *                 example="Country2"
+ *             ),
+ *             @OA\Property(
+ *                 property="logo",
+ *                 type="string",
+ *                 example="img.png"
+ *             )
+ *         )
+ *     )
  * )
  */
+
 class BorderCrossingController extends Controller
 {
     private BorderCrossingService $borderCrossingService;

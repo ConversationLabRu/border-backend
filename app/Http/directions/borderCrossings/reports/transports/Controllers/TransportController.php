@@ -17,20 +17,9 @@ use Nette\Schema\ValidationException;
  *     type="object",
  *     required={"id", "name"},
  *     @OA\Property(
- *         property="id",
- *         type="integer",
- *         format="int64",
- *         example=1
- *     ),
- *     @OA\Property(
- *         property="name",
- *         type="string",
- *         example="Auto"
- *     ),
- *     @OA\Property(
  *          property="icon",
  *          type="string",
- *          example="path"
+ *          example="img.png"
  *      )
  * )
  */

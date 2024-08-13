@@ -11,54 +11,81 @@ use Nette\Schema\ValidationException;
 
 
 /**
- * @OA\Schema(
- *     schema="Report",
- *     type="object",
- *     required={"id", "name"},
- *     @OA\Property(
- *         property="id",
- *         type="integer",
- *         format="int64",
- *         example=1
- *     ),
- *     @OA\Property(
- *         property="border_crossing_id",
- *         type="integer",
- *         format="int64",
- *         example=1
- *     ),
- *     @OA\Property(
- *          property="transport_id",
- *          type="integer",
- *          format="int64",
- *          example=1
- *      ),
- *     @OA\Property(
- *          property="user_id",
- *          type="integer",
- *          format="int64",
- *          example=1
- *      ),
- *     @OA\Property(
- *         property="checkpoint_queue",
- *         type="timestamp",
- *         example="2024-07-01 08:00:00"
- *     ),
- *     @OA\Property(
- *          property="checkpoint_entry",
- *          type="timestamp",
- *          example="2024-07-01 08:00:00"
- *      ),
- *     @OA\Property(
- *          property="checkpoint_exit",
- *          type="timestamp",
- *          example="2024-07-01 08:00:00"
- *      ),
- *     @OA\Property(
- *          property="comment",
+ * @OA\Schemas (
+ *     @OA\Schema(
+ *      schema="LastReportDTO",
+ *      type="object",
+ *      required={"id", "name"},
+ *      @OA\Property(
+ *          property="checkpoint_queue",
  *          type="string",
- *          example="comment"
- *      )
+ *          example="2024-08-14 13:04:00"
+ *      ),
+ *      @OA\Property(
+ *           property="checkpoint_entry",
+ *           type="string",
+ *           example="2024-08-14 13:04:00"
+ *       ),
+ *      @OA\Property(
+ *           property="checkpoint_exit",
+ *           type="string",
+ *           example="2024-08-14 13:04:00"
+ *       ),
+ *      @OA\Property(
+ *            property="comment",
+ *            type="string",
+ *            example="test"
+ *        ),
+ *      @OA\Property(
+ *            property="is_flipped_direction",
+ *            type="boolean",
+ *            example=true
+ *        )
+ *  ),
+ *     @OA\Schema(
+ *      schema="AllReportDTO",
+ *      type="object",
+ *      required={"id", "name"},
+ *      @OA\Property(
+ *          property="checkpoint_queue",
+ *          type="string",
+ *          example="2024-08-14 13:04:00"
+ *      ),
+ *      @OA\Property(
+ *           property="checkpoint_entry",
+ *           type="string",
+ *           example="2024-08-14 13:04:00"
+ *       ),
+ *      @OA\Property(
+ *           property="checkpoint_exit",
+ *           type="string",
+ *           example="2024-08-14 13:04:00"
+ *       ),
+ *      @OA\Property(
+ *            property="comment",
+ *            type="string",
+ *            example="test"
+ *        ),
+ *      @OA\Property(
+ *            property="is_flipped_direction",
+ *            type="boolean",
+ *            example=true
+ *        ),
+ *     @OA\Property(
+ *             property="id",
+ *             type="integer",
+ *             example=1
+ *         ),
+ *     @OA\Property(
+ *             property="transport",
+ *             type="object",
+ *                  @OA\Property(
+ *                  property="icon",
+ *                  type="string",
+ *                  example="img.png"
+ *              )
+ *         )
+ *  )
  * )
  */
 class ReportController extends Controller
@@ -83,7 +110,7 @@ class ReportController extends Controller
      *       description="Request Successful",
      *       @OA\JsonContent(
      *           type="array",
-     *           @OA\Items(ref="#/components/schemas/Report")
+     *           @OA\Items(ref="#/components/schemas/LastReportDTO")
      *       )
      *     ),
      *     @OA\Response(
@@ -114,7 +141,7 @@ class ReportController extends Controller
      *       description="Request Successful",
      *       @OA\JsonContent(
      *           type="array",
-     *           @OA\Items(ref="#/components/schemas/Report")
+     *           @OA\Items(ref="#/components/schemas/AllReportDTO")
      *       )
      *     ),
      *     @OA\Response(
@@ -187,53 +214,7 @@ class ReportController extends Controller
      *     ),
      *     @OA\Response(
      *         response="201",
-     *         description="Report Created Successfully",
-     *         @OA\JsonContent(
-     *             type="object",
-     *          @OA\Property(
-     *                   property="id",
-     *                   type="integer",
-     *                   example=1
-     *               ),
-     *             @OA\Property(
-     *                  property="border_crossing_id",
-     *                  type="integer",
-     *                  example=1
-     *              ),
-     *              @OA\Property(
-     *                  property="transport_id",
-     *                  type="integer",
-     *                  example=2
-     *              ),
-     *              @OA\Property(
-     *                  property="user_id",
-     *                  type="integer",
-     *                  example=3
-     *              ),
-     *              @OA\Property(
-     *                  property="checkpoint_queue",
-     *                  type="string",
-     *                  format="date-time",
-     *                  example="2024-07-01T08:00:00Z"
-     *              ),
-     *              @OA\Property(
-     *                  property="checkpoint_entry",
-     *                  type="string",
-     *                  format="date-time",
-     *                  example="2024-07-01T09:00:00Z"
-     *              ),
-     *              @OA\Property(
-     *                  property="checkpoint_exit",
-     *                  type="string",
-     *                  format="date-time",
-     *                  example="2024-07-01T10:00:00Z"
-     *              ),
-     *              @OA\Property(
-     *                  property="comment",
-     *                  type="string",
-     *                  example="Sample comment"
-     *              )
-     *         )
+     *         description="Report Created Successfully"
      *     ),
      *     @OA\Response(
      *         response="422",

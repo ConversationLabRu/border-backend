@@ -124,7 +124,7 @@
                                 "schema": {
                                     "type": "array",
                                     "items": {
-                                        "$ref": "#/components/schemas/Report"
+                                        "$ref": "#/components/schemas/LastReportDTO"
                                     }
                                 }
                             }
@@ -164,7 +164,7 @@
                                 "schema": {
                                     "type": "array",
                                     "items": {
-                                        "$ref": "#/components/schemas/Report"
+                                        "$ref": "#/components/schemas/AllReportDTO"
                                     }
                                 }
                             }
@@ -246,51 +246,7 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Report Created Successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "border_crossing_id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "transport_id": {
-                                            "type": "integer",
-                                            "example": 2
-                                        },
-                                        "user_id": {
-                                            "type": "integer",
-                                            "example": 3
-                                        },
-                                        "checkpoint_queue": {
-                                            "type": "string",
-                                            "format": "date-time",
-                                            "example": "2024-07-01T08:00:00Z"
-                                        },
-                                        "checkpoint_entry": {
-                                            "type": "string",
-                                            "format": "date-time",
-                                            "example": "2024-07-01T09:00:00Z"
-                                        },
-                                        "checkpoint_exit": {
-                                            "type": "string",
-                                            "format": "date-time",
-                                            "example": "2024-07-01T10:00:00Z"
-                                        },
-                                        "comment": {
-                                            "type": "string",
-                                            "example": "Sample comment"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Report Created Successfully"
                     },
                     "422": {
                         "description": "Ошибка если Entity не прошел валидацию",
@@ -379,24 +335,57 @@
                         "format": "int64",
                         "example": 1
                     },
-                    "direction_id": {
-                        "type": "integer",
-                        "format": "int64",
-                        "example": 1
-                    },
-                    "from": {
-                        "type": "integer",
-                        "format": "int64",
-                        "example": "2"
-                    },
-                    "to": {
-                        "type": "integer",
-                        "format": "int64",
-                        "example": "1"
-                    },
                     "is_queue": {
                         "type": "boolean",
-                        "example": "true"
+                        "example": true
+                    },
+                    "header_image": {
+                        "type": "string",
+                        "example": "test.png"
+                    },
+                    "from_city": {
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "example": "City1"
+                            },
+                            "country": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Country1"
+                                    },
+                                    "logo": {
+                                        "type": "string",
+                                        "example": "img.png"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "to_city": {
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "example": "City2"
+                            },
+                            "country": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Country2"
+                                    },
+                                    "logo": {
+                                        "type": "string",
+                                        "example": "img.png"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        },
+                        "type": "object"
                     }
                 },
                 "type": "object"
@@ -428,47 +417,73 @@
                 },
                 "type": "object"
             },
-            "Report": {
+            "LastReportDTO": {
                 "required": [
                     "id",
                     "name"
                 ],
                 "properties": {
-                    "id": {
-                        "type": "integer",
-                        "format": "int64",
-                        "example": 1
-                    },
-                    "border_crossing_id": {
-                        "type": "integer",
-                        "format": "int64",
-                        "example": 1
-                    },
-                    "transport_id": {
-                        "type": "integer",
-                        "format": "int64",
-                        "example": 1
-                    },
-                    "user_id": {
-                        "type": "integer",
-                        "format": "int64",
-                        "example": 1
-                    },
                     "checkpoint_queue": {
-                        "type": "timestamp",
-                        "example": "2024-07-01 08:00:00"
+                        "type": "string",
+                        "example": "2024-08-14 13:04:00"
                     },
                     "checkpoint_entry": {
-                        "type": "timestamp",
-                        "example": "2024-07-01 08:00:00"
+                        "type": "string",
+                        "example": "2024-08-14 13:04:00"
                     },
                     "checkpoint_exit": {
-                        "type": "timestamp",
-                        "example": "2024-07-01 08:00:00"
+                        "type": "string",
+                        "example": "2024-08-14 13:04:00"
                     },
                     "comment": {
                         "type": "string",
-                        "example": "comment"
+                        "example": "test"
+                    },
+                    "is_flipped_direction": {
+                        "type": "boolean",
+                        "example": true
+                    }
+                },
+                "type": "object"
+            },
+            "AllReportDTO": {
+                "required": [
+                    "id",
+                    "name"
+                ],
+                "properties": {
+                    "checkpoint_queue": {
+                        "type": "string",
+                        "example": "2024-08-14 13:04:00"
+                    },
+                    "checkpoint_entry": {
+                        "type": "string",
+                        "example": "2024-08-14 13:04:00"
+                    },
+                    "checkpoint_exit": {
+                        "type": "string",
+                        "example": "2024-08-14 13:04:00"
+                    },
+                    "comment": {
+                        "type": "string",
+                        "example": "test"
+                    },
+                    "is_flipped_direction": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "transport": {
+                        "properties": {
+                            "icon": {
+                                "type": "string",
+                                "example": "img.png"
+                            }
+                        },
+                        "type": "object"
                     }
                 },
                 "type": "object"
@@ -479,18 +494,9 @@
                     "name"
                 ],
                 "properties": {
-                    "id": {
-                        "type": "integer",
-                        "format": "int64",
-                        "example": 1
-                    },
-                    "name": {
-                        "type": "string",
-                        "example": "Auto"
-                    },
                     "icon": {
                         "type": "string",
-                        "example": "path"
+                        "example": "img.png"
                     }
                 },
                 "type": "object"
