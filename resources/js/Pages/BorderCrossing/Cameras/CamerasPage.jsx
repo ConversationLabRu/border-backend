@@ -1,4 +1,4 @@
-import { Image, Text } from "@telegram-apps/telegram-ui";
+import {Image, Section, Text} from "@telegram-apps/telegram-ui";
 // import { DirectionCard } from "@/Pages/Directions/Components/card.jsx";
 import { useFetching } from "@/hooks/useFetching.js";
 import DirectionService from "@/API/DirectionService.js";
@@ -71,28 +71,27 @@ export default function CamerasPage() {
     return (
         <div>
             <div className="container">
-                <Text weight="3" className={"header-text"}>
-                    {`Камеры ${directionCrossing.from_city.name} - ${directionCrossing.to_city.name}`}
-                </Text>
+                <Section header={`Камеры ${directionCrossing.from_city.name} - ${directionCrossing.to_city.name}`}>
+                    {cameras.length !== 0 ? (
+                        cameras.map((camera) => (
+                            <div className={"card-camera"} onClick={() => openUrlInNewTab(camera.url)}>
+                                {camera.photo !== undefined && (
+                                    <img
+                                        src={`/${camera.photo}`}
+                                        alt={"header"}
+                                        className="header-image-camera cameraPic"
+                                    />
+                                )}
+                                <Text className={"desc-card"}>
+                                    {camera.description}
+                                </Text>
+                            </div>
+                        ))
+                    ) : (
+                        <p>No directions available</p>
+                    )}
+                </Section>
 
-                {cameras.length > 0 ? (
-                    cameras.map((camera) => (
-                        <div className={"card-camera"} onClick={() => openUrlInNewTab(camera.url)}>
-                            {camera.photo !== undefined && (
-                                <img
-                                    src={`${ServerURL.URL_STATIC}/${camera.photo}`}
-                                    alt={"header"}
-                                    className="header-image-camera cameraPic"
-                                />
-                            )}
-                            <Text className={"desc-card"}>
-                                {camera.description}
-                            </Text>
-                        </div>
-                    ))
-                ) : (
-                    <p>No directions available</p>
-                )}
             </div>
         </div>
     );

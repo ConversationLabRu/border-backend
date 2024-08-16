@@ -1,4 +1,5 @@
 import axios from "axios";
+import api from "@/API/api-axios-config.js";
 
 export default class BorderCrossingService {
 
@@ -7,7 +8,7 @@ export default class BorderCrossingService {
 
         while (attempt < 5) {
             try {
-                const response = await axios.get(`/api/directions/borderCrossing?directionId=${directionId}`);
+                const response = await api.get(`/api/directions/borderCrossing?directionId=${directionId}`);
                 return response.data; // Успешный ответ, возвращаем данные
             } catch (error) {
                 attempt += 1;

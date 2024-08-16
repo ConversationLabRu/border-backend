@@ -1,0 +1,6 @@
+.icon__background {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+}

@@ -1,5 +1,5 @@
 import '../styles.css';
-import { AppRoot, Avatar, AvatarStack, List, Text } from "@telegram-apps/telegram-ui";
+import {AppRoot, Avatar, AvatarStack, Cell, List, Section, Text} from "@telegram-apps/telegram-ui";
 import { DirectionCard } from "@/Pages/Directions/Components/card.jsx";
 import { useFetching } from "@/hooks/useFetching.js";
 import DirectionService from "@/API/DirectionService.js";
@@ -55,102 +55,84 @@ export default function InformationPage() {
     return (
         <AppRoot>
             <div className="container">
+                <Section header={"Информация"}>
+                    {direction.info !== undefined && (
+                        <List>
+                            {direction.info.map((doc, index) => {
+                                if (doc.type === "document") {
+                                    return (
+                                        <Cell
 
-                <Text weight="3" className={"header-text"}>
-                    Информация
-                </Text>
+                                            after={
+                                                <img
+                                                    src={`/continue.svg`}
+                                                    alt={'dada'}
+                                                />
+                                            }
+                                            before={
+                                                <Avatar
+                                                    size={40}
+                                                    src={`/passport.png`}
+                                                />
+                                            }
+                                            onClick={() => openUrlInNewTab(doc.url)}
+                                            subtitle="Документы, необходимые для пересечаения границы"
 
-                {direction.info !== undefined && (
-                    <List>
-                        {direction.info.map((doc, index) => {
-                            if (doc.type === "document") {
-                                return (
-                                    <div className={"border-crossing-info"}
-                                         onClick={() => openUrlInNewTab(doc.url)}>
+                                        >
+                                            {`Документы`}
+                                        </Cell>
+                                    );
+                                } else if (doc.type === "import-export-standart") {
+                                    return (
 
-                                        <div className={"border-info-container"}>
-                                            <img
-                                                src={`${ServerURL.URL_STATIC}/passport.png`}
-                                                alt={"passport"}
-                                            />
+                                        <Cell
 
-                                            <div className="text-container">
-                                                <Text key={index} weight="3" className={"title-info"}>
-                                                    Документы
-                                                </Text>
+                                            after={
+                                                <img
+                                                    src={`/continue.svg`}
+                                                    alt={'dada'}
+                                                />
+                                            }
+                                            before={
+                                                <Avatar
+                                                    size={40}
+                                                    src={`/wine-bottle.png`}
+                                                />
+                                            }
+                                            onClick={() => openUrlInNewTab(doc.url)}
+                                            subtitle="Информация о разрешениях и нормах ввоза/вывоза через границу"
+                                        >
+                                            {`Нормы ввоза/вывоза`}
+                                        </Cell>
+                                    );
+                                } else {
+                                    return (
+                                        <Cell
 
-                                                <Text key={index} weight="3" className={"desc-info"}>
-                                                    Документы, необходимые для пересечения границы
-                                                </Text>
-                                            </div>
-                                        </div>
+                                            after={
+                                                <img
+                                                    src={`/continue.svg`}
+                                                    alt={'dada'}
+                                                />
+                                            }
+                                            before={
+                                                <Avatar
+                                                    size={40}
+                                                    src={`/bindle.png`}
+                                                />
+                                            }
+                                            onClick={() => openUrlInNewTab(doc.url)}
+                                            subtitle="Пересечение границы по Упрощенному Транзитному Документу"
 
-                                        <img
-                                            src={`${ServerURL.URL_STATIC}/continue.svg`}
-                                            alt={'dada'}
-                                        />
-                                    </div>
-                                );
-                            } else if (doc.type === "import-export-standart") {
-                                return (
-                                    <div className={"border-crossing-info"}
-                                         onClick={() => openUrlInNewTab(doc.url)}>
-
-                                        <div className={"border-info-container"}>
-                                            <img
-                                                src={`${ServerURL.URL_STATIC}/wine-bottle.png`}
-                                                alt={"wine-bottle"}
-                                            />
-
-                                            <div className="text-container">
-                                                <Text key={index} weight="3" className={"title-info"}>
-                                                    Нормы ввоза/вывоза
-                                                </Text>
-
-                                                <Text key={index} weight="3" className={"desc-info"}>
-                                                    Информация о разрешениях и нормах ввоза/вывоза через границу
-                                                </Text>
-                                            </div>
-                                        </div>
-
-                                        <img
-                                            src={`${ServerURL.URL_STATIC}/continue.svg`}
-                                            alt={'dada'}
-                                        />
-                                    </div>
-                                );
-                            } else {
-                                return (
-                                    <div className={"border-crossing-info non-margin"}
-                                         onClick={() => openUrlInNewTab(doc.url)}>
-
-                                        <div className={"border-info-container"}>
-                                            <img
-                                                src={`${ServerURL.URL_STATIC}/bindle.png`}
-                                                alt={"bindle"}
-                                            />
-
-                                            <div className="text-container">
-                                                <Text key={index} weight="3" className={"title-info"}>
-                                                    УТД
-                                                </Text>
-
-                                                <Text key={index} weight="3" className={"desc-info"}>
-                                                    Пересечение границы по Упрощенному Транзитному Документу
-                                                </Text>
-                                            </div>
-                                        </div>
-
-                                        <img
-                                            src={`${ServerURL.URL_STATIC}/continue.svg`}
-                                            alt={'dada'}
-                                        />
-                                    </div>
-                                );
-                            }
-                        })}
-                    </List>
-                )}
+                                        >
+                                            {`УТД`}
+                                        </Cell>
+                                    );
+                                }
+                            })}
+                        </List>
+                    )}
+                </Section>
             </div>
         </AppRoot>
     );

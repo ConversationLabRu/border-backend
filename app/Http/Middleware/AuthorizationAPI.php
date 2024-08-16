@@ -13,7 +13,7 @@ class AuthorizationAPI
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response) $next
      */
 
     public function handle(Request $request, Closure $next): Response
@@ -30,59 +30,87 @@ class AuthorizationAPI
             return response()->json(['message' => 'Доступ к API запрещен'], Response::HTTP_UNAUTHORIZED);
 
 
-
         return $next($request);
     }
 
-    public function checkSecurityTGBot(String $authHeader)
+    public function checkSecurityTGBot(string $authHeader)
     {
-        $rawData = trim($authHeader[1]);
+        // Убираем начальные и конечные пробелы
+        $rawData = trim($authHeader);
+        error_log("Raw Data: " . $rawData);
 
-        $parseData = $this->parseFormData($rawData);
+        // Парсим данные
+        $parsedData = $this->parseFormData($rawData);
 
-        if ($parseData == null) return false;
+        if ($parsedData == null) {
+            error_log("Parsed Data is null.");
+            return false;
+        }
 
-        $hashValue = $parseData["hash"];
-        unset($parseData["hash"]);
+        error_log("Parsed Data: " . print_r($parsedData, true));
 
+        // Извлекаем hash и удаляем его из массива
+        $hashValue = $parsedData["hash"] ?? null;
+        unset($parsedData["hash"]);
+
+        // Если нет хэша - возвращаем false
+        if (!$hashValue) {
+            error_log("Hash value is missing.");
+            return false;
+        }
+
+        error_log("Hash Value: " . $hashValue);
+
+        // Преобразование в формат {key}={value} и сортировка по ключам
         $stringArray = [];
-        foreach ($parseData as $key => $value) {
+        foreach ($parsedData as $key => $value) {
             $stringArray[] = "$key=$value";
         }
-        sort($stringArray);
+        sort($stringArray);  // сортируем по ключам
 
-        // Объединение их в одну строку
+        error_log("String Array (sorted): " . print_r($stringArray, true));
+
+        // Соединяем все элементы через \n
         $concatenatedData = implode("\n", $stringArray);
 
+        error_log("Concatenated Data: " . $concatenatedData);
+
         // Получение секретного ключа
-        $secretKey = hmac_sha256("WebAppData", env("TELEGRAM_BOT_TOKEN"));
+        $secretKey = $this->hmac_sha256("WebAppData", config('app.telegram_bot_token'));
+
+        error_log(config('app.telegram_bot_token'));
 
         // Получение конечного результата
-        $res = strtolower(bin2hex(hmac_sha256($secretKey, $concatenatedData)));
+        $res = strtolower(bin2hex($this->hmac_sha256($secretKey, $concatenatedData)));
 
-        return $res == $hashValue;
+        error_log("Result (hex): " . $res);
+
+        // Сравниваем результат с hash
+        $isValid = $res === $hashValue;
+        error_log("Is Valid: " . ($isValid ? "true" : "false"));
+
+        return $isValid;
     }
 
-
-    // Функция для HMAC SHA256
-    private function hmac_sha256($key, $data) {
+// Функция для HMAC SHA256
+    public function hmac_sha256($key, $data)
+    {
         return hash_hmac('sha256', $data, $key, true);
     }
 
-    private function parseFormData(String $rawData)
+    private function parseFormData(string $rawData)
     {
-        try {
-            $result = [];
-            $pairs = explode('&', $rawData);
+        $result = [];
+        $pairs = explode('&', $rawData);
 
-            foreach ($pairs as $pair) {
-                list($key, $value) = explode('=', $pair);
-                $result[$key] = urldecode($value);
-            }
-
-            return $result;
-        } catch (\Exception $e) {
-            Log::error($e->getMessage());
+        foreach ($pairs as $pair) {
+            list($key, $value) = explode('=', $pair);
+            $result[$key] = urldecode($value);
         }
+
+        error_log("Parsed Form Data: " . print_r($result, true));
+
+        return $result;
     }
+
 }

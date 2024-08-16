@@ -26,6 +26,6 @@ class CameraService
             return $cameraDTO->toArray();
         });
 
-        return $result;
+        return array_values($result->toArray());
     }
 }

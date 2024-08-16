@@ -37,13 +37,13 @@
     height: 100%;
 }
 
-.tgui-389a43acd684137a {
-    padding: 15px;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0px 0px 10px 10px rgba(0, 0, 10, .2);
-    margin-bottom: 5%;
-}
+/*.tgui-389a43acd684137a {*/
+/*    padding: 15px;*/
+/*    background: white;*/
+/*    border-radius: 10px;*/
+/*    box-shadow: 0px 0px 10px 10px rgba(0, 0, 10, .2);*/
+/*    margin-bottom: 5%;*/
+/*}*/
 
 .tgui-28e0a2576155be01 {
     display: flex;
@@ -159,8 +159,4 @@
 .report-elem-logo-container {
     display: flex;
     flex-direction: row;
-}
-
-.date-create-report-text {
-    color: rgb(88, 88, 88);
 }

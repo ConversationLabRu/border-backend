@@ -4,12 +4,11 @@
 }
 
 .title-desc {
-    color: #585858;
     margin-bottom: 5%;
 }
 
 .report-container {
-    box-shadow: 0px 0px 5px 5px rgba(0, 0, 10, .2);
+    /*box-shadow: 0px 0px 5px 5px rgba(0, 0, 10, .2);*/
     margin-bottom: 5%;
     border-radius: 10px;
     padding: 2%;
@@ -17,6 +16,7 @@
 
 .container {
     min-height: 94vh;
+    margin-top: 0;
 }
 
 .content {
@@ -31,10 +31,16 @@
 
 .choose-direction-title {
     font-size: 14px;
-    color: #585858;
     margin-top: 2%;
     margin-bottom: 2%;
 }
+
+.snackbar {
+    position: fixed;
+    bottom: 20px; /* Отступ от низа */
+    z-index: 1000; /* Убедитесь, что snackbar выше других элементов */
+}
+
 
 .label-img-margin {
     margin-right: 2%;

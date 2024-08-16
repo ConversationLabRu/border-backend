@@ -1,4 +1,5 @@
 import axios from "axios";
+import api from "@/API/api-axios-config.js";
 
 export default class CameraService {
 
@@ -7,7 +8,7 @@ export default class CameraService {
 
         while (attempt < 5) {
             try {
-                const response = await axios.get(`/api/directions/borderCrossing/cameras?borderCrossingId=${borderCrossingId}`);
+                const response = await api.get(`/api/directions/borderCrossing/cameras?borderCrossingId=${borderCrossingId}`);
                 return response.data;
             } catch (error) {
                 attempt += 1;

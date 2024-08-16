@@ -25,27 +25,29 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::prefix('directions')->group(function () {
-    Route::get('/', [DirectionController::class, 'index']); // GET /directions
-});
+Route::middleware('auth.api')->group(function () {
+    Route::prefix('directions')->group(function () {
+        Route::get('/', [DirectionController::class, 'index']); // GET /directions
+    });
 
-Route::prefix('directions/borderCrossing')->group(function () {
-    Route::get('/', [BorderCrossingController::class, 'index']); // GET /directions/borderCrossing
-});
+    Route::prefix('directions/borderCrossing')->group(function () {
+        Route::get('/', [BorderCrossingController::class, 'index']); // GET /directions/borderCrossing
+    });
 
-Route::prefix('directions/borderCrossing')->group(function () {
-    Route::get('/cameras', [CameraController::class, 'index']); // GET /directions/borderCrossing/cameras
-});
+    Route::prefix('directions/borderCrossing')->group(function () {
+        Route::get('/cameras', [CameraController::class, 'index']); // GET /directions/borderCrossing/cameras
+    });
 
-Route::prefix('directions/borderCrossing/reports')->group(function () {
-    Route::get('/last', [ReportController::class, 'getLastReports']); // GET /directions/borderCrossing/reports/last
-    Route::get('/', [ReportController::class, 'index']); // GET /directions/borderCrossing/reports
-    Route::post('/', [ReportController::class, 'store']); // POST /directions/borderCrossing/reports
-    Route::delete('/', [ReportController::class, 'destroy']); // Delete /directions/borderCrossing/reports
-});
+    Route::prefix('directions/borderCrossing/reports')->group(function () {
+        Route::get('/last', [ReportController::class, 'getLastReports']); // GET /directions/borderCrossing/reports/last
+        Route::get('/', [ReportController::class, 'index']); // GET /directions/borderCrossing/reports
+        Route::post('/', [ReportController::class, 'store']); // POST /directions/borderCrossing/reports
+        Route::delete('/', [ReportController::class, 'destroy']); // Delete /directions/borderCrossing/reports
+    });
 
-Route::prefix('directions/borderCrossing/reports')->group(function () {
-    Route::get('/transports', [TransportController::class, 'index']); // GET /directions/borderCrossing/reports/transports
+    Route::prefix('directions/borderCrossing/reports')->group(function () {
+        Route::get('/transports', [TransportController::class, 'index']); // GET /directions/borderCrossing/reports/transports
+    });
 });
 
 

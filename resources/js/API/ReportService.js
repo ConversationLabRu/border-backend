@@ -1,5 +1,6 @@
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
+import api from "@/API/api-axios-config.js";
 
 export default class ReportService {
 
@@ -8,7 +9,7 @@ export default class ReportService {
 
         while (attempt < 5) {
             try {
-                const response = await axios.get(`/api/directions/borderCrossing/reports/last?borderCrossingId=${borderCrossingId}`);
+                const response = await api.get(`/api/directions/borderCrossing/reports/last?borderCrossingId=${borderCrossingId}`);
                 return response.data; // Успешный ответ, возвращаем данные
             } catch (error) {
                 attempt += 1;
@@ -28,7 +29,7 @@ export default class ReportService {
 
         while (attempt < 5) {
             try {
-                const response = await axios.get(`/api/directions/borderCrossing/reports?borderCrossingId=${borderCrossingId}`);
+                const response = await api.get(`/api/directions/borderCrossing/reports?borderCrossingId=${borderCrossingId}`);
                 return response.data; // Успешный ответ, возвращаем данные
             } catch (error) {
                 attempt += 1;
@@ -48,7 +49,7 @@ export default class ReportService {
 
         while (attempt < 5) {
             try {
-                const response = await axios.post(`/api/directions/borderCrossing/reports`, data);
+                const response = await api.post(`/api/directions/borderCrossing/reports`, data);
                 return response.data;
             } catch (error) {
                 attempt += 1;

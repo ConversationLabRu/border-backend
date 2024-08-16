@@ -185,4 +185,6 @@ return [
         // 'Example' => AppRouting\Facades\Example::class,
     ])->toArray(),
 
+    'telegram_bot_token' => env('TELEGRAM_BOT_TOKEN', 'default_value'),
+
 ];

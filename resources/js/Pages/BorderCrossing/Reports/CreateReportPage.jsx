@@ -1,40 +1,25 @@
+import React, { useState, useEffect } from "react";
 import '../styles.css';
 import '../border-info-styles.css';
 import './reports-styles.css';
 import '@telegram-apps/telegram-ui/dist/styles.css';
 
 import {
-    Accordion,
     AppRoot,
-    Avatar,
-    AvatarStack,
-    Blockquote,
-    Button,
-    Cell, Input,
-    List,
-    Radio,
-    Text, Textarea
+    Section,
+    Cell,
+    Input,
+    Snackbar,
+    Text,
+    Textarea, Radio
 } from "@telegram-apps/telegram-ui";
-import { DirectionCard } from "@/Pages/Directions/Components/card.jsx";
-import { useFetching } from "@/hooks/useFetching.js";
-import DirectionService from "@/API/DirectionService.js";
-import React, { useState, useEffect } from "react";
-import BorderCrossingService from "@/API/BorderCrossingService.js";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { ThreeDots } from "react-loader-spinner";
-import { ServerURL } from "@/API/ServerConst.js";
 import ReportService from "@/API/ReportService.js";
-import { declensionHours, declensionMinutes } from "@/Pages/BorderCrossing/BorderCrossingInfo.jsx";
-import {
-    AccordionSummary
-} from "@telegram-apps/telegram-ui/dist/components/Blocks/Accordion/components/AccordionSummary/AccordionSummary.js";
-import {
-    AccordionContent
-} from "@telegram-apps/telegram-ui/dist/components/Blocks/Accordion/components/AccordionContent/AccordionContent.js";
-import CommentAccordion from "@/Pages/BorderCrossing/Reports/CommentAccrodion.jsx";
-import {useBackButton, useMainButton} from "@tma.js/sdk-react";
-import RadioButton from "@/Pages/BorderCrossing/Reports/RadioButton.jsx";
 import TransportService from "@/API/TransportService.js";
+import {useBackButton, useMainButton, usePopup} from "@tma.js/sdk-react";
+import { IoCheckmark, IoCloseSharp } from "react-icons/io5";
+import Icon from "@/Pages/BorderCrossing/Reports/Icon.jsx";
 
 export default function CreateReportPage() {
     const location = useLocation();
@@ -49,7 +34,6 @@ export default function CreateReportPage() {
 
     const { id } = useParams();
     const navigate = useNavigate();
-
     const directionCrossing = location.state?.directionCrossing;
     const direction = location.state?.direction;
 
@@ -57,30 +41,25 @@ export default function CreateReportPage() {
     const mainButton = useMainButton();
 
     useEffect(() => {
-
-        if ( (selectedTransport !== "") && (checkpointEntry !== "") && (checkpointExit !== "") && (selectedDirection !== "")) {
+        if (selectedTransport !== "" && checkpointEntry !== "" && checkpointExit !== "" && selectedDirection !== "") {
             mainButton.setText("Отправить данные").setBgColor("#007aff").show().enable();
         } else {
             mainButton.setText("Заполните обязательные поля").setBgColor("#808080").show().disable();
         }
-
-        console.log(selectedTransport)
-
-    }, [selectedTransport, checkpointEntry, checkpointExit, selectedDirection])
+    }, [selectedTransport, checkpointEntry, checkpointExit, selectedDirection]);
 
     useEffect(() => {
-        backButton.show()
+        backButton.show();
     }, []);
 
     useEffect(() => {
         const handleBackButtonClick = () => {
-            navigate(`/borderCrossing/${directionCrossing.id}/reports`,
-                {
-                    state: {
-                        direction: direction,
-                        directionCrossing: directionCrossing
-                    }
-                });
+            navigate(`/borderCrossing/${directionCrossing.id}/reports`, {
+                state: {
+                    direction: direction,
+                    directionCrossing: directionCrossing
+                }
+            });
             backButton.hide();
         };
 
@@ -93,83 +72,54 @@ export default function CreateReportPage() {
 
     useEffect(() => {
         TransportService.getAll().then((r) => {
-            if (r instanceof Error) {
-                // Handle error
-            } else {
+            if (!(r instanceof Error)) {
                 setTransports(r);
             }
         }).catch((r) => {
-            // Handle error
+            console.error('Error fetching transports:', r);
         });
     }, [id]);
 
-    const handleDirectionChange = (event) => {
-        setSelectedDirection(event.target.value);
+    const popup = usePopup();
 
-        if (event.target.value) {
-            setIsFlippedDirection(true);
-        } else {
-            setIsFlippedDirection(false);
+    const handleMainButtonClick = () => {
+        const reportData = {
+            border_crossing_id: id,
+            transport_id: selectedTransport,
+            user_id: 1,  // Adjust according to your user data
+            checkpoint_queue: checkpointQueue,
+            checkpoint_entry: checkpointEntry,
+            checkpoint_exit: checkpointExit,
+            comment: comment,
+            is_flipped_direction: isFlippedDirection
+        };
 
-        }
-    };
+        ReportService.createReport(reportData)
+            .then(response => {
+                popup.open({title: "Успешно", message: "Отчет успешно создан", buttons: [{type: "default", text: "Ok"}]});
 
-    const handleTransportChange = (event) => {
-        setSelectedTransport(event.target.value);
-    };
 
-    const handleCheckpointQueueChange = (event) => {
-        setCheckpointQueue(event.target.value);
-    };
-
-    const handleCheckpointEntryChange = (event) => {
-        setCheckpointEntry(event.target.value);
-    };
-
-    const handleCheckpointExitChange = (event) => {
-        setCheckpointExit(event.target.value);
-    };
-
-    const handleCommentChange = (event) => {
-        setComment(event.target.value);
-    };
-
-    useEffect(() => {
-        const handleMainButtonClick = () => {
-            // Prepare data to send
-            const reportData = {
-                border_crossing_id: id,  // Adjust this if needed
-                transport_id: selectedTransport,  // Map transport name to ID if necessary
-                user_id: 1,  // Adjust according to your user data
-                checkpoint_queue: checkpointQueue,
-                checkpoint_entry: checkpointEntry,
-                checkpoint_exit: checkpointExit,
-                comment: comment,
-                is_flipped_direction: isFlippedDirection
-
-            };
-
-            console.log(reportData)
-
-            // Send data to API
-            ReportService.createReport(reportData).then(response => {
-                navigate(`/borderCrossing/${id}/reports`,
-                    {
-                        state: {
-                            directionCrossing: directionCrossing
-                        }
+                // Переход обратно на страницу отчетов
+                navigate(`/borderCrossing/${id}/reports`, {
+                    state: {
+                        directionCrossing: directionCrossing
                     }
-                )
+                });
+
                 console.log('Report created successfully:', response);
-            }).catch(error => {
-                // Handle error
+            })
+            .catch(error => {
+
+                popup.open({title: "Ошибка", message: "Произошла ошибка при создании отчета", buttons: [{type: "default", text: "Ok"}]});
+
                 console.error('Error creating report:', error);
             });
 
-            backButton.hide();
-            mainButton.hide();
-        };
+        backButton.hide();
+        mainButton.hide();
+    };
 
+    useEffect(() => {
         mainButton.on("click", handleMainButtonClick);
 
         return () => {
@@ -180,126 +130,96 @@ export default function CreateReportPage() {
     return (
         <AppRoot>
             <div>
-                {(directionCrossing === undefined) ? (
+                {directionCrossing === undefined ? (
                     <div className="loader-overlay">
-                        <ThreeDots
-                            height="80"
-                            width="80"
-                            color="#007aff"
-                            ariaLabel="loading"
-                        />
+                        <ThreeDots height="80" width="80" color="#007aff" ariaLabel="loading" />
                     </div>
                 ) : (
                     <div className="container">
-                        <Text weight={"3"} className={"title"}>
-                            {`Добавление отчета о прохождении границы`}
-                        </Text>
+                        <Section header={"Добавление отчета о прохождении границы"}>
+                            <Text weight="1" className="choose-direction-title">
+                                Выберите направление
+                            </Text>
 
-                        <hr/>
+                            <form>
+                                <Cell
+                                    Component="label"
+                                    before={<Radio name="radio" value={`false`} />}
+                                    multiline
+                                    onChange={() => setSelectedDirection('forward')}
+                                >
+                                    {`${directionCrossing.from_city.country.name} -> ${directionCrossing.to_city.country.name}`}
+                                </Cell>
 
-                        <Text weight="1" className={"choose-direction-title"}>
-                            Выберите направление
-                        </Text>
-
-                        <form>
-
-                            <Cell
-                                Component="label"
-                                before={<Radio name="radio" value={`false`}/>}
-                                multiline
-                                onChange={handleDirectionChange}
-                            >
-                                {`${directionCrossing.from_city.country.name} -> ${directionCrossing.to_city.country.name}`}
-                            </Cell>
-
-                            <Cell
-                                Component="label"
-                                before={<Radio name="radio" value={`true`}/>}
-                                multiline
-                                onChange={handleDirectionChange}
-                            >
-                                {`${directionCrossing.to_city.country.name} -> ${directionCrossing.from_city.country.name}`}
-                            </Cell>
-                        </form>
-
-                        <hr/>
-
-                        <Text weight="1" className={"choose-direction-title"}>
-                            Выберите тип пересечения границы
-                        </Text>
-
-                        <div className={"transport-container"}>
-                            <form className={"transport-container"}>
-                                {transports && transports.map((transport, index) => (
-                                    <dv key={index}>
-                                        <Cell
-                                            Component="label"
-                                            before={<Radio name="radio" value={`${transport.id}`}/>}
-                                            multiline
-                                            onChange={handleTransportChange}
-                                        >
-                                            <img
-                                                className={"label-img-margin"}
-                                                src={`${ServerURL.URL_STATIC}/${transport.icon}`}
-                                                alt=""
-                                            />
-                                        </Cell>
-                                    </dv>
-                                ))}
+                                <Cell
+                                    Component="label"
+                                    before={<Radio name="radio" value={`true`} />}
+                                    multiline
+                                    onChange={() => setSelectedDirection('backward')}
+                                >
+                                    {`${directionCrossing.to_city.country.name} -> ${directionCrossing.from_city.country.name}`}
+                                </Cell>
                             </form>
-                        </div>
 
-                        <hr/>
+                            <Text weight="1" className="choose-direction-title">
+                                Выберите тип пересечения границы
+                            </Text>
 
-                        <Text weight="1" className={"choose-direction-title"}>
-                            Выберите время подъезда к очереди на КПП, если таковая была (необязательно)
-                        </Text>
+                            <div className="transport-container">
+                                <form className="transport-container">
+                                    {transports.map((transport, index) => (
+                                        <Cell
+                                            key={index}
+                                            Component="label"
+                                            before={<Radio name="radio" value={`${transport.id}`} />}
+                                            multiline
+                                            onChange={(e) => setSelectedTransport(e.target.value)}
+                                        >
+                                            <img className="label-img-margin" src={`/${transport.icon}`} alt="" />
+                                        </Cell>
+                                    ))}
+                                </form>
+                            </div>
 
-                        <Input
-                            name="checkpointQueue"
-                            type="datetime-local"
-                            value={checkpointQueue}
-                            onChange={handleCheckpointQueueChange}
-                        />
+                            <Text weight="1" className="choose-direction-title">
+                                Время подъезда к очереди на КПП (необязательно)
+                            </Text>
+                            <Input
+                                name="checkpointQueue"
+                                type="datetime-local"
+                                value={checkpointQueue}
+                                onChange={(e) => setCheckpointQueue(e.target.value)}
+                            />
 
-                        <hr/>
+                            <Text weight="1" className="choose-direction-title">
+                                Время въезда на первый КПП
+                            </Text>
+                            <Input
+                                name="checkpointEntry"
+                                type="datetime-local"
+                                value={checkpointEntry}
+                                onChange={(e) => setCheckpointEntry(e.target.value)}
+                            />
 
-                        <Text weight="1" className={"choose-direction-title"}>
-                            Выберите время въезда на первый КПП
-                        </Text>
+                            <Text weight="1" className="choose-direction-title">
+                                Время выезда с последнего КПП
+                            </Text>
+                            <Input
+                                name="checkpointExit"
+                                type="datetime-local"
+                                value={checkpointExit}
+                                onChange={(e) => setCheckpointExit(e.target.value)}
+                            />
 
-                        <Input
-                            name="checkpointEntry"
-                            type="datetime-local"
-                            value={checkpointEntry}
-                            onChange={handleCheckpointEntryChange}
-                        />
-
-                        <hr/>
-
-                        <Text weight="1" className={"choose-direction-title"}>
-                            Выберите время выезда с последнего КПП
-                        </Text>
-
-                        <Input
-                            name="checkpointExit"
-                            type="datetime-local"
-                            value={checkpointExit}
-                            onChange={handleCheckpointExitChange}
-                        />
-
-                        <hr/>
-
-                        <Text weight="1" className={"choose-direction-title"}>
-                            Напишите комментарий (необязательно)
-                        </Text>
-
-                        <Textarea
-                            name="comment"
-                            value={comment}
-                            onChange={handleCommentChange}
-                        />
-
+                            <Text weight="1" className="choose-direction-title">
+                                Комментарий (необязательно)
+                            </Text>
+                            <Textarea
+                                name="comment"
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                            />
+                        </Section>
                     </div>
                 )}
             </div>

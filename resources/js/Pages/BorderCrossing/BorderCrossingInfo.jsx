@@ -11,6 +11,14 @@ import { ThreeDots } from "react-loader-spinner";
 import { ServerURL } from "@/API/ServerConst.js";
 import ReportService from "@/API/ReportService.js";
 import {useBackButton} from "@tma.js/sdk-react";
+import {Icon24Chat} from "@telegram-apps/telegram-ui/dist/icons/24/chat.js";
+import {IoCamera, IoInformation} from "react-icons/io5";
+import {
+    InlineButtonsItem
+} from "@telegram-apps/telegram-ui/dist/components/Blocks/InlineButtons/components/InlineButtonsItem/InlineButtonsItem.js";
+import {AiFillCamera} from "react-icons/ai";
+import {FcOldTimeCamera} from "react-icons/fc";
+import {VscDeviceCamera} from "react-icons/vsc";
 
 export default function BorderCrossingInfo() {
     const location = useLocation();
@@ -81,7 +89,7 @@ export default function BorderCrossingInfo() {
                         <div className="image-container">
                             {/* Основное изображение */}
                             <img
-                                src={`${ServerURL.URL_STATIC}/${directionCrossing?.header_image}`}
+                                src={`/${directionCrossing?.header_image}`}
                                 alt={"header"}
                                 className="header-image"
                             />
@@ -95,45 +103,65 @@ export default function BorderCrossingInfo() {
 
                         <div className="container">
                             <div className="btn-container">
-                                <div className="btn" onClick={() => {
-                                    navigate(`/borderCrossing/${id}/cameras`,
-                                        {
-                                            state: {
-                                                directionCrossing: directionCrossing,
-                                                direction: direction
+                                <div
+                                    style={{
+                                        width: '45%'
+                                    }}
+                                    onClick={() => {
+                                        navigate(`/borderCrossing/${id}/cameras`,
+                                            {
+                                                state: {
+                                                    directionCrossing: directionCrossing,
+                                                    direction: direction
 
-                                            }
-                                        })
-                                }}>
-                                    <img
-                                        src={`${ServerURL.URL_STATIC}/camera-logo.svg`}
-                                        alt={"logo-btn"}
-                                    />
-
-                                    <Text weight="1">
-                                        Камеры
-                                    </Text>
+                                                }
+                                            })
+                                    }}
+                                >
+                                    <InlineButtonsItem
+                                        style={{
+                                            width: '100%',
+                                            height: '100%',
+                                        }}
+                                        mode="gray"
+                                        text="Камеры"
+                                    >
+                                        <VscDeviceCamera style={{
+                                            width: '100%',
+                                            height: '30%'
+                                        }}/>
+                                    </InlineButtonsItem>
                                 </div>
 
-                                <div className="btn" onClick={() => {
-                                    navigate(`/borderCrossing/${id}/info`,
-                                        {
-                                            state: {
-                                                directionCrossing: directionCrossing,
-                                                direction: direction
+                                <div
+                                    style={{
+                                        width: '45%'
+                                    }}
+                                    onClick={() => {
+                                        navigate(`/borderCrossing/${id}/info`,
+                                            {
+                                                state: {
+                                                    directionCrossing: directionCrossing,
+                                                    direction: direction
 
+                                                }
                                             }
-                                        }
-                                    )
-                                }}>
-                                    <img
-                                        src={`${ServerURL.URL_STATIC}/info-logo.svg`}
-                                        alt={"logo-btn"}
-                                    />
-
-                                    <Text weight="1">
-                                        Информация
-                                    </Text>
+                                        )
+                                    }}
+                                >
+                                    <InlineButtonsItem
+                                        style={{
+                                            width: '100%',
+                                            height: '100%',
+                                        }}
+                                        mode="gray"
+                                        text="Информация"
+                                    >
+                                        <IoInformation style={{
+                                            width: '100%',
+                                            height: '30%'
+                                        }}/>
+                                    </InlineButtonsItem>
                                 </div>
                             </div>
 
@@ -203,32 +231,32 @@ export default function BorderCrossingInfo() {
                                                             <div className={"report-elem-logo-container"}>
                                                                 <Avatar
                                                                     size={20}
-                                                                    src={`${ServerURL.URL_STATIC}/${directionCrossing.from_city.country.logo}`}
+                                                                    src={`/${directionCrossing.from_city.country.logo}`}
                                                                 />
                                                                 <Avatar
                                                                     className={"to-logo-size"}
                                                                     size={20}
-                                                                    src={`${ServerURL.URL_STATIC}/to_logo.svg`}
+                                                                    src={`/to_logo.svg`}
                                                                 />
                                                                 <Avatar
                                                                     size={20}
-                                                                    src={`${ServerURL.URL_STATIC}/${directionCrossing.to_city.country.logo}`}
+                                                                    src={`/${directionCrossing.to_city.country.logo}`}
                                                                 />
                                                             </div>
                                                         ) : (
                                                             <div className={"report-elem-logo-container"}>
                                                                 <Avatar
                                                                     size={20}
-                                                                    src={`${ServerURL.URL_STATIC}/${directionCrossing.to_city.country.logo}`}
+                                                                    src={`/${directionCrossing.to_city.country.logo}`}
                                                                 />
                                                                 <Avatar
                                                                     className={"to-logo-size"}
                                                                     size={20}
-                                                                    src={`${ServerURL.URL_STATIC}/to_logo.svg`}
+                                                                    src={`/to_logo.svg`}
                                                                 />
                                                                 <Avatar
                                                                     size={20}
-                                                                    src={`${ServerURL.URL_STATIC}/${directionCrossing.from_city.country.logo}`}
+                                                                    src={`/${directionCrossing.from_city.country.logo}`}
                                                                 />
                                                             </div>
                                                         )}
@@ -240,7 +268,7 @@ export default function BorderCrossingInfo() {
                                                 </Text>
                                             </div>
 
-                                            <Text weight="3" className={"date-create-report-text"}>
+                                            <Text weight="3">
                                                 {`${formattedDate}`}
                                             </Text>
                                         </div>
