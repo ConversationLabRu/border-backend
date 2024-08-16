@@ -144,7 +144,17 @@
 }
 
 .link-report {
-    color: #0228d9;
+    color: #006fed;
+}
+
+.link-report:hover {
+    color: #0358bf;
+    cursor: pointer;
+}
+
+.btn-crossing:hover {
+    opacity: 80%;
+    cursor: pointer;
 }
 
 .avatar-container {

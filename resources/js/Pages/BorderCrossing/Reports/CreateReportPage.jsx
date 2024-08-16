@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect, useRef} from "react";
 import '../styles.css';
 import '../border-info-styles.css';
 import './reports-styles.css';
@@ -39,6 +39,13 @@ export default function CreateReportPage() {
 
     const backButton = useBackButton();
     const mainButton = useMainButton();
+
+    // Используем useRef для захвата последнего значения комментария
+    const commentRef = useRef(comment);
+
+    useEffect(() => {
+        commentRef.current = comment;
+    }, [comment]);
 
     useEffect(() => {
         if (selectedTransport !== "" && checkpointEntry !== "" && checkpointExit !== "" && selectedDirection !== "") {
@@ -90,7 +97,7 @@ export default function CreateReportPage() {
             checkpoint_queue: checkpointQueue,
             checkpoint_entry: checkpointEntry,
             checkpoint_exit: checkpointExit,
-            comment: comment,
+            comment: commentRef.current,
             is_flipped_direction: isFlippedDirection
         };
 
@@ -181,43 +188,38 @@ export default function CreateReportPage() {
                                 </form>
                             </div>
 
-                            <Text weight="1" className="choose-direction-title">
-                                Время подъезда к очереди на КПП (необязательно)
-                            </Text>
                             <Input
+                                header={"Время подъезда к очереди на КПП (необязательно)"}
                                 name="checkpointQueue"
                                 type="datetime-local"
                                 value={checkpointQueue}
                                 onChange={(e) => setCheckpointQueue(e.target.value)}
                             />
 
-                            <Text weight="1" className="choose-direction-title">
-                                Время въезда на первый КПП
-                            </Text>
                             <Input
+                                header={"Время въезда на первый КПП"}
                                 name="checkpointEntry"
                                 type="datetime-local"
                                 value={checkpointEntry}
                                 onChange={(e) => setCheckpointEntry(e.target.value)}
+                                placeholder="Выберите дату и время"
+                                defaultValue=""
                             />
 
-                            <Text weight="1" className="choose-direction-title">
-                                Время выезда с последнего КПП
-                            </Text>
                             <Input
+                                header={"Время выезда с последнего КПП"}
                                 name="checkpointExit"
                                 type="datetime-local"
                                 value={checkpointExit}
                                 onChange={(e) => setCheckpointExit(e.target.value)}
                             />
 
-                            <Text weight="1" className="choose-direction-title">
-                                Комментарий (необязательно)
-                            </Text>
                             <Textarea
+                                header={"Комментарий (необязательно)"}
                                 name="comment"
                                 value={comment}
                                 onChange={(e) => setComment(e.target.value)}
+                                placeholder={"Здесь ваш комментарий"}
                             />
                         </Section>
                     </div>

@@ -264,16 +264,21 @@ export default function ReportsPage() {
                                                 </div>
 
                                                 {report.checkpoint_queue !== null && (
-                                                    <div className={"time-desc-container"}>
-                                                        <Text weight="3">
-                                                            {`Очередь на КПП:`}
-                                                        </Text>
+                                                    <div>
+                                                        <div className={"time-desc-container"}>
+                                                            <Text weight="3">
+                                                                {`Очередь на КПП:`}
+                                                            </Text>
 
-                                                        <Text weight="3">
-                                                            {formattedDate} в {formattedTime}
-                                                        </Text>
+                                                            <Text weight="3">
+                                                                {formattedDate} в {formattedTime}
+                                                            </Text>
+                                                        </div>
+
+                                                        <hr/>
                                                     </div>
                                                 )}
+
 
                                                 <div className={"time-desc-container"}>
                                                     <Text weight="3">
@@ -284,6 +289,8 @@ export default function ReportsPage() {
                                                         {formattedDateEntry} в {formattedTimeEntry}
                                                     </Text>
                                                 </div>
+
+                                                <hr/>
 
                                                 <div className={"time-desc-container"}>
                                                     <Text weight="3">

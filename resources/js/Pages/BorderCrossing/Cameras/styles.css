@@ -9,6 +9,11 @@
     border-radius: 8px;
 }
 
+.card-camera:hover {
+    opacity: 80%;
+    cursor: pointer;
+}
+
 .header-image-camera {
     width: 100%;
     height: 5%;

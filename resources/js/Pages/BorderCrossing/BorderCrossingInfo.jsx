@@ -104,6 +104,8 @@ export default function BorderCrossingInfo() {
                         <div className="container">
                             <div className="btn-container">
                                 <div
+                                    className={'btn-crossing'}
+
                                     style={{
                                         width: '45%'
                                     }}
@@ -134,6 +136,7 @@ export default function BorderCrossingInfo() {
                                 </div>
 
                                 <div
+                                    className={'btn-crossing'}
                                     style={{
                                         width: '45%'
                                     }}
@@ -186,7 +189,18 @@ export default function BorderCrossingInfo() {
                                 </Text>
                             </div>
 
-                            <List>
+                            <List
+                                onClick={() => {
+                                    navigate(`/borderCrossing/${id}/reports`,
+                                        {
+                                            state: {
+                                                directionCrossing: directionCrossing,
+                                                direction: direction
+
+                                            }
+                                        }
+                                    );
+                                }}>
                                 {reports.map((report, index) => {
 
                                     // Предполагаем, что checkpoint_entry и checkpoint_exit - это объекты Date
