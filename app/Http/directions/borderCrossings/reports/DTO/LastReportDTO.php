@@ -9,6 +9,7 @@ class LastReportDTO
     private ?string $checkpointQueue;
     private ?string $comment;
     private bool $isFlippedDirection;
+    private int $userId;
 
     /**
      * @param string $checkpointEntry
@@ -17,13 +18,14 @@ class LastReportDTO
      * @param string|null $comment
      * @param bool $isFlippedDirection
      */
-    public function __construct(string $checkpointEntry, string $checkpointExit, ?string $checkpointQueue, ?string $comment, bool $isFlippedDirection)
+    public function __construct(string $checkpointEntry, string $checkpointExit, ?string $checkpointQueue, ?string $comment, bool $isFlippedDirection, int $userId)
     {
         $this->checkpointEntry = $checkpointEntry;
         $this->checkpointExit = $checkpointExit;
         $this->checkpointQueue = $checkpointQueue;
         $this->comment = $comment;
         $this->isFlippedDirection = $isFlippedDirection;
+        $this->userId = $userId;
     }
 
     public function getCheckpointEntry(): string
@@ -51,6 +53,13 @@ class LastReportDTO
         return $this->isFlippedDirection;
     }
 
+    public function getUserId(): int
+    {
+        return $this->userId;
+    }
+
+
+
     public function toArray(): array
     {
         return [
@@ -59,6 +68,7 @@ class LastReportDTO
             'checkpoint_exit' => $this->checkpointExit,
             'comment' => $this->comment,
             'is_flipped_direction' => $this->isFlippedDirection,
+            'user_id' => $this->userId
         ];
     }
 }

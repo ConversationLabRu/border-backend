@@ -12,15 +12,15 @@ class TransportService
     {
         $transports = Transport::all();
 
-        $result = $transports->map(function (Transport $transport) {
-                $transportDTO = new TransportDTO(
-                    $transport->getAttributeValue("icon"),
-                    $transport->getAttributeValue("id"),
-                );
+//        $result = $transports->map(function (Transport $transport) {
+//                $transportDTO = new TransportDTO(
+//                    $transport->getAttributeValue("icon"),
+//                    $transport->getAttributeValue("id"),
+//                );
+//
+//                return $transportDTO->toArray();
+//            });
 
-                return $transportDTO->toArray();
-            });
-
-        return $result;
+        return $transports;
     }
 }

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->bigInteger('transport_id')->unsigned();
             $table->foreign('transport_id')->references('id')->on('transports');
             $table->bigInteger('user_id')->unsigned();
-            $table->foreign('user_id')->references('id')->on('users');
+            $table->bigInteger('user_id');
             $table->timestamp('checkpoint_queue')->nullable();
             $table->timestamp('checkpoint_entry');
             $table->timestamp('checkpoint_exit');

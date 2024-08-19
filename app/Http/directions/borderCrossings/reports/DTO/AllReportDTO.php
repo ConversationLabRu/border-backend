@@ -3,15 +3,16 @@
 namespace App\Http\directions\borderCrossings\reports\DTO;
 
 use App\Http\directions\borderCrossings\reports\transports\DTO\TransportDTO;
+use App\Http\directions\borderCrossings\reports\transports\Entities\Transport;
 
 class AllReportDTO extends LastReportDTO
 {
     private int $id;
-    private TransportDTO $transport;
+    private Transport $transport;
 
     /**
      * @param int $id
-     * @param TransportDTO $transport
+     * @param Transport $transport
      */
     public function __construct(string $checkpointEntry,
                                 string $checkpointExit,
@@ -19,9 +20,10 @@ class AllReportDTO extends LastReportDTO
                                 ?string $comment,
                                 bool $isFlippedDirection,
                                 int $id,
-                                TransportDTO $transport)
+                                Transport $transport,
+                                int $userId)
     {
-        parent::__construct($checkpointEntry, $checkpointExit, $checkpointQueue, $comment, $isFlippedDirection);
+        parent::__construct($checkpointEntry, $checkpointExit, $checkpointQueue, $comment, $isFlippedDirection, $userId);
         $this->id = $id;
         $this->transport = $transport;
     }
@@ -31,7 +33,7 @@ class AllReportDTO extends LastReportDTO
         return $this->id;
     }
 
-    public function getTransport(): TransportDTO
+    public function getTransport(): Transport
     {
         return $this->transport;
     }
@@ -45,6 +47,7 @@ class AllReportDTO extends LastReportDTO
             'comment' => $this->getComment(),
             'is_flipped_direction' => $this->isFlippedDirection(),
             'id' => $this->id,
+            'user_id' => $this->getUserId(),
             'transport' => $this->transport->toArray(),
         ];
     }

@@ -4,7 +4,6 @@
 
 .header-image {
     width: 100%; /* Или установите нужную ширину */
-    height: 200px; /* Или установите нужную высоту */
 }
 
 .overlay-text {
@@ -116,7 +115,7 @@
 .btn-container {
     display: flex;
     flex-direction: row;
-    justify-content: space-around;
+    justify-content: space-evenly;
 }
 
 .btn {
@@ -139,12 +138,16 @@
     display: flex;
     flex-direction: row;
     justify-content: space-around;
-    margin-top: 5%;
     margin-bottom: 5%;
+}
+
+.tgui-65c206f0fd891b6b {
+    font-size: 15px;
 }
 
 .link-report {
     color: #006fed;
+    font-size: 15px;
 }
 
 .link-report:hover {

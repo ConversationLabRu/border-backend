@@ -8,5 +8,32 @@
 .to-logo-size img {
     width: 80%;
     height: 80%;
+}
 
+.report-list:hover {
+    cursor: pointer;
+    opacity: 80%;
+}
+
+.time-container-title {
+    display: flex;
+    flex-direction: column;
+}
+
+.bel-container-inf {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.report-title {
+    align-items: start;
+    margin-left: 4%;
+    box-shadow: 0 0 1px 0px;
+    width: 90%;
+    height: fit-content;
+    padding: 2%;
+    display: flex;
+    flex-direction: column;
+    border-radius: 10px;
 }

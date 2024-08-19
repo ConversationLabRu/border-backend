@@ -22,10 +22,13 @@ hr {
 
 .container {
     min-height: 94vh;
-    margin: 2%;
 }
 
-.content {
+.tgui-8af0d10d5540c6cc {
+    opacity: 0;
+}
+
+  .content {
     flex: 1; /* Занимает всё доступное пространство, оставляя кнопку внизу */
 }
 
@@ -50,6 +53,14 @@ hr {
 
 .label-img-margin {
     margin-right: 2%;
+}
+
+.title-section header h1 {
+    font-size: 20px;
+}
+
+.subtitle-section header h1{
+    font-size: 15px;
 }
 
 .transport-container {

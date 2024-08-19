@@ -23,6 +23,10 @@ return new class extends Migration
             $table->foreign('to_id')->references('id')->on('cities');
             $table->boolean('is_quque');
             $table->text('header_image');
+            $table->text("url_arcticle");
+            $table->boolean('is_car');
+            $table->boolean('is_bus');
+            $table->boolean('is_walking');
         });
 
         Schema::enableForeignKeyConstraints();

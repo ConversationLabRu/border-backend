@@ -75,7 +75,12 @@ use Illuminate\Support\Facades\Http;
  *                 example="img.png"
  *             )
  *         )
- *     )
+ *     ),
+ *     @OA\Property(
+ *          property="url_arcticle",
+ *          type="string",
+ *          example="www.google.com"
+ *      ),
  * )
  */
 

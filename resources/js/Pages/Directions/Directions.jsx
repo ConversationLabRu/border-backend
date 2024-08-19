@@ -3,7 +3,7 @@ import {AppRoot, Avatar, Cell, Image, List, Section, Text} from "@telegram-apps/
 // import { DirectionCard } from "@/Pages/Directions/Components/card.jsx";
 import { useFetching } from "@/hooks/useFetching.js";
 import DirectionService from "@/API/DirectionService.js";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {useNavigate} from "react-router-dom";
 import {DirectionCard} from "@/Pages/Directions/Components/card.jsx";
 import {ServerURL} from "@/API/ServerConst.js";
@@ -29,11 +29,26 @@ export default function Directions() {
     return (
         <AppRoot>
             <div>
-                <img
-                    src="/bordersmain.jpg"
-                    alt={"das"}
-                    className="header-image"
-                />
+                {/*<img*/}
+                {/*    src="/bordersmain.jpg"*/}
+                {/*    alt={"das"}*/}
+                {/*    className="header-image"*/}
+                {/*/>*/}
+
+                <div className="image-container">
+                    {/* Основное изображение */}
+                    <img
+                        src="/bordersmain.jpg"
+                        alt={"das"}
+                        className="header-image"
+                    />
+                    {/* Текст поверх изображения */}
+                    <div className="overlay-text-direction">
+                        <Text weight="1" className="img-text">
+                            Границы
+                        </Text>
+                    </div>
+                </div>
 
                 <List>
                     <Section header="Направления">
@@ -42,12 +57,14 @@ export default function Directions() {
                                 <Cell
                                     before={<Avatar size={48} src={`${direction.logo}`}/>}
                                     subtitle="Информация, камера, правила и др."
-                                    onClick={() => {navigate(`/borderCrossing/${direction.id}`,
-                                        {
-                                            state: {
-                                                direction: direction
-                                            }
-                                        });}}
+                                    onClick={() => {
+                                        navigate(`/borderCrossing/${direction.id}`,
+                                            {
+                                                state: {
+                                                    direction: direction
+                                                }
+                                            });
+                                    }}
 
                                 >
                                     {direction.name}

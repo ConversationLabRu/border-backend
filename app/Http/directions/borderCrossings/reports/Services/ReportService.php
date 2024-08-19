@@ -35,7 +35,8 @@ class ReportService
                 $report->getAttributeValue("checkpoint_exit"),
                 $report->getAttributeValue("checkpoint_queue"),
                 $report->getAttributeValue("comment"),
-                $report->getAttributeValue("is_flipped_direction")
+                $report->getAttributeValue("is_flipped_direction"),
+                $report->getAttributeValue("user_id"),
             );
 
             return $reportDTO->toArray();
@@ -58,11 +59,6 @@ class ReportService
 
         $result = $reports->map(function (Report $report) {
 
-            $transportDTO = new TransportDTO(
-                $report->transport->icon,
-                $report->transport->id
-            );
-
             $reportDTO = new AllReportDTO(
                 $report->getAttributeValue("checkpoint_entry"),
                 $report->getAttributeValue("checkpoint_exit"),
@@ -70,7 +66,8 @@ class ReportService
                 $report->getAttributeValue("comment"),
                 $report->getAttributeValue("is_flipped_direction"),
                 $report->getAttributeValue("id"),
-                $transportDTO,
+                $report->transport,
+                $report->getAttributeValue("user_id"),
             );
 
             return $reportDTO->toArray();
@@ -102,7 +99,7 @@ class ReportService
         $request->validate([
             'border_crossing_id' => 'required|exists:borderсrossings,id',
             'transport_id' => 'required|exists:transports,id',
-            'user_id' => 'required|exists:users,id',
+            'user_id' => 'required|integer',
             'checkpoint_queue' => 'nullable|date',
             'checkpoint_entry' => 'required|date',
             'checkpoint_exit' => 'required|date',

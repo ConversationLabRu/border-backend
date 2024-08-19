@@ -16,7 +16,11 @@ class BorderCrossing extends Model
         'from',
         'to',
         'is_queue',
-        'header_image'
+        'header_image',
+        'url_arcticle',
+        'is_car',
+        'is_bus',
+        'is_walking'
     ];
 
     // Если не используете timestamps, укажите это

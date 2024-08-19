@@ -1,0 +1,40 @@
+.tgui-8af0d10d5540c6cc {
+    opacity: 0.1;
+}
+
+.container span {
+    margin-top: 3%;
+    font-size: 15px;
+}
+
+/* Стили для iOS */
+html.ios input[type="datetime-local"] {
+    box-shadow: 0 0 0 2px var(--tgui--outline);
+    border-radius: 14px;
+    padding: 20px;
+    /* любые другие стили */
+}
+
+html.macos input[type="datetime-local"] {
+    box-shadow: 0 0 0 2px var(--tgui--outline);
+    border-radius: 14px;
+    padding: 5px;
+    /* любые другие стили */
+}
+
+html.ios textarea {
+    margin: 4%;
+    box-shadow: 0 0 0 2px var(--tgui--outline);
+    border-radius: 14px;
+    padding: 20px;
+    /* любые другие стили */
+}
+
+html.macos textarea {
+    margin: 4%;
+    box-shadow: 0 0 0 2px var(--tgui--outline);
+    border-radius: 14px;
+    padding: 5px;
+    /* любые другие стили */
+}
+

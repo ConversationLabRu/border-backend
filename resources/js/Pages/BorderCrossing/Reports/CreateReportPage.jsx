@@ -2,6 +2,7 @@ import React, {useState, useEffect, useRef} from "react";
 import '../styles.css';
 import '../border-info-styles.css';
 import './reports-styles.css';
+import './create-report-styles.css';
 import '@telegram-apps/telegram-ui/dist/styles.css';
 
 import {
@@ -17,8 +18,8 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { ThreeDots } from "react-loader-spinner";
 import ReportService from "@/API/ReportService.js";
 import TransportService from "@/API/TransportService.js";
-import {useBackButton, useMainButton, usePopup} from "@tma.js/sdk-react";
-import { IoCheckmark, IoCloseSharp } from "react-icons/io5";
+import {retrieveLaunchParams, useBackButton, useMainButton, usePopup} from "@tma.js/sdk-react";
+import {IoBus, IoCar, IoCheckmark, IoCloseSharp, IoWalk} from "react-icons/io5";
 import Icon from "@/Pages/BorderCrossing/Reports/Icon.jsx";
 
 export default function CreateReportPage() {
@@ -46,6 +47,28 @@ export default function CreateReportPage() {
     useEffect(() => {
         commentRef.current = comment;
     }, [comment]);
+
+    console.log(navigator.userAgent)
+
+    // Определение iOS и macOS
+    const isIOS = () => {
+        return /iPad|iPhone|iPod/.test(navigator.platform) && !window.MSStream;
+    };
+
+    const isMacOS = () => {
+        return /Macintosh|MacIntel|MacPPC|Mac68K/.test(navigator.platform) && !isIOS();
+    };
+
+    // Применение классов к <html>
+    useEffect(() => {
+        console.log(navigator.platform)
+
+        if (isIOS()) {
+            document.documentElement.classList.add('ios');
+        } else if (isMacOS()) {
+            document.documentElement.classList.add('macos');
+        }
+    }, []);
 
     useEffect(() => {
         if (selectedTransport !== "" && checkpointEntry !== "" && checkpointExit !== "" && selectedDirection !== "") {
@@ -90,10 +113,15 @@ export default function CreateReportPage() {
     const popup = usePopup();
 
     const handleMainButtonClick = () => {
+
+        mainButton.setText("Отправить данные").setBgColor("#808080").show().disable();
+
+        const { initDataRaw, initData } = retrieveLaunchParams();
+
         const reportData = {
             border_crossing_id: id,
             transport_id: selectedTransport,
-            user_id: 1,  // Adjust according to your user data
+            user_id: Number(initData.user.id),  // Adjust according to your user data
             checkpoint_queue: checkpointQueue,
             checkpoint_entry: checkpointEntry,
             checkpoint_exit: checkpointExit,
@@ -105,6 +133,8 @@ export default function CreateReportPage() {
             .then(response => {
                 popup.open({title: "Успешно", message: "Отчет успешно создан", buttons: [{type: "default", text: "Ok"}]});
 
+                backButton.hide();
+                mainButton.hide();
 
                 // Переход обратно на страницу отчетов
                 navigate(`/borderCrossing/${id}/reports`, {
@@ -119,11 +149,12 @@ export default function CreateReportPage() {
 
                 popup.open({title: "Ошибка", message: "Произошла ошибка при создании отчета", buttons: [{type: "default", text: "Ok"}]});
 
+                mainButton.setText("Отправить данные").setBgColor("#007aff").show().enable();
+                backButton.show();
+
                 console.error('Error creating report:', error);
             });
 
-        backButton.hide();
-        mainButton.hide();
     };
 
     useEffect(() => {
@@ -142,16 +173,18 @@ export default function CreateReportPage() {
                         <ThreeDots height="80" width="80" color="#007aff" ariaLabel="loading" />
                     </div>
                 ) : (
-                    <div className="container">
-                        <Section header={"Добавление отчета о прохождении границы"}>
-                            <Text weight="1" className="choose-direction-title">
+
+                    <Section header={"Добавление отчета о прохождении границы"}>
+                        <div className="container">
+
+                            <Text className="choose-direction-title">
                                 Выберите направление
                             </Text>
 
                             <form>
                                 <Cell
                                     Component="label"
-                                    before={<Radio name="radio" value={`false`} />}
+                                    before={<Radio name="radio" value={`false`}/>}
                                     multiline
                                     onChange={() => setSelectedDirection('forward')}
                                 >
@@ -160,7 +193,7 @@ export default function CreateReportPage() {
 
                                 <Cell
                                     Component="label"
-                                    before={<Radio name="radio" value={`true`} />}
+                                    before={<Radio name="radio" value={`true`}/>}
                                     multiline
                                     onChange={() => setSelectedDirection('backward')}
                                 >
@@ -168,33 +201,78 @@ export default function CreateReportPage() {
                                 </Cell>
                             </form>
 
-                            <Text weight="1" className="choose-direction-title">
+                            <hr/>
+
+                            <Text className="choose-direction-title">
                                 Выберите тип пересечения границы
                             </Text>
+
 
                             <div className="transport-container">
                                 <form className="transport-container">
                                     {transports.map((transport, index) => (
-                                        <Cell
-                                            key={index}
-                                            Component="label"
-                                            before={<Radio name="radio" value={`${transport.id}`} />}
-                                            multiline
-                                            onChange={(e) => setSelectedTransport(e.target.value)}
-                                        >
-                                            <img className="label-img-margin" src={`/${transport.icon}`} alt="" />
-                                        </Cell>
+                                        <div key={index}>
+                                            {(transport.name === "Car" && directionCrossing.is_car) ? (
+                                                <Cell
+                                                    Component="label"
+                                                    before={<Radio name="radio" value={`${transport.id}`}/>}
+                                                    multiline
+                                                    onChange={(e) => setSelectedTransport(e.target.value)}
+                                                >
+                                                    <IoCar size={28}/>
+                                                </Cell>
+                                            ) : (transport.name === "Bus" && directionCrossing.is_bus) ? (
+                                                <Cell
+                                                    Component="label"
+                                                    before={<Radio name="radio" value={`${transport.id}`}/>}
+                                                    multiline
+                                                    onChange={(e) => setSelectedTransport(e.target.value)}
+                                                >
+                                                    <IoBus size={28}/>
+                                                </Cell>
+                                            ) : (transport.name === "Walking" && directionCrossing.is_walking) ? (
+                                                <Cell
+                                                    Component="label"
+                                                    before={<Radio name="radio" value={`${transport.id}`}/>}
+                                                    multiline
+                                                    onChange={(e) => setSelectedTransport(e.target.value)}
+                                                >
+                                                    <IoWalk size={28}/>
+                                                </Cell>
+                                            ) : null}
+                                        </div>
                                     ))}
                                 </form>
                             </div>
 
+                            <hr/>
+
+                            {(isMacOS() || isIOS()) && (
+                                <>
+                                    <Text>
+                                        {"Время подъезда к очереди на КПП (необязательно)"}
+                                    </Text>
+                                </>
+                            )}
+
                             <Input
+                                className={"datetime-ios"}
                                 header={"Время подъезда к очереди на КПП (необязательно)"}
                                 name="checkpointQueue"
                                 type="datetime-local"
                                 value={checkpointQueue}
                                 onChange={(e) => setCheckpointQueue(e.target.value)}
                             />
+
+                            <hr/>
+
+                            {(isMacOS() || isIOS()) && (
+                                <>
+                                    <Text>
+                                        {"Время въезда на первый КПП"}
+                                    </Text>
+                                </>
+                            )}
 
                             <Input
                                 header={"Время въезда на первый КПП"}
@@ -206,6 +284,16 @@ export default function CreateReportPage() {
                                 defaultValue=""
                             />
 
+                            <hr/>
+
+                            {(isMacOS() || isIOS()) && (
+                                <>
+                                    <Text>
+                                        {"Время выезда с последнего КПП"}
+                                    </Text>
+                                </>
+                            )}
+
                             <Input
                                 header={"Время выезда с последнего КПП"}
                                 name="checkpointExit"
@@ -214,15 +302,17 @@ export default function CreateReportPage() {
                                 onChange={(e) => setCheckpointExit(e.target.value)}
                             />
 
+                            <hr/>
+
                             <Textarea
                                 header={"Комментарий (необязательно)"}
                                 name="comment"
                                 value={comment}
                                 onChange={(e) => setComment(e.target.value)}
-                                placeholder={"Здесь ваш комментарий"}
+                                placeholder={"Напишите комментарий (необязательно)"}
                             />
-                        </Section>
-                    </div>
+                        </div>
+                    </Section>
                 )}
             </div>
         </AppRoot>

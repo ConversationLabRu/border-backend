@@ -63,7 +63,11 @@ class BorderCrossingService
                 $direction->is_quque,
                 $direction->header_image,
                 $fromCityDTO,
-                $toCityDTO
+                $toCityDTO,
+                $direction->url_arcticle,
+                $direction->is_bus,
+                $direction->is_walking,
+                $direction->is_car
             );
 
             Log::info('Created DirectionCrossingDTO:', ['directionDTO' => $directionDTO]);
