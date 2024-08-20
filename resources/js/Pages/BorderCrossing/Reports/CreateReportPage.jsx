@@ -28,6 +28,7 @@ export default function CreateReportPage() {
     const [selectedDirection, setSelectedDirection] = useState('');
     const [selectedTransport, setSelectedTransport] = useState('');
     const [checkpointQueue, setCheckpointQueue] = useState('');
+    const [timeEnterWaitingArea, setTimeEnterWaitingArea] = useState('');
     const [checkpointEntry, setCheckpointEntry] = useState('');
     const [checkpointExit, setCheckpointExit] = useState('');
     const [comment, setComment] = useState('');
@@ -71,12 +72,39 @@ export default function CreateReportPage() {
     }, []);
 
     useEffect(() => {
-        if (selectedTransport !== "" && checkpointEntry !== "" && checkpointExit !== "" && selectedDirection !== "") {
-            mainButton.setText("Отправить данные").setBgColor("#007aff").show().enable();
+        const reportData = {
+            border_crossing_id: id,
+            transport_id: selectedTransport,
+            user_id: 1,  // Adjust according to your user data
+            checkpoint_queue: checkpointQueue,
+            checkpoint_entry: checkpointEntry,
+            checkpoint_exit: checkpointExit,
+            comment: commentRef.current,
+            is_flipped_direction: isFlippedDirection,
+            time_enter_waiting_area: timeEnterWaitingArea,
+        };
+
+        console.log(reportData)
+
+        if ( ( (!isFlippedDirection && directionCrossing?.from_city?.country.name === "Беларусь")
+            || (isFlippedDirection && directionCrossing?.to_city?.country.name === "Беларусь") ) ) {
+
+            console.log("ИЗ БЕЛАРУСИ")
+
+            if (selectedTransport !== "" && checkpointEntry !== "" && checkpointExit !== "" && timeEnterWaitingArea !== "") {
+                mainButton.setText("Отправить данные").setBgColor("#007aff").show().enable();
+            } else {
+                mainButton.setText("Заполните обязательные поля").setBgColor("#808080").show().disable();
+            }
         } else {
-            mainButton.setText("Заполните обязательные поля").setBgColor("#808080").show().disable();
+            if (selectedTransport !== "" && checkpointEntry !== "" && checkpointExit !== "") {
+                mainButton.setText("Отправить данные").setBgColor("#007aff").show().enable();
+            } else {
+                mainButton.setText("Заполните обязательные поля").setBgColor("#808080").show().disable();
+            }
         }
-    }, [selectedTransport, checkpointEntry, checkpointExit, selectedDirection]);
+
+    }, [selectedTransport, checkpointEntry, checkpointExit, selectedDirection, isFlippedDirection, timeEnterWaitingArea]);
 
     useEffect(() => {
         backButton.show();
@@ -126,7 +154,8 @@ export default function CreateReportPage() {
             checkpoint_entry: checkpointEntry,
             checkpoint_exit: checkpointExit,
             comment: commentRef.current,
-            is_flipped_direction: isFlippedDirection
+            is_flipped_direction: isFlippedDirection,
+            time_enter_waiting_area: timeEnterWaitingArea,
         };
 
         ReportService.createReport(reportData)
@@ -139,7 +168,8 @@ export default function CreateReportPage() {
                 // Переход обратно на страницу отчетов
                 navigate(`/borderCrossing/${id}/reports`, {
                     state: {
-                        directionCrossing: directionCrossing
+                        directionCrossing: directionCrossing,
+                        direction: direction
                     }
                 });
 
@@ -165,6 +195,12 @@ export default function CreateReportPage() {
         }
     }, [mainButton, selectedTransport, checkpointEntry, checkpointExit, selectedDirection]);
 
+    useEffect(() => {
+        console.log('from_city:', directionCrossing?.from_city?.country.name);
+        console.log('to_city:', directionCrossing?.to_city?.country.name);
+        console.log('isFlippedDirection:', isFlippedDirection);
+        }, [directionCrossing, isFlippedDirection]);
+
     return (
         <AppRoot>
             <div>
@@ -184,18 +220,18 @@ export default function CreateReportPage() {
                             <form>
                                 <Cell
                                     Component="label"
-                                    before={<Radio name="radio" value={`false`}/>}
+                                    before={<Radio name="radio" value={`false`} checked={!isFlippedDirection}/>}
                                     multiline
-                                    onChange={() => setSelectedDirection('forward')}
+                                    onChange={() => setIsFlippedDirection(false)}
                                 >
                                     {`${directionCrossing.from_city.country.name} -> ${directionCrossing.to_city.country.name}`}
                                 </Cell>
 
                                 <Cell
                                     Component="label"
-                                    before={<Radio name="radio" value={`true`}/>}
+                                    before={<Radio name="radio" value={`true`} checked={isFlippedDirection}/>}
                                     multiline
-                                    onChange={() => setSelectedDirection('backward')}
+                                    onChange={() => setIsFlippedDirection(true)}
                                 >
                                     {`${directionCrossing.to_city.country.name} -> ${directionCrossing.from_city.country.name}`}
                                 </Cell>
@@ -247,22 +283,64 @@ export default function CreateReportPage() {
 
                             <hr/>
 
-                            {(isMacOS() || isIOS()) && (
-                                <>
-                                    <Text>
-                                        {"Время подъезда к очереди на КПП (необязательно)"}
-                                    </Text>
-                                </>
-                            )}
+                            {((!isFlippedDirection && directionCrossing?.from_city?.country.name === "Беларусь")
+                                || (isFlippedDirection && directionCrossing?.to_city?.country.name === "Беларусь")) ? (
+                                <div>
+                                    {(isMacOS() || isIOS()) && (
+                                        <>
+                                            <Text>
+                                                {"Выберите время подъезда к очереди в зону ожидания (необязательно)"}
+                                            </Text>
+                                        </>
+                                    )}
 
-                            <Input
-                                className={"datetime-ios"}
-                                header={"Время подъезда к очереди на КПП (необязательно)"}
-                                name="checkpointQueue"
-                                type="datetime-local"
-                                value={checkpointQueue}
-                                onChange={(e) => setCheckpointQueue(e.target.value)}
-                            />
+                                    <Input
+                                        className={"datetime-ios"}
+                                        header={"Выберите время подъезда к очереди в зону ожидания (необязательно)"}
+                                        name="checkpointQueue"
+                                        type="datetime-local"
+                                        value={checkpointQueue}
+                                        onChange={(e) => setCheckpointQueue(e.target.value)}
+                                    />
+
+                                    {(isMacOS() || isIOS()) && (
+                                        <>
+                                            <Text>
+                                                {"Выберите время въезда в зону ожидания"}
+                                            </Text>
+                                        </>
+                                    )}
+
+                                    <Input
+                                        className={"datetime-ios"}
+                                        header={"Выберите время въезда в зону ожидания"}
+                                        name="timeEnterWaitingArea"
+                                        type="datetime-local"
+                                        value={timeEnterWaitingArea}
+                                        onChange={(e) => setTimeEnterWaitingArea(e.target.value)}
+                                    />
+
+                                </div>
+                            ) : (
+                                <div>
+                                    {(isMacOS() || isIOS()) && (
+                                        <>
+                                            <Text>
+                                                {"Время подъезда к очереди на КПП (необязательно)"}
+                                            </Text>
+                                        </>
+                                    )}
+
+                                    <Input
+                                        className={"datetime-ios"}
+                                        header={"Время подъезда к очереди на КПП (необязательно)"}
+                                        name="checkpointQueue"
+                                        type="datetime-local"
+                                        value={checkpointQueue}
+                                        onChange={(e) => setCheckpointQueue(e.target.value)}
+                                    />
+                                </div>
+                            )}
 
                             <hr/>
 

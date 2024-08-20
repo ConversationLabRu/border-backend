@@ -84,7 +84,19 @@ use Nette\Schema\ValidationException;
  *                  type="string",
  *                  example="img.png"
  *              )
- *         )
+ *         ),
+ *      @OA\Property(
+ *                   property="time_enter_waiting_area",
+ *                   type="string",
+ *                   format="date-time",
+ *                   example="2024-07-01T10:00:00Z"
+ *               ),
+ *               @OA\Property(
+ *                   property="time_leave_waiting_area",
+ *                   type="string",
+ *                   format="date-time",
+ *                   example="2024-07-01T10:00:00Z"
+ *               ),
  *  )
  * )
  */
@@ -209,7 +221,24 @@ class ReportController extends Controller
      *                 property="comment",
      *                 type="string",
      *                 example="Sample comment"
-     *             )
+     *             ),
+     *              @OA\Property(
+     *                  property="is_flipped_direction",
+     *                  type="boolean",
+     *                  example=true
+     *              ),
+     *              @OA\Property(
+     *                  property="time_enter_waiting_area",
+     *                  type="string",
+     *                  format="date-time",
+     *                  example="2024-07-01T10:00:00Z"
+     *              ),
+     *              @OA\Property(
+     *                  property="time_leave_waiting_area",
+     *                  type="string",
+     *                  format="date-time",
+     *                  example="2024-07-01T10:00:00Z"
+     *              ),
      *         )
      *     ),
      *     @OA\Response(

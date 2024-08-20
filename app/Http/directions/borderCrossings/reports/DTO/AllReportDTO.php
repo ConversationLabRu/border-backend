@@ -21,9 +21,10 @@ class AllReportDTO extends LastReportDTO
                                 bool $isFlippedDirection,
                                 int $id,
                                 Transport $transport,
-                                int $userId)
+                                int $userId,
+                                ?string $timeEnterWaitingArea)
     {
-        parent::__construct($checkpointEntry, $checkpointExit, $checkpointQueue, $comment, $isFlippedDirection, $userId);
+        parent::__construct($checkpointEntry, $checkpointExit, $checkpointQueue, $comment, $isFlippedDirection, $userId, $timeEnterWaitingArea);
         $this->id = $id;
         $this->transport = $transport;
     }
@@ -49,6 +50,7 @@ class AllReportDTO extends LastReportDTO
             'id' => $this->id,
             'user_id' => $this->getUserId(),
             'transport' => $this->transport->toArray(),
+            'time_enter_waiting_area' => $this->getTimeEnterWaitingArea(),
         ];
     }
 }

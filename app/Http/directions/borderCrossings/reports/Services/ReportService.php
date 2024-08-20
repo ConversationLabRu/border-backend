@@ -37,6 +37,7 @@ class ReportService
                 $report->getAttributeValue("comment"),
                 $report->getAttributeValue("is_flipped_direction"),
                 $report->getAttributeValue("user_id"),
+                $report->getAttributeValue("time_enter_waiting_area"),
             );
 
             return $reportDTO->toArray();
@@ -63,11 +64,12 @@ class ReportService
                 $report->getAttributeValue("checkpoint_entry"),
                 $report->getAttributeValue("checkpoint_exit"),
                 $report->getAttributeValue("checkpoint_queue"),
-                $report->getAttributeValue("comment"),
+                strip_tags($report->getAttributeValue("comment")),
                 $report->getAttributeValue("is_flipped_direction"),
                 $report->getAttributeValue("id"),
                 $report->transport,
                 $report->getAttributeValue("user_id"),
+                $report->getAttributeValue("time_enter_waiting_area"),
             );
 
             return $reportDTO->toArray();
@@ -104,7 +106,8 @@ class ReportService
             'checkpoint_entry' => 'required|date',
             'checkpoint_exit' => 'required|date',
             'comment' => 'nullable|string',
-            'is_flipped_direction' => 'nullable|boolean'
+            'is_flipped_direction' => 'nullable|boolean',
+            'time_enter_waiting_area' => 'nullable|date',
         ]);
 
         // Создание экземпляра модели
@@ -119,7 +122,8 @@ class ReportService
             'checkpoint_entry',
             'checkpoint_exit',
             'comment',
-            'is_flipped_direction'
+            'is_flipped_direction',
+            'time_enter_waiting_area',
         ]));
 
         $report->save();

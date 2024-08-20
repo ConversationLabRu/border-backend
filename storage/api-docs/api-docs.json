@@ -237,6 +237,20 @@
                                     "comment": {
                                         "type": "string",
                                         "example": "Sample comment"
+                                    },
+                                    "is_flipped_direction": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "time_enter_waiting_area": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2024-07-01T10:00:00Z"
+                                    },
+                                    "time_leave_waiting_area": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2024-07-01T10:00:00Z"
                                     }
                                 },
                                 "type": "object"
@@ -386,6 +400,10 @@
                             }
                         },
                         "type": "object"
+                    },
+                    "url_arcticle": {
+                        "type": "string",
+                        "example": "www.google.com"
                     }
                 },
                 "type": "object"
@@ -478,6 +496,16 @@
                             }
                         },
                         "type": "object"
+                    },
+                    "time_enter_waiting_area": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-07-01T10:00:00Z"
+                    },
+                    "time_leave_waiting_area": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-07-01T10:00:00Z"
                     }
                 },
                 "type": "object"

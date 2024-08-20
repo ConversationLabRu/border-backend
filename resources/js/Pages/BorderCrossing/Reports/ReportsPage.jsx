@@ -172,6 +172,9 @@ export default function ReportsPage() {
                                     let formattedDateExit = ""
                                     let formattedTimeExit = ""
 
+                                    let dateEnterWaitingArea = ""
+                                    let timeEnterWaitingArea = ""
+
                                     const formatter = new Intl.DateTimeFormat('ru-RU', options);
                                     const formatterTime = new Intl.DateTimeFormat('ru-RU', optionsTime);
 
@@ -182,6 +185,20 @@ export default function ReportsPage() {
                                     formattedTimeExit = formatterTime.format(exitTime)
 
                                     let differenceInMs = exitTime - entryTime;
+
+                                    if ((!report.is_flipped_direction && directionCrossing?.from_city?.country.name === "Беларусь") || (report.is_flipped_direction && directionCrossing?.to_city?.country.name === "Беларусь")) {
+
+                                        const enterWaitingAreaTime = new Date(report.time_enter_waiting_area);
+
+                                        // Форматируем дату с учетом временной зоны пользователя
+                                        const formatter = new Intl.DateTimeFormat('ru-RU', options);
+                                        const formatterTime = new Intl.DateTimeFormat('ru-RU', optionsTime);
+
+                                        dateEnterWaitingArea = formatter.format(enterWaitingAreaTime);
+                                        timeEnterWaitingArea = formatterTime.format(enterWaitingAreaTime)
+
+                                        differenceInMs = exitTime - enterWaitingAreaTime
+                                    }
 
                                     if (report.checkpoint_queue !== null) {
                                         const queueTime = new Date(report.checkpoint_queue);
@@ -210,7 +227,7 @@ export default function ReportsPage() {
                                                 <div className={"border-info-container"}>
                                                     <AvatarStack className={"avatar-stack-report"}>
                                                         <React.Fragment>
-                                                            {report.is_flipped_direction ? (
+                                                            {!report.is_flipped_direction ? (
                                                                 <div className={"report-elem-logo-container"}>
                                                                     <Avatar
                                                                         size={20}
@@ -259,6 +276,24 @@ export default function ReportsPage() {
                                                     <IoWalk size={28}/>
                                                 ) : null}
                                             </div>
+
+                                            {((!report.is_flipped_direction && directionCrossing?.from_city?.country.name === "Беларусь")
+                                                || (report.is_flipped_direction && directionCrossing?.to_city?.country.name === "Беларусь")) && (
+                                                <div>
+                                                    <div className={"time-desc-container"}>
+                                                        <Text weight="3">
+                                                            {`Въезд в зону ожидания:`}
+                                                        </Text>
+
+                                                        <Text weight="3">
+                                                            {dateEnterWaitingArea} в {timeEnterWaitingArea}
+                                                        </Text>
+                                                    </div>
+
+                                                    <hr/>
+
+                                                </div>
+                                            )}
 
                                             {report.checkpoint_queue !== null && (
                                                 <div>

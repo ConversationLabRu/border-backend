@@ -21,7 +21,8 @@ class Report extends Model
         'checkpoint_entry',
         'checkpoint_exit',
         'comment',
-        'is_flipped_direction'
+        'is_flipped_direction',
+        'time_enter_waiting_area',
     ];
 
     // Если не используете timestamps, укажите это

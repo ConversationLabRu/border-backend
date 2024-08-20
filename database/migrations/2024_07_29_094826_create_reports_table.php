@@ -26,6 +26,7 @@ return new class extends Migration
             $table->timestamp('checkpoint_exit');
             $table->text('comment')->nullable();
             $table->boolean('is_flipped_direction');
+            $table->timestamp('time_enter_waiting_area')->nullable();
         });
 
         Schema::enableForeignKeyConstraints();

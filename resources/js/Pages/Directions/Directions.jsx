@@ -29,26 +29,26 @@ export default function Directions() {
     return (
         <AppRoot>
             <div>
-                {/*<img*/}
-                {/*    src="/bordersmain.jpg"*/}
-                {/*    alt={"das"}*/}
-                {/*    className="header-image"*/}
-                {/*/>*/}
+                <img
+                    src="/bordersmainnew.png"
+                    alt={"das"}
+                    className="header-image"
+                />
 
-                <div className="image-container">
-                    {/* Основное изображение */}
-                    <img
-                        src="/bordersmain.jpg"
-                        alt={"das"}
-                        className="header-image"
-                    />
-                    {/* Текст поверх изображения */}
-                    <div className="overlay-text-direction">
-                        <Text weight="1" className="img-text">
-                            Границы
-                        </Text>
-                    </div>
-                </div>
+                {/*<div className="image-container">*/}
+                {/*    /!* Основное изображение *!/*/}
+                {/*    <img*/}
+                {/*        src="/bordersmain.jpg"*/}
+                {/*        alt={"das"}*/}
+                {/*        className="header-image"*/}
+                {/*    />*/}
+                {/*    /!* Текст поверх изображения *!/*/}
+                {/*    <div className="overlay-text-direction">*/}
+                {/*        <Text weight="1" className="img-text">*/}
+                {/*            Границы*/}
+                {/*        </Text>*/}
+                {/*    </div>*/}
+                {/*</div>*/}
 
                 <List>
                     <Section header="Направления">
