@@ -13,30 +13,38 @@ class Handler extends WebhookHandler
 {
     public function start(): void
     {
-        Telegraph::chat($this->chat->chat_id) // Убедитесь, что вы используете правильный метод для установки чата
+        $webAppUrl = env('WEB_APP_URL', 'default_url_if_not_set'); // 'default_url_if_not_set' используется как запасной вариант на случай, если переменная не установлена
+
+
+        $this->chat->message($this->chat->chat_id) // Убедитесь, что вы используете правильный метод для установки чата
         ->message('Для продолжения откройте приложение!')
             ->keyboard(Keyboard::make()->buttons([
-                Button::make('ОТКРЫТЬ ПРИЛОЖЕНИЕ')->webApp(config('app.WEB_APP_URL')),
+                Button::make('ОТКРЫТЬ ПРИЛОЖЕНИЕ')->webApp($webAppUrl),
             ]))
             ->send();
     }
 
     protected function handleUnknownCommand(Stringable $text): void
     {
-        Telegraph::chat($this->chat->chat_id) // Убедитесь, что вы используете правильный метод для установки чата
+        $webAppUrl = env('WEB_APP_URL', 'default_url_if_not_set'); // 'default_url_if_not_set' используется как запасной вариант на случай, если переменная не установлена
+
+        $this->chat->message($this->chat->chat_id) // Убедитесь, что вы используете правильный метод для установки чата
         ->message('Для продолжения откройте приложение!')
             ->keyboard(Keyboard::make()->buttons([
-                Button::make('ОТКРЫТЬ ПРИЛОЖЕНИЕ')->webApp(config('app.WEB_APP_URL')),
+                Button::make('ОТКРЫТЬ ПРИЛОЖЕНИЕ')->webApp($webAppUrl),
             ]))
             ->send();
     }
 
     protected function handleChatMessage(Stringable $text): void
     {
-        Telegraph::chat($this->chat->chat_id) // Убедитесь, что вы используете правильный метод для установки чата
+        $webAppUrl = env('WEB_APP_URL', 'default_url_if_not_set'); // 'default_url_if_not_set' используется как запасной вариант на случай, если переменная не установлена
+
+
+        $this->chat->message($this->chat->chat_id) // Убедитесь, что вы используете правильный метод для установки чата
         ->message('Для продолжения откройте приложение!')
             ->keyboard(Keyboard::make()->buttons([
-                Button::make('ОТКРЫТЬ ПРИЛОЖЕНИЕ')->webApp(config('app.WEB_APP_URL')),
+                Button::make('ОТКРЫТЬ ПРИЛОЖЕНИЕ')->webApp($webAppUrl),
             ]))
             ->send();
     }
