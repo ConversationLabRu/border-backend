@@ -186,5 +186,6 @@ return [
     ])->toArray(),
 
     'telegram_bot_token' => env('TELEGRAM_BOT_TOKEN', 'default_value'),
+    'WEB_APP_URL' => env('TELEGRAM_BOT_TOKEN', 'default_value'),
 
 ];

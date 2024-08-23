@@ -39,6 +39,7 @@ export default function CamerasPage() {
             .then((r) => {
                 if (!(r instanceof Error)) {
                     setCameras(r);
+                     console.log(r)
                 }
             })
             .catch((error) => {
@@ -58,6 +59,9 @@ export default function CamerasPage() {
         };
 
         const initializeHls = () => {
+
+            console.log(videoRefs)
+
             if (window.Hls) {
                 cameras.forEach((camera) => {
                     if (videoRefs.current[camera.id] && Hls.isSupported()) {
@@ -123,6 +127,7 @@ export default function CamerasPage() {
                                 {camera.url.substring(0, 3) === "pko" ? (
                                     <div className="video-container">
                                         <video
+                                            id={camera.id}
                                             ref={(el) => (videoRefs.current[camera.id] = el)}
                                             controls
                                             muted

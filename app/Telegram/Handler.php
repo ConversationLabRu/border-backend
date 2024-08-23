@@ -16,7 +16,7 @@ class Handler extends WebhookHandler
         Telegraph::chat($this->chat->chat_id) // Убедитесь, что вы используете правильный метод для установки чата
         ->message('Для продолжения откройте приложение!')
             ->keyboard(Keyboard::make()->buttons([
-                Button::make('ОТКРЫТЬ ПРИЛОЖЕНИЕ')->webApp('https://354e-195-190-102-194.ngrok-free.app'),
+                Button::make('ОТКРЫТЬ ПРИЛОЖЕНИЕ')->webApp(config('app.WEB_APP_URL')),
             ]))
             ->send();
     }
@@ -26,7 +26,7 @@ class Handler extends WebhookHandler
         Telegraph::chat($this->chat->chat_id) // Убедитесь, что вы используете правильный метод для установки чата
         ->message('Для продолжения откройте приложение!')
             ->keyboard(Keyboard::make()->buttons([
-                Button::make('ОТКРЫТЬ ПРИЛОЖЕНИЕ')->webApp('https://354e-195-190-102-194.ngrok-free.app'),
+                Button::make('ОТКРЫТЬ ПРИЛОЖЕНИЕ')->webApp(config('app.WEB_APP_URL')),
             ]))
             ->send();
     }
@@ -36,7 +36,7 @@ class Handler extends WebhookHandler
         Telegraph::chat($this->chat->chat_id) // Убедитесь, что вы используете правильный метод для установки чата
         ->message('Для продолжения откройте приложение!')
             ->keyboard(Keyboard::make()->buttons([
-                Button::make('ОТКРЫТЬ ПРИЛОЖЕНИЕ')->webApp('https://354e-195-190-102-194.ngrok-free.app'),
+                Button::make('ОТКРЫТЬ ПРИЛОЖЕНИЕ')->webApp(config('app.WEB_APP_URL')),
             ]))
             ->send();
     }

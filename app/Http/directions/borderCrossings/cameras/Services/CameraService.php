@@ -21,6 +21,7 @@ class CameraService
                 $camera->getAttributeValue("url"),
                 $camera->getAttributeValue("description"),
                 $camera->getAttributeValue("photo"),
+                $camera->getAttributeValue("id"),
             );
 
             return $cameraDTO->toArray();
