@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # MariaDB
+  db:
+    image: mariadb:latest
+    container_name: my_mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: border
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  # Adminer для управления БД
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+
+  # Laravel приложение
+  laravel-app:
+    image: php:8.1-fpm
+    container_name: laravel-app
+    environment:
+      - DB_HOST=db
+      - DB_DATABASE=border
+      - DB_USERNAME=root
+      - DB_PASSWORD=root
+    volumes:
+      - ./laravel:/var/www/html
+    depends_on:
+      - db
+
+  # Nginx для обработки запросов
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./laravel:/var/www/html
+    ports:
+      - 8888:80
+    depends_on:
+      - laravel-app
+
+volumes:
+  db_data:

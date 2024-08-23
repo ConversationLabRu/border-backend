@@ -7,7 +7,7 @@ import {
     Avatar,
     AvatarStack, Badge,
     Blockquote,
-    Button, Cell, Info,
+    Button, ButtonCell, Cell, Info,
     List, Radio,
     Section,
     Text
@@ -29,8 +29,10 @@ import {
     AccordionContent
 } from "@telegram-apps/telegram-ui/dist/components/Blocks/Accordion/components/AccordionContent/AccordionContent.js";
 import CommentAccordion from "@/Pages/BorderCrossing/Reports/CommentAccrodion.jsx";
-import {useBackButton, useMainButton} from "@tma.js/sdk-react";
+import {retrieveLaunchParams, useBackButton, useMainButton, usePopup} from "@tma.js/sdk-react";
 import {IoBus, IoCar, IoWalk} from "react-icons/io5";
+import {Icon28AddCircle} from "@telegram-apps/telegram-ui/dist/icons/28/add_circle.js";
+import {Icon28Close} from "@telegram-apps/telegram-ui/dist/icons/28/close.js";
 
 export default function ReportsPage() {
     const location = useLocation();
@@ -112,6 +114,37 @@ export default function ReportsPage() {
         });
     }, [id]);
 
+    const { initDataRaw, initData } = retrieveLaunchParams();
+
+
+    const popup = usePopup();
+
+    // Функция для удаления отчета
+    const handleDeleteReport = (reportId) => {
+
+        popup.open({title: "Подтвердите действие", message: "Вы уверены, что хотите удалить отчет?",
+            buttons: [
+                {type: "cancel"},
+                {type: "ok", id: "accept"}
+            ]
+        }).then(buttonId => {
+            if (buttonId !== "accept") return;
+
+            const requestBody = { id: reportId }; // Формируем JSON тело запроса
+
+            console.log(requestBody)
+
+            ReportService.deleteReport(requestBody) // Передаем requestBody в функцию удаления
+                .then(() => {
+                    // Удаляем отчет локально
+                    setReports((prevReports) => prevReports.filter(report => report.id !== reportId));
+                })
+                .catch((error) => {
+                    // Обработка ошибок
+                    console.error("Ошибка при удалении отчета:", error);
+                });
+        })
+    };
 
     const [expandedIndexes, setExpandedIndexes] = useState([]);
 
@@ -354,6 +387,19 @@ export default function ReportsPage() {
                                                     </Accordion>
                                                 </>
                                             )}
+
+                                            {(initData.user.id === 747551551 || initData.user.id === 241666959) && (
+                                                <ButtonCell
+                                                    before={<Icon28Close />}
+                                                    mode="destructive"
+                                                    onClick={() => {
+                                                        handleDeleteReport(report.id)
+                                                    }}
+                                                >
+                                                    Удалить
+                                                </ButtonCell>
+                                            )}
+
                                         </div>
                                     )
                                 })}

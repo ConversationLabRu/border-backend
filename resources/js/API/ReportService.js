@@ -64,4 +64,29 @@ export default class ReportService {
         }
     }
 
+    static async deleteReport(data) {
+        let attempt = 0;
+
+        while (attempt < 5) {
+            try {
+                const response = await api.delete(`/api/directions/borderCrossing/reports`, {
+                    data,
+                    headers: {
+                        'Content-Type': 'application/json' // Указываем, что данные в формате JSON
+                    }
+                });
+                return response.data;
+            } catch (error) {
+                attempt += 1;
+                console.error(`Attempt ${attempt} failed: ${error.message}`);
+                if (attempt >= 5) {
+                    console.error('Max retries reached. Throwing error.');
+                    throw error; // Превышен лимит попыток, выбрасываем ошибку
+                }
+                // Если не достигнут лимит попыток, можно добавить задержку перед повтором
+                await new Promise(res => setTimeout(res, 1000)); // Задержка 1 секунда
+            }
+        }
+    }
+
 }
