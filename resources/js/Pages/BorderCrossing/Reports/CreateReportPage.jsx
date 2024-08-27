@@ -49,7 +49,6 @@ export default function CreateReportPage() {
         commentRef.current = comment;
     }, [comment]);
 
-    console.log(navigator.userAgent)
 
     // Определение iOS и macOS
     const isIOS = () => {
@@ -62,7 +61,6 @@ export default function CreateReportPage() {
 
     // Применение классов к <html>
     useEffect(() => {
-        console.log(navigator.platform)
 
         if (isIOS()) {
             document.documentElement.classList.add('ios');
@@ -84,17 +82,18 @@ export default function CreateReportPage() {
             time_enter_waiting_area: timeEnterWaitingArea,
         };
 
-        console.log(reportData)
 
         if ( ( (!isFlippedDirection && directionCrossing?.from_city?.country.name === "Беларусь")
             || (isFlippedDirection && directionCrossing?.to_city?.country.name === "Беларусь") ) ) {
 
-            console.log("ИЗ БЕЛАРУСИ")
-
-            if (selectedTransport !== "" && checkpointEntry !== "" && checkpointExit !== "" && timeEnterWaitingArea !== "") {
+            if (selectedTransport === "3" && checkpointEntry !== "" && checkpointExit !== "") {
                 mainButton.setText("Отправить данные").setBgColor("#007aff").show().enable();
             } else {
-                mainButton.setText("Заполните обязательные поля").setBgColor("#808080").show().disable();
+                if (selectedTransport !== "" && checkpointEntry !== "" && checkpointExit !== "" && timeEnterWaitingArea !== "") {
+                    mainButton.setText("Отправить данные").setBgColor("#007aff").show().enable();
+                } else {
+                    mainButton.setText("Заполните обязательные поля").setBgColor("#808080").show().disable();
+                }
             }
         } else {
             if (selectedTransport !== "" && checkpointEntry !== "" && checkpointExit !== "") {
@@ -173,7 +172,6 @@ export default function CreateReportPage() {
                     }
                 });
 
-                console.log('Report created successfully:', response);
             })
             .catch(error => {
 
@@ -194,12 +192,6 @@ export default function CreateReportPage() {
             mainButton.off("click", handleMainButtonClick);
         }
     }, [mainButton, selectedTransport, checkpointEntry, checkpointExit, selectedDirection]);
-
-    useEffect(() => {
-        console.log('from_city:', directionCrossing?.from_city?.country.name);
-        console.log('to_city:', directionCrossing?.to_city?.country.name);
-        console.log('isFlippedDirection:', isFlippedDirection);
-        }, [directionCrossing, isFlippedDirection]);
 
     return (
         <AppRoot>
@@ -283,8 +275,9 @@ export default function CreateReportPage() {
 
                             <hr/>
 
-                            {((!isFlippedDirection && directionCrossing?.from_city?.country.name === "Беларусь")
-                                || (isFlippedDirection && directionCrossing?.to_city?.country.name === "Беларусь")) ? (
+                            {(((!isFlippedDirection && directionCrossing?.from_city?.country.name === "Беларусь")
+                                || (isFlippedDirection && directionCrossing?.to_city?.country.name === "Беларусь"))
+                                && selectedTransport !== "3") ? (
                                 <div>
                                     {(isMacOS() || isIOS()) && (
                                         <>

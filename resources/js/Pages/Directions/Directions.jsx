@@ -1,5 +1,5 @@
 import './styles.css';
-import {AppRoot, Avatar, Cell, Image, List, Section, Text} from "@telegram-apps/telegram-ui";
+import {AppRoot, Avatar, Button, Cell, Image, List, Section, Text} from "@telegram-apps/telegram-ui";
 // import { DirectionCard } from "@/Pages/Directions/Components/card.jsx";
 import { useFetching } from "@/hooks/useFetching.js";
 import DirectionService from "@/API/DirectionService.js";
@@ -7,6 +7,7 @@ import React, { useState, useEffect } from "react";
 import {useNavigate} from "react-router-dom";
 import {DirectionCard} from "@/Pages/Directions/Components/card.jsx";
 import {ServerURL} from "@/API/ServerConst.js";
+import {Icon20Copy} from "@telegram-apps/telegram-ui/dist/icons/20/copy.js";
 
 export default function Directions() {
     const [directions, setDirections] = useState([]);
@@ -26,6 +27,12 @@ export default function Directions() {
         })
     }, [],);
 
+    const openUrlInNewTab = (url) => {
+        if (url) {
+            window.open(url, '_blank', 'noopener,noreferrer');
+        }
+    };
+
     return (
         <AppRoot>
             <div>
@@ -34,21 +41,6 @@ export default function Directions() {
                     alt={"das"}
                     className="header-image"
                 />
-
-                {/*<div className="image-container">*/}
-                {/*    /!* Основное изображение *!/*/}
-                {/*    <img*/}
-                {/*        src="/bordersmain.jpg"*/}
-                {/*        alt={"das"}*/}
-                {/*        className="header-image"*/}
-                {/*    />*/}
-                {/*    /!* Текст поверх изображения *!/*/}
-                {/*    <div className="overlay-text-direction">*/}
-                {/*        <Text weight="1" className="img-text">*/}
-                {/*            Границы*/}
-                {/*        </Text>*/}
-                {/*    </div>*/}
-                {/*</div>*/}
 
                 <List>
                     <Section header="Направления">
@@ -74,15 +66,20 @@ export default function Directions() {
                             <p>No directions available</p>
                         )}
                     </Section>
+
+                    <div className="bottom-button-container" onClick={() => openUrlInNewTab("https://t.me/conversationlab")}>
+                        <Button
+                            before={
+                                <Avatar size={24} src={"/images/logo-company.jpg"}/>
+                            }
+                            mode="filled"
+                            size="s"
+                        >
+                            Связаться с разработчиками
+                        </Button>
+                    </div>
                 </List>
 
-                {/*<div className="container">*/}
-                {/*    /!*<Text weight="3" className={"header-text"}>*!/*/}
-                {/*    /!*    Направления*!/*/}
-                {/*    /!*</Text>*!/*/}
-
-                {/*    */}
-                {/*</div>*/}
             </div>
         </AppRoot>
     );

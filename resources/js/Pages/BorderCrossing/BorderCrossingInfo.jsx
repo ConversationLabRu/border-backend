@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { ThreeDots } from "react-loader-spinner";
 import ReportService from "@/API/ReportService.js";
-import { useBackButton } from "@tma.js/sdk-react";
+import {useBackButton, useMainButton} from "@tma.js/sdk-react";
 import { IoInformation } from "react-icons/io5";
 import { VscDeviceCamera } from "react-icons/vsc";
 import React from 'react';
@@ -33,6 +33,7 @@ export default function BorderCrossingInfo() {
                 state: { direction }
             });
             backButton.hide();
+            mainButton.hide();
         };
         backButton.on("click", handleBackButtonClick);
         return () => backButton.off("click", handleBackButtonClick);
@@ -44,6 +45,35 @@ export default function BorderCrossingInfo() {
         }
     };
 
+    const mainButton = useMainButton();
+
+
+    useEffect(() => {
+        backButton.show()
+        mainButton.setText("Добавить отчет").setBgColor("#007aff").show().enable();
+    }, []);
+
+    useEffect(() => {
+        const handleMainButtonClick = () => {
+            navigate(`/borderCrossing/${id}/reports/create`,
+                {
+                    state: {
+                        directionCrossing: directionCrossing,
+                        direction: direction
+                    }
+                }
+            );
+
+            mainButton.hide();
+        };
+
+        mainButton.on("click", handleMainButtonClick);
+
+        return () => {
+            mainButton.off("click", handleMainButtonClick);
+        }
+    }, [mainButton]);
+
     useEffect(() => {
         const directionIdNumber = Number(id);
         ReportService.getLast(directionIdNumber).then((r) => {
@@ -54,70 +84,6 @@ export default function BorderCrossingInfo() {
             console.error('Ошибка при получении отчётов:', error);
         });
     }, [id]);
-
-    useEffect(() => {
-        if (directionCrossing?.from_city?.name === "Каменный Лог" || directionCrossing?.to_city?.name === "Каменный Лог") {
-            fetch('https://belarusborder.by/info/monitoring-new?token=test&checkpointId=b60677d4-8a00-4f93-a781-e129e1692a03')
-                .then((response) => response.json())
-                .then((data) => setWaitingArea(data))
-                .catch((error) => console.error('Ошибка при получении данных:', error));
-        } else if (directionCrossing?.from_city?.name === "Брест" || directionCrossing?.to_city?.name === "Брест") {
-            fetch('https://belarusborder.by/info/monitoring-new?token=test&checkpointId=a9173a85-3fc0-424c-84f0-defa632481e4')
-                .then((response) => response.json())
-                .then((data) => setWaitingArea(data))
-                .catch((error) => console.error('Ошибка при получении данных:', error));
-        } else if (directionCrossing?.from_city?.name === "Бенякони" || directionCrossing?.to_city?.name === "Бенякони") {
-            fetch('https://belarusborder.by/info/monitoring-new?token=test&checkpointId=53d94097-2b34-11ec-8467-ac1f6bf889c0')
-                .then((response) => response.json())
-                .then((data) => setWaitingArea(data))
-                .catch((error) => console.error('Ошибка при получении данных:', error));
-        }
-    }, [directionCrossing]);
-
-    // Функция для вычисления разницы во времени
-    const calculateTimeDifference = (registrationDate) => {
-        const [timeStr, dateStr] = registrationDate.split(' ');
-        const [day, month, year] = dateStr.split('.').map(Number);
-        const [hours, minutes, seconds] = timeStr.split(':').map(Number);
-        const registrationDateUTC = new Date(Date.UTC(year, month - 1, day, hours, minutes, seconds));
-
-        const now = new Date();
-        const belarusTime = new Date(now.getTime() + 3 * 60 * 60 * 1000);
-
-        const differenceInMs = belarusTime - registrationDateUTC;
-
-        const differenceInMinutes = Math.floor(differenceInMs / 60000);
-        const hoursDiff = Math.floor(differenceInMinutes / 60);
-        const minutesDiff = differenceInMinutes % 60;
-        return { hours: hoursDiff, minutes: minutesDiff };
-    };
-
-    const renderWaitingAreaInfo = () => {
-        if (waitingArea && waitingArea.carLiveQueue.length > 0) {
-            const regTime = waitingArea.carLiveQueue[0].registration_date;
-
-            const { hours, minutes } = calculateTimeDifference(regTime);
-
-            let parts = [];
-
-            // Добавляем часы в строку, если значение часов больше нуля
-            if (hours > 0) {
-                parts.push(declensionHours(hours));
-            }
-
-            // Добавляем минуты в строку, если значение минут больше нуля
-            if (minutes > 0) {
-                parts.push(declensionMinutes(minutes));
-            }
-
-            // Формируем строку в зависимости от наличия элементов
-            if (parts.length > 0) {
-                return `${parts.join(' ')}`;
-            } else {
-                return 'неизвестно';
-            }        }
-        return "Загрузка...";
-    };
 
     return (
         <AppRoot>
@@ -175,7 +141,7 @@ export default function BorderCrossingInfo() {
                                 <div className="bel-container-inf report-title">
                                     <div>
                                         <Text weight="1" className={""}>
-                                            {waitingArea ? `Текущая очередь в зоне ожидания: ${waitingArea.carLiveQueue?.length || 0}` : "Загрузка..."}
+                                            {`Текущая очередь в зоне ожидания: ${directionCrossing['cache'].countCar}`}
                                         </Text>
                                     </div>
 
@@ -183,7 +149,7 @@ export default function BorderCrossingInfo() {
                                         <Text weight="1">
                                             Предполагаемое время до въезда в ПП:
                                         </Text>
-                                        {renderWaitingAreaInfo()}
+                                        {directionCrossing["cache"]["time"]}
                                     </div>
                                 </div>
                             )}
@@ -210,7 +176,7 @@ export default function BorderCrossingInfo() {
                                 className={"report-list"}
                             >
                                 {reports.map((report, index) => {
-                                    const entryTime = new Date(report.checkpoint_entry);
+
                                     const exitTime = new Date(report.checkpoint_exit);
                                     const options = {
                                         day: '2-digit',
@@ -219,18 +185,6 @@ export default function BorderCrossingInfo() {
                                     };
                                     const formatter = new Intl.DateTimeFormat('ru-RU', options);
                                     const formattedDate = formatter.format(exitTime);
-
-                                    let differenceInMs = exitTime - entryTime;
-
-                                    if (report.checkpoint_queue !== null) {
-                                        const queueTime = new Date(report.checkpoint_queue);
-                                        differenceInMs = exitTime - queueTime;
-                                    }
-
-                                    const differenceInMinutes = Math.floor(differenceInMs / 60000);
-                                    const hours = Math.floor(differenceInMinutes / 60);
-                                    const minutes = differenceInMinutes % 60;
-                                    const timeDifference = `${declensionHours(hours)} ${declensionMinutes(minutes)}`;
 
                                     return (
                                         <div className="border-crossing-container" key={index}>
@@ -253,7 +207,7 @@ export default function BorderCrossingInfo() {
                                                     </React.Fragment>
                                                 </AvatarStack>
                                                 <Text weight="3" className={"text-card"} style={{ marginTop: "0" }}>
-                                                    {timeDifference}
+                                                    {report.time_difference_text}
                                                 </Text>
                                             </div>
                                             <Text weight="3" style={{ marginTop: "0" }}>

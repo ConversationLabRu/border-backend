@@ -4,6 +4,7 @@ namespace App\Http\directions\borderCrossings\reports\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\directions\borderCrossings\reports\Entities\Report;
+use App\Http\directions\borderCrossings\reports\Exceptions\TimeExpiredDeletedException;
 use App\Http\directions\borderCrossings\reports\Services\ReportService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -97,6 +98,17 @@ use Nette\Schema\ValidationException;
  *                   format="date-time",
  *                   example="2024-07-01T10:00:00Z"
  *               ),
+ *              @OA\Property(
+ *             property="time_difference_text",
+ *             type="string",
+ *             example="11 часов 6 минут"
+ *         ),
+ *          ),
+ *              @OA\Property(
+ *                    property="is_show_button",
+ *                    type="boolean",
+ *                    example="true"
+ *                ),
  *  )
  * )
  */
@@ -272,6 +284,8 @@ class ReportController extends Controller
             return response(status: 204);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['message' => $e->getMessage()], Response::HTTP_UNPROCESSABLE_ENTITY);
+        } catch (TimeExpiredDeletedException $e) {
+            return response()->json(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
         }
     }
 }

@@ -45,9 +45,12 @@ hr {
 }
 
 .snackbar {
-    position: fixed;
-    bottom: 20px; /* Отступ от низа */
-    z-index: 1000; /* Убедитесь, что snackbar выше других элементов */
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.snackbar-show {
+    opacity: 1;
 }
 
 

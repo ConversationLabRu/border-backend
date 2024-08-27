@@ -11,6 +11,7 @@ class LastReportDTO
     private bool $isFlippedDirection;
     private int $userId;
     private ?string $timeEnterWaitingArea;
+    private ?string $timeDifferenceText;
 
     /**
      * @param string $checkpointEntry
@@ -19,7 +20,7 @@ class LastReportDTO
      * @param string|null $comment
      * @param bool $isFlippedDirection
      */
-    public function __construct(string $checkpointEntry, string $checkpointExit, ?string $checkpointQueue, ?string $comment, bool $isFlippedDirection, int $userId, $timeEnterWaitingArea)
+    public function __construct(string $checkpointEntry, string $checkpointExit, ?string $checkpointQueue, ?string $comment, bool $isFlippedDirection, int $userId, $timeEnterWaitingArea, $timeDifferenceText)
     {
         $this->checkpointEntry = $checkpointEntry;
         $this->checkpointExit = $checkpointExit;
@@ -28,6 +29,7 @@ class LastReportDTO
         $this->isFlippedDirection = $isFlippedDirection;
         $this->userId = $userId;
         $this->timeEnterWaitingArea = $timeEnterWaitingArea;
+        $this->timeDifferenceText = $timeDifferenceText;
     }
 
     public function getCheckpointEntry(): string
@@ -65,6 +67,11 @@ class LastReportDTO
         return $this->timeEnterWaitingArea;
     }
 
+    public function getTimeDifferenceText(): ?string
+    {
+        return $this->timeDifferenceText;
+    }
+
 
     public function toArray(): array
     {
@@ -76,6 +83,7 @@ class LastReportDTO
             'is_flipped_direction' => $this->isFlippedDirection,
             'user_id' => $this->userId,
             'time_enter_waiting_area' => $this->timeEnterWaitingArea,
+            'time_difference_text' => $this->timeDifferenceText,
         ];
     }
 }

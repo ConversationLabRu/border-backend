@@ -54,7 +54,6 @@ export default function BorderCrossing() {
 
     const openUrlInNewTab = (url) => {
         if (url) {
-            console.log(url)
             window.open(url, '_blank', 'noopener,noreferrer');
         }
     };

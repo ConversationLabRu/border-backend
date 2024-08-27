@@ -81,6 +81,20 @@ use Illuminate\Support\Facades\Http;
  *          type="string",
  *          example="www.google.com"
  *      ),
+ *     @OA\Property(
+ *          property="cache",
+ *          type="object",
+ *          @OA\Property(
+ *              property="time",
+ *              type="string",
+ *              example="2024-01-01 14:00:00"
+ *          ),
+ *          @OA\Property(
+ *               property="countCar",
+ *               type="int",
+ *               example="6"
+ *           ),
+ *      ),
  * )
  */
 

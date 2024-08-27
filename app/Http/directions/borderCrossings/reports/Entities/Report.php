@@ -23,6 +23,7 @@ class Report extends Model
         'comment',
         'is_flipped_direction',
         'time_enter_waiting_area',
+        'create_report_timestamp'
     ];
 
     // Если не используете timestamps, укажите это

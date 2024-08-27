@@ -13,6 +13,7 @@ class DirectionCrossingDTO
     private bool $is_bus;
     private bool $is_walking;
     private bool $is_car;
+    private $cache;
 
     public function __construct(int $id, bool $is_quque, string $header_image, ?CityDTO $from_city, ?CityDTO $to_city, string $url_arcticle, bool $is_bus, bool $is_walking, bool $is_car)
     {
@@ -73,6 +74,26 @@ class DirectionCrossingDTO
         return $this->is_car;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getCache()
+    {
+        return $this->cache;
+    }
+
+    /**
+     * @param mixed $cache
+     */
+    public function setCache($cache): void
+    {
+        $this->cache = $cache;
+    }
+
+
+
+
+
     // Convert DTO to array for easy JSON serialization
     public function toArray(): array
     {
@@ -85,7 +106,8 @@ class DirectionCrossingDTO
             'url_arcticle' => $this->url_arcticle,
             'is_car' => $this->is_car,
             'is_bus' => $this->is_bus,
-            'is_walking' => $this->is_walking
+            'is_walking' => $this->is_walking,
+            'cache' => $this->cache,
         ];
     }
 }

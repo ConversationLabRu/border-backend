@@ -9,6 +9,7 @@ class AllReportDTO extends LastReportDTO
 {
     private int $id;
     private Transport $transport;
+    private bool $isShowButton;
 
     /**
      * @param int $id
@@ -22,11 +23,14 @@ class AllReportDTO extends LastReportDTO
                                 int $id,
                                 Transport $transport,
                                 int $userId,
-                                ?string $timeEnterWaitingArea)
+                                ?string $timeEnterWaitingArea,
+                                ?string $timeDifferenceText,
+                                bool $isShowButton)
     {
-        parent::__construct($checkpointEntry, $checkpointExit, $checkpointQueue, $comment, $isFlippedDirection, $userId, $timeEnterWaitingArea);
+        parent::__construct($checkpointEntry, $checkpointExit, $checkpointQueue, $comment, $isFlippedDirection, $userId, $timeEnterWaitingArea, $timeDifferenceText);
         $this->id = $id;
         $this->transport = $transport;
+        $this->isShowButton = $isShowButton;
     }
 
     public function getId(): int
@@ -38,6 +42,15 @@ class AllReportDTO extends LastReportDTO
     {
         return $this->transport;
     }
+
+    public function isShowButton(): bool
+    {
+        return $this->isShowButton;
+    }
+
+
+
+
 
     public function toArray(): array
     {
@@ -51,6 +64,8 @@ class AllReportDTO extends LastReportDTO
             'user_id' => $this->getUserId(),
             'transport' => $this->transport->toArray(),
             'time_enter_waiting_area' => $this->getTimeEnterWaitingArea(),
+            'time_difference_text' => $this->getTimeDifferenceText(),
+            'is_show_button' => $this->isShowButton()
         ];
     }
 }

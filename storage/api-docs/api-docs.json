@@ -404,6 +404,19 @@
                     "url_arcticle": {
                         "type": "string",
                         "example": "www.google.com"
+                    },
+                    "cache": {
+                        "properties": {
+                            "time": {
+                                "type": "string",
+                                "example": "2024-01-01 14:00:00"
+                            },
+                            "countCar": {
+                                "type": "integer",
+                                "example": "6"
+                            }
+                        },
+                        "type": "object"
                     }
                 },
                 "type": "object"
@@ -454,6 +467,10 @@
                     "is_flipped_direction": {
                         "type": "boolean",
                         "example": true
+                    },
+                    "is_show_button": {
+                        "type": "boolean",
+                        "example": "true"
                     }
                 },
                 "type": "object"
@@ -506,6 +523,10 @@
                         "type": "string",
                         "format": "date-time",
                         "example": "2024-07-01T10:00:00Z"
+                    },
+                    "time_difference_text": {
+                        "type": "string",
+                        "example": "11 часов 6 минут"
                     }
                 },
                 "type": "object"

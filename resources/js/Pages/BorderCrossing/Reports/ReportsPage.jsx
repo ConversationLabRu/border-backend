@@ -9,7 +9,7 @@ import {
     Blockquote,
     Button, ButtonCell, Cell, Info,
     List, Radio,
-    Section,
+    Section, Snackbar,
     Text
 } from "@telegram-apps/telegram-ui";
 import { DirectionCard } from "@/Pages/Directions/Components/card.jsx";
@@ -30,9 +30,10 @@ import {
 } from "@telegram-apps/telegram-ui/dist/components/Blocks/Accordion/components/AccordionContent/AccordionContent.js";
 import CommentAccordion from "@/Pages/BorderCrossing/Reports/CommentAccrodion.jsx";
 import {retrieveLaunchParams, useBackButton, useMainButton, usePopup} from "@tma.js/sdk-react";
-import {IoBus, IoCar, IoWalk} from "react-icons/io5";
+import {IoBus, IoCar, IoCloseSharp, IoWalk} from "react-icons/io5";
 import {Icon28AddCircle} from "@telegram-apps/telegram-ui/dist/icons/28/add_circle.js";
 import {Icon28Close} from "@telegram-apps/telegram-ui/dist/icons/28/close.js";
+import Icon from "@/Pages/BorderCrossing/Reports/Icon.jsx";
 
 export default function ReportsPage() {
     const location = useLocation();
@@ -47,7 +48,7 @@ export default function ReportsPage() {
 
     useEffect(() => {
         backButton.show()
-        mainButton.setText("Создать отчет").setBgColor("#007aff").show().enable();
+        mainButton.setText("Добавить отчет").setBgColor("#007aff").show().enable();
     }, []);
 
     useEffect(() => {
@@ -107,7 +108,6 @@ export default function ReportsPage() {
                 // Handle error
             } else {
                 setReports(r);
-                console.log(directionCrossing)
             }
         }).catch((r) => {
             // Handle error
@@ -118,6 +118,15 @@ export default function ReportsPage() {
 
 
     const popup = usePopup();
+
+    const [snackbarVisible, setSnackbarVisible] = useState(false);
+    const [snackbarIcon, setSnackbarIcon] = useState(<Icon
+        IconImage={IoCloseSharp}
+        iconBackground="rgba(0,0,0,0)"
+        iconColor="white"
+        iconSize={40}
+    />); // true -> успешно ; false -> ошибка
+    const [snackbarMessage, setSnackbarMessage] = useState('');
 
     // Функция для удаления отчета
     const handleDeleteReport = (reportId) => {
@@ -132,8 +141,6 @@ export default function ReportsPage() {
 
             const requestBody = { id: reportId }; // Формируем JSON тело запроса
 
-            console.log(requestBody)
-
             ReportService.deleteReport(requestBody) // Передаем requestBody в функцию удаления
                 .then(() => {
                     // Удаляем отчет локально
@@ -142,9 +149,25 @@ export default function ReportsPage() {
                 .catch((error) => {
                     // Обработка ошибок
                     console.error("Ошибка при удалении отчета:", error);
+
+                    setSnackbarMessage(error.response.data.message);
+                    setSnackbarIcon(<Icon
+                        IconImage={IoCloseSharp}
+                        iconBackground="rgba(0,0,0,0)"
+                        iconColor="white"
+                        iconSize={40}
+                    />);
+                    setSnackbarVisible(true);
                 });
         })
     };
+
+    useEffect(() => {
+        if (snackbarVisible) {
+            const timer = setTimeout(() => setSnackbarVisible(false), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [snackbarVisible]);
 
     const [expandedIndexes, setExpandedIndexes] = useState([]);
 
@@ -217,8 +240,6 @@ export default function ReportsPage() {
                                     formattedDateExit = formatter.format(exitTime);
                                     formattedTimeExit = formatterTime.format(exitTime)
 
-                                    let differenceInMs = exitTime - entryTime;
-
                                     if ((!report.is_flipped_direction && directionCrossing?.from_city?.country.name === "Беларусь") || (report.is_flipped_direction && directionCrossing?.to_city?.country.name === "Беларусь")) {
 
                                         const enterWaitingAreaTime = new Date(report.time_enter_waiting_area);
@@ -229,8 +250,6 @@ export default function ReportsPage() {
 
                                         dateEnterWaitingArea = formatter.format(enterWaitingAreaTime);
                                         timeEnterWaitingArea = formatterTime.format(enterWaitingAreaTime)
-
-                                        differenceInMs = exitTime - enterWaitingAreaTime
                                     }
 
                                     if (report.checkpoint_queue !== null) {
@@ -241,18 +260,9 @@ export default function ReportsPage() {
                                         const formatterTime = new Intl.DateTimeFormat('ru-RU', optionsTime);
                                         formattedDate = formatter.format(queueTime);
                                         formattedTime = formatterTime.format(queueTime)
-
-                                        differenceInMs = exitTime - queueTime
                                     }
 
-                                    // Вычисляем разницу в миллисекундах
-                                    // Преобразуем миллисекунды в часы и минуты
-                                    const differenceInMinutes = Math.floor(differenceInMs / 60000);
-                                    const hours = Math.floor(differenceInMinutes / 60);
-                                    const minutes = differenceInMinutes % 60;
-
-                                    // Форматируем разницу во времени
-                                    const timeDifference = `${declensionHours(hours)} ${declensionMinutes(minutes)}`;
+                                    console.log(report)
 
                                     return (
                                         <div className={"report-container"}>
@@ -297,7 +307,7 @@ export default function ReportsPage() {
                                                     </AvatarStack>
 
                                                     <Text weight="3" className={"text-card"}>
-                                                        {timeDifference}
+                                                        {report.time_difference_text}
                                                     </Text>
                                                 </div>
 
@@ -310,8 +320,8 @@ export default function ReportsPage() {
                                                 ) : null}
                                             </div>
 
-                                            {((!report.is_flipped_direction && directionCrossing?.from_city?.country.name === "Беларусь")
-                                                || (report.is_flipped_direction && directionCrossing?.to_city?.country.name === "Беларусь")) && (
+                                            {(((!report.is_flipped_direction && directionCrossing?.from_city?.country.name === "Беларусь")
+                                                || (report.is_flipped_direction && directionCrossing?.to_city?.country.name === "Беларусь")) && report.transport.name !== "Bus") && (
                                                 <div>
                                                     <div className={"time-desc-container"}>
                                                         <Text weight="3">
@@ -328,17 +338,59 @@ export default function ReportsPage() {
                                                 </div>
                                             )}
 
-                                            {report.checkpoint_queue !== null && (
+                                            {( (report.checkpoint_queue !== null) && ((!report.is_flipped_direction && directionCrossing?.from_city?.country.name === "Беларусь")
+                                                || (report.is_flipped_direction && directionCrossing?.to_city?.country.name === "Беларусь"))) ? (
                                                 <div>
-                                                    <div className={"time-desc-container"}>
-                                                        <Text weight="3">
-                                                            {`Очередь на КПП:`}
-                                                        </Text>
 
-                                                        <Text weight="3">
-                                                            {formattedDate} в {formattedTime}
-                                                        </Text>
-                                                    </div>
+                                                    {report.transport.name === "Car" ? (
+                                                        <div className={"time-desc-container"}>
+                                                            <Text weight="3">
+                                                                {`Очередь в зону ожидания`}
+                                                            </Text>
+
+                                                            <Text weight="3">
+                                                                {formattedDate} в {formattedTime}
+                                                            </Text>
+                                                        </div>
+                                                    ) : (
+                                                        <div className={"time-desc-container"}>
+                                                            <Text weight="3">
+                                                                {`Очередь перед КПП`}
+                                                            </Text>
+
+                                                            <Text weight="3">
+                                                                {formattedDate} в {formattedTime}
+                                                            </Text>
+                                                        </div>
+                                                    )}
+
+
+                                                    <hr/>
+                                                </div>
+                                            ) : (report.checkpoint_queue !== null) && (
+                                                <div>
+                                                    {report.transport.name === "Car" ? (
+                                                        <div className={"time-desc-container"}>
+                                                            <Text weight="3">
+                                                                {`Очередь в зону ожидания`}
+                                                            </Text>
+
+                                                            <Text weight="3">
+                                                                {formattedDate} в {formattedTime}
+                                                            </Text>
+                                                        </div>
+                                                    ) : (
+                                                        <div className={"time-desc-container"}>
+                                                            <Text weight="3">
+                                                                {`Очередь перед КПП`}
+                                                            </Text>
+
+                                                            <Text weight="3">
+                                                                {formattedDate} в {formattedTime}
+                                                            </Text>
+                                                        </div>
+                                                    )}
+
 
                                                     <hr/>
                                                 </div>
@@ -358,7 +410,7 @@ export default function ReportsPage() {
                                             <hr/>
 
                                             <div className={"time-desc-container"}>
-                                                <Text weight="3">
+                                            <Text weight="3">
                                                     {`Выезд с КПП:`}
                                                 </Text>
 
@@ -388,7 +440,8 @@ export default function ReportsPage() {
                                                 </>
                                             )}
 
-                                            {(initData.user.id === 747551551 || initData.user.id === 241666959) && (
+                                            {((initData.user.id === 7475515512 || initData.user.id === 241666959)
+                                                || (report.user_id === initData.user.id && report.is_show_button)) && (
                                                 <ButtonCell
                                                     before={<Icon28Close />}
                                                     mode="destructive"
@@ -403,6 +456,15 @@ export default function ReportsPage() {
                                         </div>
                                     )
                                 })}
+
+                                <Snackbar
+                                    className={`snackbar ${snackbarVisible ? 'snackbar-show' : ''}`}
+                                    onClose={() => setSnackbarVisible(false)}
+                                    before={snackbarIcon}
+                                    duration={3000}
+                                >
+                                    {snackbarMessage}
+                                </Snackbar>
                             </div>
                         </Section>
                     </Section>

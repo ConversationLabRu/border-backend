@@ -9,8 +9,14 @@ use App\Http\directions\borderCrossings\Entities\BorderCrossing;
 use App\Http\directions\borderCrossings\reports\DTO\AllReportDTO;
 use App\Http\directions\borderCrossings\reports\DTO\LastReportDTO;
 use App\Http\directions\borderCrossings\reports\Entities\Report;
+use App\Http\directions\borderCrossings\reports\Exceptions\TimeExpiredDeletedException;
 use App\Http\directions\borderCrossings\reports\transports\DTO\TransportDTO;
+use App\Http\directions\borderCrossings\Services\BorderCrossingService;
+use Carbon\Carbon;
+use DateTime;
+use DateTimeZone;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Log;
 use Nette\Schema\ValidationException;
 
@@ -38,6 +44,7 @@ class ReportService
                 $report->getAttributeValue("is_flipped_direction"),
                 $report->getAttributeValue("user_id"),
                 $report->getAttributeValue("time_enter_waiting_area"),
+                $this->convertDiffTimeToText($report)
             );
 
             return $reportDTO->toArray();
@@ -55,10 +62,13 @@ class ReportService
 
         $reports = Report::with('transport')
             ->where("border_crossing_id", $borderCrossingId)
-            ->orderBy('id', 'desc')
+            ->orderBy('checkpoint_exit', 'desc')
             ->get();
 
         $result = $reports->map(function (Report $report) {
+
+            $reportTimestamp = Carbon::parse($report->getAttributeValue("create_report_timestamp"));
+            $diffInSeconds = now()->diffInSeconds($reportTimestamp);
 
             $reportDTO = new AllReportDTO(
                 $report->getAttributeValue("checkpoint_entry"),
@@ -70,6 +80,8 @@ class ReportService
                 $report->transport,
                 $report->getAttributeValue("user_id"),
                 $report->getAttributeValue("time_enter_waiting_area"),
+                $this->convertDiffTimeToText($report),
+                $diffInSeconds <= 3600
             );
 
             return $reportDTO->toArray();
@@ -85,12 +97,33 @@ class ReportService
             'id' => 'required|integer|exists:reports,id',
         ]);
 
+        $headerString = explode(" ", $request->header('Authorization'))[1];
+
+        // Парсинг строки запроса
+        parse_str($headerString, $params);
+
+        // Декодирование параметра user
+        $userData = json_decode(urldecode($params['user']), true);
+
+        // Получение user id
+        $userId = $userData['id'];
+
         $id = $validatedData['id'];
 
         $report = Report::find($id);
 
-        if ($report) {
+        $reportTimestamp = Carbon::parse($report->getAttributeValue("create_report_timestamp"));
+        $diffInSeconds = now()->diffInSeconds($reportTimestamp);
+
+        // Второй id - это Константина
+
+        // 3600 - кол-во секунд в одном часе
+
+        if ($report && (($report->getAttributeValue("user_id") == $userId) && $diffInSeconds <= 3600)
+            || ($report->getAttributeValue("user_id") == 241666959 || $report->getAttributeValue("user_id") == 747551551)) {
             $report->delete();
+        } else {
+            throw new TimeExpiredDeletedException("Истекло время удаления");
         }
 
     }
@@ -123,12 +156,48 @@ class ReportService
             'checkpoint_exit',
             'comment',
             'is_flipped_direction',
-            'time_enter_waiting_area',
+            'time_enter_waiting_area'
         ]));
+
+        $report->create_report_timestamp = now();
 
         $report->save();
 
         return $report;
 
+    }
+
+    public function convertDiffTimeToText(Report $report): string
+    {
+        $entryTime = new DateTime($report["checkpoint_entry"], new DateTimeZone('Europe/Minsk'));
+        $exitTime = new DateTime($report["checkpoint_exit"], new DateTimeZone('Europe/Minsk'));
+
+        $differenceInMs = $exitTime->diff($entryTime);
+
+        if (!is_null($report["time_enter_waiting_area"])) {
+
+            $enterWaitingAreaTime = new DateTime($report["time_enter_waiting_area"], new DateTimeZone('Europe/Minsk'));
+
+            $differenceInMs = $exitTime->diff($enterWaitingAreaTime);
+        }
+
+        if (!is_null($report["checkpoint_queue"])) {
+            $queueTime = new DateTime($report["checkpoint_queue"], new DateTimeZone('Europe/Minsk'));
+
+            $differenceInMs = $exitTime->diff($queueTime);
+        }
+
+        // Получаем разницу в часах и минутах
+        $totalHours = $differenceInMs->days * 24 + $differenceInMs->h; // Учитываем дни в часы
+        $totalMinutes = $totalHours * 60 + $differenceInMs->i; // Конвертируем часы в минуты и добавляем минуты
+
+        // Для удобства, если вам нужно вернуть только часы и минуты
+        $hoursDiff = floor($totalMinutes / 60);
+        $minutesDiff = $totalMinutes % 60;
+
+        Log::info("Total Hours: '$hoursDiff'");
+        Log::info("Total Minutes: '$minutesDiff'");
+
+        return BorderCrossingService::declensionHours($hoursDiff) . ' ' . BorderCrossingService::declensionMinutes($minutesDiff);
     }
 }

@@ -27,6 +27,7 @@ return new class extends Migration
             $table->text('comment')->nullable();
             $table->boolean('is_flipped_direction');
             $table->timestamp('time_enter_waiting_area')->nullable();
+            $table->timestamp('create_report_timestamp');
         });
 
         Schema::enableForeignKeyConstraints();

@@ -39,7 +39,6 @@ export default function CamerasPage() {
             .then((r) => {
                 if (!(r instanceof Error)) {
                     setCameras(r);
-                     console.log(r)
                 }
             })
             .catch((error) => {
@@ -59,8 +58,6 @@ export default function CamerasPage() {
         };
 
         const initializeHls = () => {
-
-            console.log(videoRefs)
 
             if (window.Hls) {
                 cameras.forEach((camera) => {
