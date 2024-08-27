@@ -320,24 +320,6 @@ export default function ReportsPage() {
                                                 ) : null}
                                             </div>
 
-                                            {(((!report.is_flipped_direction && directionCrossing?.from_city?.country.name === "Беларусь")
-                                                || (report.is_flipped_direction && directionCrossing?.to_city?.country.name === "Беларусь")) && report.transport.name !== "Bus") && (
-                                                <div>
-                                                    <div className={"time-desc-container"}>
-                                                        <Text weight="3">
-                                                            {`Въезд в зону ожидания:`}
-                                                        </Text>
-
-                                                        <Text weight="3">
-                                                            {dateEnterWaitingArea} в {timeEnterWaitingArea}
-                                                        </Text>
-                                                    </div>
-
-                                                    <hr/>
-
-                                                </div>
-                                            )}
-
                                             {( (report.checkpoint_queue !== null) && ((!report.is_flipped_direction && directionCrossing?.from_city?.country.name === "Беларусь")
                                                 || (report.is_flipped_direction && directionCrossing?.to_city?.country.name === "Беларусь"))) ? (
                                                 <div>
@@ -393,6 +375,24 @@ export default function ReportsPage() {
 
 
                                                     <hr/>
+                                                </div>
+                                            )}
+
+                                            {(((!report.is_flipped_direction && directionCrossing?.from_city?.country.name === "Беларусь")
+                                                || (report.is_flipped_direction && directionCrossing?.to_city?.country.name === "Беларусь")) && report.transport.name !== "Bus") && (
+                                                <div>
+                                                    <div className={"time-desc-container"}>
+                                                        <Text weight="3">
+                                                            {`Въезд в зону ожидания:`}
+                                                        </Text>
+
+                                                        <Text weight="3">
+                                                            {dateEnterWaitingArea} в {timeEnterWaitingArea}
+                                                        </Text>
+                                                    </div>
+
+                                                    <hr/>
+
                                                 </div>
                                             )}
 
