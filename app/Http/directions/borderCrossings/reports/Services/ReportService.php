@@ -12,6 +12,7 @@ use App\Http\directions\borderCrossings\reports\Entities\Report;
 use App\Http\directions\borderCrossings\reports\Exceptions\TimeExpiredDeletedException;
 use App\Http\directions\borderCrossings\reports\transports\DTO\TransportDTO;
 use App\Http\directions\borderCrossings\Services\BorderCrossingService;
+use App\Utils\LogUtils;
 use Carbon\Carbon;
 use DateTime;
 use DateTimeZone;
@@ -33,6 +34,8 @@ class ReportService
             ->orderBy('checkpoint_exit', 'desc') // Сортировка по дате в порядке убывания
             ->limit(6) // Ограничение результата до 6 записей
             ->get(); // Получение результата
+
+        LogUtils::elasticLog($request, "Получил последние 6 отчетов погран-перехода: ".$borderCrossingId);
 
         $result = $reports->map(function (Report $report) {
 
@@ -63,7 +66,11 @@ class ReportService
         $reports = Report::with('transport')
             ->where("border_crossing_id", $borderCrossingId)
             ->orderBy('checkpoint_exit', 'desc')
+            ->limit(20)
             ->get();
+
+        LogUtils::elasticLog($request, "Перешел на страницу со всеми отчетами по погран-переходу: ".$borderCrossingId);
+
 
         $result = $reports->map(function (Report $report) {
 
@@ -110,6 +117,8 @@ class ReportService
 
         $id = $validatedData['id'];
 
+        LogUtils::elasticLog($request, "Удаление отчета: ". $id);
+
         $report = Report::find($id);
 
         $reportTimestamp = Carbon::parse($report->getAttributeValue("create_report_timestamp"));
@@ -119,10 +128,11 @@ class ReportService
 
         // 3600 - кол-во секунд в одном часе
 
-        if ($report && (($report->getAttributeValue("user_id") == $userId) && $diffInSeconds <= 3600)
-            || ($report->getAttributeValue("user_id") == 241666959 || $report->getAttributeValue("user_id") == 747551551)) {
+        if ($report && ( ( ($report->getAttributeValue("user_id") == $userId) && $diffInSeconds <= 3600)
+                || ($userId == 241666959 || $userId == 747551551))) {
             $report->delete();
         } else {
+            LogUtils::elasticLog($request, "Истекло время удаления отчета ". $id);
             throw new TimeExpiredDeletedException("Истекло время удаления");
         }
 
@@ -163,6 +173,8 @@ class ReportService
 
         $report->save();
 
+        LogUtils::elasticLog($request, "Создал отчет ");
+
         return $report;
 
     }
@@ -194,9 +206,6 @@ class ReportService
         // Для удобства, если вам нужно вернуть только часы и минуты
         $hoursDiff = floor($totalMinutes / 60);
         $minutesDiff = $totalMinutes % 60;
-
-        Log::info("Total Hours: '$hoursDiff'");
-        Log::info("Total Minutes: '$minutesDiff'");
 
         return BorderCrossingService::declensionHours($hoursDiff) . ' ' . BorderCrossingService::declensionMinutes($minutesDiff);
     }

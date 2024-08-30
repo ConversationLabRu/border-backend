@@ -184,6 +184,22 @@ export default function ReportsPage() {
         });
     };
 
+    // const filteredReports = reports.filter(report => report.transport.name === "Car");
+    const [filteredReports, setFilteredReports] = useState([]);
+
+    useEffect(() => {
+        setFilteredReports(reports); // Устанавливаем начальное значение
+    }, [reports]);
+
+    const handleFilterChange = (transportName) => {
+        if (transportName === "All") {
+            setFilteredReports(reports);
+            return
+        }
+
+        setFilteredReports(reports.filter(report => report.transport.name === transportName));
+    };
+
     return (
         <AppRoot>
             <div>
@@ -200,7 +216,40 @@ export default function ReportsPage() {
                     <Section header={`${directionCrossing.from_city.name} - ${directionCrossing.to_city.name}`} className={"title-section"}>
                         <Section header={"Отчёты о прохождении"} className={"subtitle-section"}>
                             <div className="container">
-                                {reports.map((report, index) => {
+                                <Section header={"Сортировать"}>
+                                    <div className="filter-param-container">
+                                        <form className="transport-container">
+                                            <Cell
+                                                Component="label"
+                                                before={<Radio name="radio"/>}
+                                                multiline
+                                                onChange={() => handleFilterChange("All")}
+                                            >
+                                                Все
+                                            </Cell>
+
+                                            <Cell
+                                                Component="label"
+                                                before={<Radio name="radio"/>}
+                                                multiline
+                                                onChange={() => handleFilterChange("Car")}
+                                            >
+                                                <IoCar size={28}/>
+                                            </Cell>
+
+                                            <Cell
+                                                Component="label"
+                                                before={<Radio name="radio"/>}
+                                                multiline
+                                                onChange={() => handleFilterChange("Bus")}
+                                            >
+                                                <IoBus size={28}/>
+                                            </Cell>
+                                        </form>
+                                    </div>
+                                </Section>
+
+                                {filteredReports.map((report, index) => {
 
                                     // Предполагаем, что checkpoint_entry и checkpoint_exit - это объекты Date
                                     const entryTime = new Date(report.checkpoint_entry);
@@ -354,7 +403,7 @@ export default function ReportsPage() {
                                                     {report.transport.name === "Car" ? (
                                                         <div className={"time-desc-container"}>
                                                             <Text weight="3">
-                                                                {`Очередь в зону ожидания`}
+                                                                {`Очередь перед КПП`}
                                                             </Text>
 
                                                             <Text weight="3">
@@ -440,7 +489,7 @@ export default function ReportsPage() {
                                                 </>
                                             )}
 
-                                            {((initData.user.id === 7475515512 || initData.user.id === 241666959)
+                                            {((initData.user.id === 747551551 || initData.user.id === 241666959)
                                                 || (report.user_id === initData.user.id && report.is_show_button)) && (
                                                 <ButtonCell
                                                     before={<Icon28Close />}

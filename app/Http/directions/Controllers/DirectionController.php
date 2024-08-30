@@ -4,7 +4,10 @@ namespace App\Http\directions\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\directions\Services\DirectionService;
-use App\Http\directions\Entities\Direction; // Импортируйте вашу модель
+use App\Http\directions\Entities\Direction;
+use Illuminate\Http\Request;
+
+// Импортируйте вашу модель
 
 /**
  * @OA\Schema(
@@ -66,8 +69,8 @@ class DirectionController extends Controller
      *     )
      * )
      */
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json($this->directionService->getAllDirections());
+        return response()->json($this->directionService->getAllDirections($request));
     }
 }

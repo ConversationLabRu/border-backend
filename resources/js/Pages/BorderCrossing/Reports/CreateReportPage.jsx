@@ -193,6 +193,22 @@ export default function CreateReportPage() {
         }
     }, [mainButton, selectedTransport, checkpointEntry, checkpointExit, selectedDirection]);
 
+    // Ваш код
+    const commentHTMLElRef = useRef(null);  // Используем useRef для доступа к полю комментария
+
+    // Функция для прокрутки к полю комментария при его фокусе
+    const handleCommentFocus = () => {
+        setTimeout(() => {
+            const commentElement = document.getElementById("commentTextarea");  // Получаем элемент по ID
+            if (commentElement) {
+                commentElement.scrollIntoView({ behavior: 'smooth', block: 'start' });  // Прокручиваем так, чтобы элемент был полностью виден
+
+            }
+        }, 500);
+    };
+
+
+
     return (
         <AppRoot>
             <div>
@@ -275,113 +291,118 @@ export default function CreateReportPage() {
 
                             <hr/>
 
-                            {(((!isFlippedDirection && directionCrossing?.from_city?.country.name === "Беларусь")
-                                || (isFlippedDirection && directionCrossing?.to_city?.country.name === "Беларусь"))
-                                && selectedTransport !== "3") ? (
-                                <div>
-                                    {(isMacOS() || isIOS()) && (
-                                        <>
-                                            <Text>
-                                                {"Выберите время подъезда к очереди в зону ожидания (необязательно)"}
-                                            </Text>
-                                        </>
-                                    )}
+                            <div className="scrollable">
+                                {(((!isFlippedDirection && directionCrossing?.from_city?.country.name === "Беларусь")
+                                        || (isFlippedDirection && directionCrossing?.to_city?.country.name === "Беларусь"))
+                                    && selectedTransport !== "3") ? (
+                                    <div>
+                                        {(isMacOS() || isIOS()) && (
+                                            <>
+                                                <Text>
+                                                    {"Выберите время подъезда к очереди в зону ожидания (необязательно)"}
+                                                </Text>
+                                            </>
+                                        )}
 
-                                    <Input
-                                        className={"datetime-ios"}
-                                        header={"Выберите время подъезда к очереди в зону ожидания (необязательно)"}
-                                        name="checkpointQueue"
-                                        type="datetime-local"
-                                        value={checkpointQueue}
-                                        onChange={(e) => setCheckpointQueue(e.target.value)}
-                                    />
+                                        <Input
+                                            className={"datetime-ios"}
+                                            header={"Выберите время подъезда к очереди в зону ожидания (необязательно)"}
+                                            name="checkpointQueue"
+                                            type="datetime-local"
+                                            value={checkpointQueue}
+                                            onChange={(e) => setCheckpointQueue(e.target.value)}
+                                        />
 
-                                    {(isMacOS() || isIOS()) && (
-                                        <>
-                                            <Text>
-                                                {"Выберите время въезда в зону ожидания"}
-                                            </Text>
-                                        </>
-                                    )}
+                                        {(isMacOS() || isIOS()) && (
+                                            <>
+                                                <Text>
+                                                    {"Выберите время въезда в зону ожидания"}
+                                                </Text>
+                                            </>
+                                        )}
 
-                                    <Input
-                                        className={"datetime-ios"}
-                                        header={"Выберите время въезда в зону ожидания"}
-                                        name="timeEnterWaitingArea"
-                                        type="datetime-local"
-                                        value={timeEnterWaitingArea}
-                                        onChange={(e) => setTimeEnterWaitingArea(e.target.value)}
-                                    />
+                                        <Input
+                                            className={"datetime-ios"}
+                                            header={"Выберите время въезда в зону ожидания"}
+                                            name="timeEnterWaitingArea"
+                                            type="datetime-local"
+                                            value={timeEnterWaitingArea}
+                                            onChange={(e) => setTimeEnterWaitingArea(e.target.value)}
+                                        />
 
-                                </div>
-                            ) : (
-                                <div>
-                                    {(isMacOS() || isIOS()) && (
-                                        <>
-                                            <Text>
-                                                {"Время подъезда к очереди на КПП (необязательно)"}
-                                            </Text>
-                                        </>
-                                    )}
+                                    </div>
+                                ) : (
+                                    <div>
 
-                                    <Input
-                                        className={"datetime-ios"}
-                                        header={"Время подъезда к очереди на КПП (необязательно)"}
-                                        name="checkpointQueue"
-                                        type="datetime-local"
-                                        value={checkpointQueue}
-                                        onChange={(e) => setCheckpointQueue(e.target.value)}
-                                    />
-                                </div>
-                            )}
+                                        {(isMacOS() || isIOS()) && (
+                                            <>
+                                                <Text>
+                                                    {"Время подъезда к очереди на КПП (необязательно)"}
+                                                </Text>
+                                            </>
+                                        )}
 
-                            <hr/>
+                                        <Input
+                                            className={"datetime-ios"}
+                                            header={"Время подъезда к очереди на КПП (необязательно)"}
+                                            name="checkpointQueue"
+                                            type="datetime-local"
+                                            value={checkpointQueue}
+                                            onChange={(e) => setCheckpointQueue(e.target.value)}
+                                        />
+                                    </div>
+                                )}
 
-                            {(isMacOS() || isIOS()) && (
-                                <>
-                                    <Text>
-                                        {"Время въезда на первый КПП"}
-                                    </Text>
-                                </>
-                            )}
+                                <hr/>
 
-                            <Input
-                                header={"Время въезда на первый КПП"}
-                                name="checkpointEntry"
-                                type="datetime-local"
-                                value={checkpointEntry}
-                                onChange={(e) => setCheckpointEntry(e.target.value)}
-                                placeholder="Выберите дату и время"
-                                defaultValue=""
-                            />
+                                {(isMacOS() || isIOS()) && (
+                                    <>
+                                        <Text>
+                                            {"Время въезда на первый КПП"}
+                                        </Text>
+                                    </>
+                                )}
 
-                            <hr/>
+                                <Input
+                                    header={"Время въезда на первый КПП"}
+                                    name="checkpointEntry"
+                                    type="datetime-local"
+                                    value={checkpointEntry}
+                                    onChange={(e) => setCheckpointEntry(e.target.value)}
+                                    placeholder="Выберите дату и время"
+                                    defaultValue=""
+                                />
 
-                            {(isMacOS() || isIOS()) && (
-                                <>
-                                    <Text>
-                                        {"Время выезда с последнего КПП"}
-                                    </Text>
-                                </>
-                            )}
+                                <hr/>
 
-                            <Input
-                                header={"Время выезда с последнего КПП"}
-                                name="checkpointExit"
-                                type="datetime-local"
-                                value={checkpointExit}
-                                onChange={(e) => setCheckpointExit(e.target.value)}
-                            />
+                                {(isMacOS() || isIOS()) && (
+                                    <>
+                                        <Text>
+                                            {"Время выезда с последнего КПП"}
+                                        </Text>
+                                    </>
+                                )}
 
-                            <hr/>
+                                <Input
+                                    header={"Время выезда с последнего КПП"}
+                                    name="checkpointExit"
+                                    type="datetime-local"
+                                    value={checkpointExit}
+                                    onChange={(e) => setCheckpointExit(e.target.value)}
+                                />
 
-                            <Textarea
-                                header={"Комментарий (необязательно)"}
-                                name="comment"
-                                value={comment}
-                                onChange={(e) => setComment(e.target.value)}
-                                placeholder={"Напишите комментарий (необязательно)"}
-                            />
+                                <hr/>
+
+                                <Textarea
+                                    id="commentTextarea"
+                                    onClick={handleCommentFocus}
+                                    header={"Комментарий (необязательно)"}
+                                    name="comment"
+                                    value={comment}
+                                    onChange={(e) => setComment(e.target.value)}
+                                    placeholder={"Напишите комментарий (необязательно)"}
+                                />
+                            </div>
                         </div>
                     </Section>
                 )}

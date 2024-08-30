@@ -54,7 +54,11 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => ['single','elasticsearch','stderr'],
+            'channels' => array_filter([
+                'single',
+                'stderr',
+                env('APP_ENV') === 'production' ? 'elasticsearch' : null,
+            ]),
             'ignore_exceptions' => false,
         ],
 

@@ -7,6 +7,7 @@ use App\Http\directions\borderCrossings\Dto\CityDTO;
 use App\Http\directions\borderCrossings\Dto\CountryDTO;
 use App\Http\directions\borderCrossings\Dto\DirectionCrossingDTO;
 use App\Http\directions\borderCrossings\Entities\BorderCrossing;
+use App\Utils\LogUtils;
 use Carbon\Carbon;
 use DateTime;
 use DateTimeZone;
@@ -33,21 +34,17 @@ class BorderCrossingService
             ->where("direction_id", $directionId)
             ->get();
 
-        // Логируем данные для отладки
-        Log::info("Loaded directions: '${directions}'");
+        LogUtils::elasticLog($request, "Перешел на страницу с Погран-переходами направления: ".$directionId);
+
 
         // Проверка наличия данных
         if ($directions->isEmpty()) {
-            Log::info('No directions found for directionId: ' . $directionId);
+            LogUtils::elasticLog($request, 'No directions found for directionId: ' . $directionId);
         }
 
         $result = $directions->map(function (BorderCrossing $direction) {
             $fromCity = $direction->fromCity;
             $toCity = $direction->toCity;
-
-            if (!$fromCity || !$toCity) {
-                Log::warning('Missing city data for direction id: ' . $direction->id);
-            }
 
             $fromCityDTO = $fromCity ? new CityDTO(
                 $fromCity->name,
@@ -124,6 +121,7 @@ class BorderCrossingService
             $response = Http::get("https://belarusborder.by/info/monitoring-new?token=test&checkpointId=53d94097-2b34-11ec-8467-ac1f6bf889c0");
             $data = $this->convertToCacheObjectBelarusInfo($response);
             Cache::put('benyakoni', $data, now()->addMinutes(5));
+
         }
 
         return $data;
@@ -131,50 +129,58 @@ class BorderCrossingService
 
     function convertToCacheObjectBelarusInfo(\Illuminate\Http\Client\Response $response) : ?CacheDTO
     {
-        if (sizeof($response['carLiveQueue']) == 0) {
-            Log::info("Информация о машинах нет");
+        try {
+            if (sizeof($response['carLiveQueue']) == 0) {
+                Log::info("Информация о машинах нет");
 
 
-            $cacheDTO = new CacheDTO(
-                "0",
-                0
-            );
-            return $cacheDTO;
-        };
+                $cacheDTO = new CacheDTO(
+                    "0",
+                    0
+                );
+                return $cacheDTO;
+            };
 
-        // Получаем время регистрации
-        $regTime = $response['carLiveQueue'][0]['registration_date'];
+            // Получаем время регистрации
+            $regTime = $response['carLiveQueue'][0]['registration_date'];
 
-        // Вычисляем разницу во времени
-        $timeDifference = $this->calculateTimeDifference($regTime);
-        $hours = $timeDifference['hours'];
-        $minutes = $timeDifference['minutes'];
+            // Вычисляем разницу во времени
+            $timeDifference = $this->calculateTimeDifference($regTime);
+            $hours = $timeDifference['hours'];
+            $minutes = $timeDifference['minutes'];
 
-        // Формируем части строки
-        $parts = [];
+            // Формируем части строки
+            $parts = [];
 
-        if ($hours > 0) {
-            $parts[] = $this->declensionHours($hours);
-        }
+            if ($hours > 0) {
+                $parts[] = $this->declensionHours($hours);
+            }
 
-        if ($minutes > 0) {
-            $parts[] = $this->declensionMinutes($minutes);
-        }
+            if ($minutes > 0) {
+                $parts[] = $this->declensionMinutes($minutes);
+            }
 
-        // Формируем итоговую строку
-        if (count($parts) > 0) {
-            Log::info("Информация о машинах есть");
+            // Формируем итоговую строку
+            if (count($parts) > 0) {
+                Log::info("Информация о машинах есть");
 
-            $cacheDTO = new CacheDTO(
-                implode(' ', $parts),
-                sizeof($response->json()['carLiveQueue'])
-            );
-            return $cacheDTO;
+                $cacheDTO = new CacheDTO(
+                    implode(' ', $parts),
+                    sizeof($response->json()['carLiveQueue'])
+                );
+                return $cacheDTO;
 
-        } else {
-            Log::info("Информация о машинах нет");
+            } else {
+                Log::info("Информация о машинах нет");
 
 
+                $cacheDTO = new CacheDTO(
+                    "0",
+                    0
+                );
+                return $cacheDTO;
+            }
+        } catch (\Exception $e) {
             $cacheDTO = new CacheDTO(
                 "0",
                 0
@@ -210,9 +216,6 @@ class BorderCrossingService
         // Для удобства, если вам нужно вернуть только часы и минуты
         $hoursDiff = floor($totalMinutes / 60);
         $minutesDiff = $totalMinutes % 60;
-
-        Log::info("Total Hours: '$hoursDiff'");
-        Log::info("Total Minutes: '$minutesDiff'");
 
         return [
             'hours' => $hoursDiff,

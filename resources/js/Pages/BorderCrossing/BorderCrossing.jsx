@@ -9,6 +9,7 @@ import {useLocation, useNavigate, useParams} from "react-router-dom";
 import { ThreeDots } from "react-loader-spinner";
 import { ServerURL } from "@/API/ServerConst.js";
 import {useBackButton} from "@tma.js/sdk-react";
+import {BsQuestionCircleFill} from "react-icons/bs";
 
 export default function BorderCrossing() {
     const [directionCrossings, setDirectionCrossings] = useState([]);
@@ -179,6 +180,28 @@ export default function BorderCrossing() {
                                                         subtitle="Информация о разрешениях и нормах ввоза/вывоза через границу"
                                                     >
                                                         {`Нормы ввоза/вывоза`}
+                                                    </Cell>
+                                                );
+                                            } else if (doc.type === "frequent-questions") {
+                                                return (
+                                                    <Cell
+
+                                                        after={
+                                                            <img
+                                                                src={`/continue.svg`}
+                                                                alt={'dada'}
+                                                            />
+                                                        }
+                                                        before={
+                                                            <Avatar
+                                                                size={40}
+                                                                src={`/question-mark.png`}
+                                                            />
+                                                        }
+                                                        onClick={() => openUrlInNewTab(doc.url)}
+
+                                                    >
+                                                        {`Частые вопросы`}
                                                     </Cell>
                                                 );
                                             } else {
