@@ -213,7 +213,7 @@ class ReportService
     public function getStatistics(Request $request)
     {
         $borderCrossingId = (int) $request->query("borderCrossingId");
-        LogUtils::elasticLog($request, "Запросил статистику по погран-переходу: " . $borderCrossingId);
+        LogUtils::elasticLog($request, "Запросил прогноз по погран-переходу: " . $borderCrossingId);
 
         $currentDayOfWeek = date('N'); // Получаем текущий день недели (1 = Пн, 7 = Вс)
 

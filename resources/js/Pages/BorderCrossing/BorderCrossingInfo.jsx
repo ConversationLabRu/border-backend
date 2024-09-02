@@ -257,18 +257,18 @@ export default function BorderCrossingInfo() {
 
                             <Modal
                                 header={<ModalHeader>Статистика</ModalHeader>}
-                                trigger={<Button size="m" onClick={handleShowStatistics}>Посмотреть статистику</Button>}
+                                trigger={<Button size="m" onClick={handleShowStatistics}>Посмотреть прогноз</Button>}
                             >
                                 {statisticData ? (
                                     <Placeholder
-                                        header="Статистика прохождения погран-перехода"
+                                        header="Прогноз прохождения погран-перехода"
                                     >
                                         {formatStatistics(statisticData)}
 
                                     </Placeholder>
                                 ) : (
                                     <Placeholder
-                                        header="Статистика прохождения погран-перехода"
+                                        header="Прогноз прохождения погран-перехода"
                                     >
                                         <Text weight="1">
                                             Нет данных
