@@ -8,6 +8,7 @@ use App\Http\directions\borderCrossings\Dto\DirectionCrossingDTO;
 use App\Http\directions\borderCrossings\Entities\BorderCrossing;
 use App\Http\directions\borderCrossings\reports\DTO\AllReportDTO;
 use App\Http\directions\borderCrossings\reports\DTO\LastReportDTO;
+use App\Http\directions\borderCrossings\reports\DTO\StatisticDTO;
 use App\Http\directions\borderCrossings\reports\Entities\Report;
 use App\Http\directions\borderCrossings\reports\Exceptions\TimeExpiredDeletedException;
 use App\Http\directions\borderCrossings\reports\transports\DTO\TransportDTO;
@@ -176,7 +177,6 @@ class ReportService
         LogUtils::elasticLog($request, "Создал отчет ");
 
         return $report;
-
     }
 
     public function convertDiffTimeToText(Report $report): string
@@ -208,5 +208,111 @@ class ReportService
         $minutesDiff = $totalMinutes % 60;
 
         return BorderCrossingService::declensionHours($hoursDiff) . ' ' . BorderCrossingService::declensionMinutes($minutesDiff);
+    }
+
+    public function getStatistics(Request $request)
+    {
+        $borderCrossingId = (int) $request->query("borderCrossingId");
+        LogUtils::elasticLog($request, "Запросил статистику по погран-переходу: " . $borderCrossingId);
+
+        $currentDayOfWeek = date('N'); // Получаем текущий день недели (1 = Пн, 7 = Вс)
+
+        $transportData = [
+            ['transport_id' => 2, 'is_flipped_direction' => false, 'label' => 'CarNotFlipped'],
+            ['transport_id' => 2, 'is_flipped_direction' => true, 'label' => 'CarFlipped'],
+            ['transport_id' => 3, 'is_flipped_direction' => false, 'label' => 'BusNotFlipped'],
+            ['transport_id' => 3, 'is_flipped_direction' => true, 'label' => 'BusFlipped'],
+        ];
+
+        $results = [];
+
+        foreach ($transportData as $data) {
+            $reports = $this->getReports($borderCrossingId, $data['transport_id'], $data['is_flipped_direction']);
+
+            // Если недостаточно данных, ищем по текущему дню недели
+            if ($reports->count() < 3) {
+                $reports = $this->getReportsByDayOfWeek($borderCrossingId, $data['transport_id'], $data['is_flipped_direction'], $currentDayOfWeek);
+            }
+
+            $results[$data['label']] = $this->calculateMedian(
+                $reports->map(fn($report) => $this->calculatePassageTime($report))->filter()->toArray()
+            );
+        }
+
+        $result = new StatisticDTO(
+            $results['CarNotFlipped'] ?? 'Нет информации',
+            $results['CarFlipped'] ?? 'Нет информации',
+            $results['BusNotFlipped'] ?? 'Нет информации',
+            $results['BusFlipped'] ?? 'Нет информации'
+        );
+
+        LogUtils::elasticLog($request, "Результат статистики погран перехода " . $borderCrossingId . ": " . $result);
+
+
+        return $result->toArray();
+    }
+
+    private function getReports($borderCrossingId, $transportId, $isFlippedDirection)
+    {
+        return Report::where('border_crossing_id', $borderCrossingId)
+            ->where('transport_id', $transportId)
+            ->where('is_flipped_direction', $isFlippedDirection)
+            ->orderBy('checkpoint_exit', 'desc')
+            ->limit(4)
+            ->get();
+    }
+
+    private function getReportsByDayOfWeek($borderCrossingId, $transportId, $isFlippedDirection, $dayOfWeek)
+    {
+        return Report::where('border_crossing_id', $borderCrossingId)
+            ->where('transport_id', $transportId)
+            ->where('is_flipped_direction', $isFlippedDirection)
+            ->whereRaw('DAYOFWEEK(checkpoint_exit) = ?', [$dayOfWeek])
+            ->orderBy('checkpoint_exit', 'desc')
+            ->limit(10)
+            ->get();
+    }
+
+    private function calculatePassageTime($report)
+    {
+        $entryTime = new DateTime($report["checkpoint_entry"], new DateTimeZone('Europe/Minsk'));
+        $exitTime = new DateTime($report["checkpoint_exit"], new DateTimeZone('Europe/Minsk'));
+
+        $difference = $exitTime->diff($entryTime);
+
+        if (!is_null($report["time_enter_waiting_area"])) {
+            $enterWaitingAreaTime = new DateTime($report["time_enter_waiting_area"], new DateTimeZone('Europe/Minsk'));
+            $difference = $exitTime->diff($enterWaitingAreaTime);
+        }
+
+        if (!is_null($report["checkpoint_queue"])) {
+            $queueTime = new DateTime($report["checkpoint_queue"], new DateTimeZone('Europe/Minsk'));
+            $difference = $exitTime->diff($queueTime);
+        }
+
+        // Получаем разницу в минутах
+        return ($difference->days * 24 * 60) + ($difference->h * 60) + $difference->i;
+    }
+
+    private function calculateMedian($times)
+    {
+        if (empty($times)) {
+            return "Нет информации";
+        }
+
+        sort($times);
+        $count = count($times);
+        $middle = floor(($count - 1) / 2);
+
+        if ($count % 2 !== 0) {
+            $result = $times[$middle];
+        } else {
+            $result = ($times[$middle] + $times[$middle + 1]) / 2.0;
+        }
+
+        $hours = floor($result / 60);
+        $minutes = $result % 60;
+
+        return BorderCrossingService::declensionHours($hours) . ' ' . BorderCrossingService::declensionMinutes($minutes);
     }
 }

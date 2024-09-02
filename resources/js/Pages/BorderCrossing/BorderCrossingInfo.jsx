@@ -1,15 +1,18 @@
 import './styles.css';
 import './border-info-styles.css';
-import { AppRoot, Avatar, AvatarStack, List, Text } from "@telegram-apps/telegram-ui";
+import {AppRoot, Avatar, AvatarStack, Button, List, Modal, Placeholder, Text} from "@telegram-apps/telegram-ui";
 import { InlineButtonsItem } from "@telegram-apps/telegram-ui/dist/components/Blocks/InlineButtons/components/InlineButtonsItem/InlineButtonsItem.js";
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { ThreeDots } from "react-loader-spinner";
 import ReportService from "@/API/ReportService.js";
 import {useBackButton, useMainButton} from "@tma.js/sdk-react";
-import { IoInformation } from "react-icons/io5";
+import {IoBus, IoCar, IoInformation} from "react-icons/io5";
 import { VscDeviceCamera } from "react-icons/vsc";
 import React from 'react';
+import {
+    ModalHeader
+} from "@telegram-apps/telegram-ui/dist/components/Overlays/Modal/components/ModalHeader/ModalHeader.js";
 
 
 export default function BorderCrossingInfo() {
@@ -74,16 +77,114 @@ export default function BorderCrossingInfo() {
         }
     }, [mainButton]);
 
+    const [countryLogos, setCountryLogos] = useState({
+        fromCountryLogo: null,
+        toCountryLogo: null,
+    });
+
+
     useEffect(() => {
         const directionIdNumber = Number(id);
         ReportService.getLast(directionIdNumber).then((r) => {
             if (!(r instanceof Error)) {
                 setReports(r);
+
+                if (r.length > 0) {
+                    // Извлечь логотипы из первого отчета
+                    const firstReport = r[0];
+                    const fromCountryLogo = firstReport?.from_city?.country?.logo;
+                    const toCountryLogo = firstReport?.to_city?.country?.logo;
+                    setCountryLogos({
+                        fromCountryLogo,
+                        toCountryLogo,
+                    });
+                }
             }
         }).catch((error) => {
             console.error('Ошибка при получении отчётов:', error);
         });
     }, [id]);
+
+    const handleShowStatistics = () => {
+        const directionIdNumber = Number(id);
+        ReportService.getStatistic(directionIdNumber).then((r) => {
+            if (!(r instanceof Error)) {
+                setStatisticData(r); // Обновить состояние с данными статистики
+            }
+        }).catch((error) => {
+            console.error('Ошибка при получении отчётов:', error);
+        });
+    };
+
+    const formatDirectionTime = (key, value) => {
+        switch (key) {
+            case 'timeCarNotFlipped':
+
+                return <div>
+                    <div className={"report-elem-logo-container stat-container"}>
+                        <IoCar size={28}/>
+                        <Avatar size={20} className={"first-elem-logo"} src={`/${directionCrossing.from_city.country.logo}`}/>
+                        <Avatar className={"to-logo-size"} size={20} src={`/to_logo.svg`}/>
+                        <Avatar size={20} className={"stat-logo-last"} src={`/${directionCrossing.to_city.country.logo}`}/>
+
+                        {value}
+                    </div>
+                </div>
+            case 'timeCarFlipped':
+                return <div>
+                    <div className={"report-elem-logo-container stat-container"}>
+                        <IoCar size={28}/>
+                        <Avatar size={20} className={"first-elem-logo"} src={`/${directionCrossing.to_city.country.logo}`}/>
+                        <Avatar className={"to-logo-size"} size={20} src={`/to_logo.svg`}/>
+                        <Avatar size={20} className={"stat-logo-last"} src={`/${directionCrossing.from_city.country.logo}`}/>
+
+                        {value}
+                    </div>
+                </div>
+            case 'timeBusNotFlipped':
+                return <div>
+                    <div className={"report-elem-logo-container stat-container"}>
+                        <IoBus size={28}/>
+                        <Avatar size={20} className={"first-elem-logo"} src={`/${directionCrossing.from_city.country.logo}`}/>
+                        <Avatar className={"to-logo-size"} size={20} src={`/to_logo.svg`}/>
+                        <Avatar size={20} className={"stat-logo-last"} src={`/${directionCrossing.to_city.country.logo}`}/>
+
+                        {value}
+                    </div>
+                </div>
+            case 'timeBusFlipped':
+                return <div>
+                    <div className={"report-elem-logo-container stat-container"}>
+                        <IoBus size={28}/>
+                        <Avatar size={20} className={"first-elem-logo"} src={`/${directionCrossing.to_city.country.logo}`}/>
+                        <Avatar className={"to-logo-size"} size={20} src={`/to_logo.svg`}/>
+                        <Avatar size={20} className={"stat-logo-last"} src={`/${directionCrossing.from_city.country.logo}`}/>
+
+                        {value}
+                    </div>
+                </div>
+            default:
+                return `${key}: ${value}`;
+        }
+    };
+
+    const formatStatistics = (data) => {
+        if (!data) return [];
+
+        // Преобразовать данные в массив строк (или отформатировать как нужно)
+        return Object.entries(data).map(([key, value], index) => (
+            <React.Fragment key={index}>
+                {/*<Text weight="1">{formatDirectionTime(key, value)}</Text>*/}
+
+                {formatDirectionTime(key, value)}
+                <br />
+            </React.Fragment>
+        ));
+    };
+
+
+
+    const [statisticData, setStatisticData] = useState(null); // Добавить состояние для хранения статистики
 
     return (
         <AppRoot>
@@ -153,6 +254,30 @@ export default function BorderCrossingInfo() {
                                     </div>
                                 </div>
                             )}
+
+                            <Modal
+                                header={<ModalHeader>Статистика</ModalHeader>}
+                                trigger={<Button size="m" onClick={handleShowStatistics}>Посмотреть статистику</Button>}
+                            >
+                                {statisticData ? (
+                                    <Placeholder
+                                        header="Статистика прохождения погран-перехода"
+                                    >
+                                        {formatStatistics(statisticData)}
+
+                                    </Placeholder>
+                                ) : (
+                                    <Placeholder
+                                        header="Статистика прохождения погран-перехода"
+                                    >
+                                        <Text weight="1">
+                                            Нет данных
+                                        </Text>
+                                    </Placeholder>
+                                )}
+                            </Modal>
+
+
 
                             <div className="report-container-title">
                                 <Text weight="1">

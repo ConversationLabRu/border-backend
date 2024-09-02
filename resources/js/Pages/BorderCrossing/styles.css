@@ -3,6 +3,7 @@
 }
 
 .header-image {
+    filter: brightness(50%);
     width: 100%; /* Или установите нужную ширину */
 }
 
