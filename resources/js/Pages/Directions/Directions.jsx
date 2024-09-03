@@ -39,7 +39,7 @@ export default function Directions() {
                 <img
                     src="/bordersmainnew.png"
                     alt={"das"}
-                    className="header-image"
+                    className="header-image-direction"
                 />
 
                 <List>

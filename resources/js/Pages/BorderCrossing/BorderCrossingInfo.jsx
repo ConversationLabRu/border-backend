@@ -256,19 +256,22 @@ export default function BorderCrossingInfo() {
                             )}
 
                             <Modal
-                                header={<ModalHeader>Статистика</ModalHeader>}
+                                header={<ModalHeader>Прогноз</ModalHeader>}
                                 trigger={<Button size="m" onClick={handleShowStatistics}>Посмотреть прогноз</Button>}
                             >
                                 {statisticData ? (
                                     <Placeholder
-                                        header="Прогноз прохождения погран-перехода"
-                                    >
+                                        header={<>
+                                            Прогноз прохождения <br/> пункта пропуска
+                                        </>}                                    >
                                         {formatStatistics(statisticData)}
 
                                     </Placeholder>
                                 ) : (
                                     <Placeholder
-                                        header="Прогноз прохождения погран-перехода"
+                                        header={<>
+                                            Прогноз прохождения <br/> пункта пропуска
+                                        </>}
                                     >
                                         <Text weight="1">
                                             Нет данных
