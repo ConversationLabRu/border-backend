@@ -256,13 +256,19 @@ export default function BorderCrossingInfo() {
                             )}
 
                             <Modal
-                                header={<ModalHeader>Прогноз</ModalHeader>}
+                                header={<ModalHeader>Прогноз прохождения пункта пропуска</ModalHeader>}
                                 trigger={<Button size="m" onClick={handleShowStatistics}>Посмотреть прогноз</Button>}
                             >
                                 {statisticData ? (
                                     <Placeholder
                                         header={<>
-                                            Прогноз прохождения <br/> пункта пропуска
+                                            <Text weight="3" style={{fontSize: "calc(var(--tgui--text--font_size) - 10%)"}}>
+                                                Прогноз построен на основе отчетов о прохождении пункта пропуска.
+                                            </Text>
+                                            <br/>
+                                            <Text weight="1" style={{fontSize: "calc(var(--tgui--text--font_size) - 10%)"}}>
+                                                Добавляя отчеты, вы значительно улучшаете точность прогноза.
+                                            </Text>
                                         </>}                                    >
                                         {formatStatistics(statisticData)}
 
@@ -270,7 +276,13 @@ export default function BorderCrossingInfo() {
                                 ) : (
                                     <Placeholder
                                         header={<>
-                                            Прогноз прохождения <br/> пункта пропуска
+                                            <Text weight="3" style={{fontSize: "calc(var(--tgui--text--font_size) - 10%)"}}>
+                                                Прогноз построен на основе отчетов о прохождении пункта пропуска.
+                                            </Text>
+                                            <br/>
+                                            <Text weight="1" style={{fontSize: "calc(var(--tgui--text--font_size) - 10%)"}}>
+                                                Добавляя отчеты, вы значительно улучшаете точность прогноза.
+                                            </Text>
                                         </>}
                                     >
                                         <Text weight="1">

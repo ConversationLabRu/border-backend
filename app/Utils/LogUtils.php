@@ -19,7 +19,9 @@ class LogUtils
 
             // Получение user id
             $userId = $userData['id'];
-            $userName = $userData['username'];
+
+            $userName = $userData['username'] ?? "Empty";
+
             $firstName = $userData['first_name'];
         } else {
             $userId = "1";
