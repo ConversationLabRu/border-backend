@@ -37,8 +37,17 @@
     font-size: 30px;
 }
 
-.tgui-65c206f0fd891b6b {
-
+.loader-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.7); /* полупрозрачный белый цвет */
+    z-index: 9999; /* высокий z-index, чтобы оверлей был поверх всех элементов */
 }
 
 .title-crossing-container {

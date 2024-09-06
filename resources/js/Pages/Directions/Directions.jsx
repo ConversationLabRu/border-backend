@@ -8,6 +8,7 @@ import {useNavigate} from "react-router-dom";
 import {DirectionCard} from "@/Pages/Directions/Components/card.jsx";
 import {ServerURL} from "@/API/ServerConst.js";
 import {Icon20Copy} from "@telegram-apps/telegram-ui/dist/icons/20/copy.js";
+import {ThreeDots} from "react-loader-spinner";
 
 export default function Directions() {
     const [directions, setDirections] = useState([]);
@@ -36,49 +37,56 @@ export default function Directions() {
     return (
         <AppRoot>
             <div>
-                <img
-                    src="/bordersmainnew.png"
-                    alt={"das"}
-                    className="header-image-direction"
-                />
 
-                <List>
-                    <Section header="Направления">
-                        {directions.length > 0 ? (
-                            directions.map((direction) => (
-                                <Cell
-                                    before={<Avatar size={48} src={`${direction.logo}`}/>}
-                                    subtitle="Информация, камера, правила и др."
-                                    onClick={() => {
-                                        navigate(`/borderCrossing/${direction.id}`,
-                                            {
-                                                state: {
-                                                    direction: direction
-                                                }
-                                            });
-                                    }}
+                {directions.length !== 0 ? (
+                    <>
+                        <img
+                            src="/bordersmainnew.png"
+                            alt={"das"}
+                            className="header-image-direction"
+                        />
+                        <List>
+                            <Section header="Направления">
+                                {directions.map((direction) => (
+                                    <Cell
+                                        before={<Avatar size={48} src={`${direction.logo}`}/>}
+                                        subtitle="Информация, камера, правила и др."
+                                        onClick={() => {
+                                            navigate(`/borderCrossing/${direction.id}`,
+                                                {
+                                                    state: {
+                                                        direction: direction
+                                                    }
+                                                });
+                                        }}
 
+                                    >
+                                        {direction.name}
+                                    </Cell>
+                                ))}
+                            </Section>
+
+                            <div className="bottom-button-container"
+                                 onClick={() => openUrlInNewTab("https://t.me/conversationlab")}>
+                                <Button
+                                    before={
+                                        <Avatar size={24} src={"/images/logo-company.jpg"}/>
+                                    }
+                                    mode="filled"
+                                    size="s"
                                 >
-                                    {direction.name}
-                                </Cell>
-                            ))
-                        ) : (
-                            <p>No directions available</p>
-                        )}
-                    </Section>
-
-                    <div className="bottom-button-container" onClick={() => openUrlInNewTab("https://t.me/conversationlab")}>
-                        <Button
-                            before={
-                                <Avatar size={24} src={"/images/logo-company.jpg"}/>
-                            }
-                            mode="filled"
-                            size="s"
-                        >
-                            Связаться с разработчиками
-                        </Button>
-                    </div>
-                </List>
+                                    Связаться с разработчиками
+                                </Button>
+                            </div>
+                        </List>
+                    </>
+                ) : (
+                    <>
+                        <div className="loader-overlay">
+                            <ThreeDots height="80" width="80" color="#007aff" ariaLabel="loading"/>
+                        </div>
+                    </>
+                )}
 
             </div>
         </AppRoot>
