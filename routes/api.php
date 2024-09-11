@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\TestController;
+use App\Http\Controllers\TelegramController;
 use App\Http\directions\borderCrossings\reports\transports\Controllers\TransportController;
 use App\Http\directions\Controllers\DirectionController;
 use App\Http\directions\borderCrossings\Controllers\BorderCrossingController;
@@ -32,6 +32,7 @@ Route::middleware('auth.api')->group(function () {
 
     Route::prefix('directions/borderCrossing')->group(function () {
         Route::get('/', [BorderCrossingController::class, 'index']); // GET /directions/borderCrossing
+        Route::post('/send-photo', [TelegramController::class, 'sendPhotoToChat']);
     });
 
     Route::prefix('directions/borderCrossing')->group(function () {

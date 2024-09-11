@@ -9,9 +9,11 @@ import {DirectionCard} from "@/Pages/Directions/Components/card.jsx";
 import {ServerURL} from "@/API/ServerConst.js";
 import {Icon20Copy} from "@telegram-apps/telegram-ui/dist/icons/20/copy.js";
 import {ThreeDots} from "react-loader-spinner";
+import {useTWAEvent} from "@tonsolutions/telemetree-react";
 
 export default function Directions() {
     const [directions, setDirections] = useState([]);
+    const eventBuilder = useTWAEvent();
 
     const navigate = useNavigate();
 
@@ -52,6 +54,12 @@ export default function Directions() {
                                         before={<Avatar size={48} src={`${direction.logo}`}/>}
                                         subtitle="Информация, камера, правила и др."
                                         onClick={() => {
+
+                                            eventBuilder.track('Button Clicked', {
+                                                label: 'Subscribe Button', // Additional info about the button
+                                                category: 'User Engagement', // Categorize the event
+                                            });
+
                                             navigate(`/borderCrossing/${direction.id}`,
                                                 {
                                                     state: {

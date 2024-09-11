@@ -53,6 +53,17 @@
     margin-bottom: 5%;
 }
 
+.share-text {
+    display: none;
+    font-size: 12px;
+    color: rgba(var(--tg-theme-text-color), 0.5);
+    margin-top: 6%;
+}
+
+.share-button {
+    margin-top: 5%;
+}
+
 .modal-header-text {
     font-size: 12px;
 }

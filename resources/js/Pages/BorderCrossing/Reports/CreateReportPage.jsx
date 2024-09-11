@@ -61,7 +61,6 @@ export default function CreateReportPage() {
 
     // Применение классов к <html>
     useEffect(() => {
-
         if (isIOS()) {
             document.documentElement.classList.add('ios');
         } else if (isMacOS()) {

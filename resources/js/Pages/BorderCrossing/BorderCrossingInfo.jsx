@@ -13,6 +13,8 @@ import React from 'react';
 import {
     ModalHeader
 } from "@telegram-apps/telegram-ui/dist/components/Overlays/Modal/components/ModalHeader/ModalHeader.js";
+import html2canvas from "html2canvas";
+import BorderCrossingService from "@/API/BorderCrossingService.js";
 
 
 export default function BorderCrossingInfo() {
@@ -179,12 +181,71 @@ export default function BorderCrossingInfo() {
                 {formatDirectionTime(key, value)}
                 <br />
             </React.Fragment>
+
+
         ));
     };
 
-
-
     const [statisticData, setStatisticData] = useState(null); // Добавить состояние для хранения статистики
+
+    // Определение iOS и macOS
+    const isIOS = () => {
+        return /iPad|iPhone|iPod/.test(navigator.platform) && !window.MSStream;
+    };
+
+    useEffect(() => {
+        if (isIOS()) {
+            document.documentElement.classList.add('ios');
+        }
+    }, []);
+
+    // Функция для захвата изображения и отправки
+    const captureAndShare = async () => {
+        const shareButton = document.querySelector('.share-button');
+        const shareText = document.querySelector('.share-text');
+
+        if (shareButton) {
+            shareButton.style.display = 'none'; // Скрываем кнопку
+            shareText.style.display = 'block'
+
+        }
+
+        const element = document.getElementById('statistic-placeholder');
+
+// Задаём фон через CSS перед созданием снимка
+        const root = document.documentElement;
+        const rootStyles = getComputedStyle(root);
+        const backgroundColor = rootStyles.getPropertyValue('--tg-theme-bg-color').trim();
+
+        element.style.backgroundColor = backgroundColor;
+
+        const canvas = await html2canvas(element, { backgroundColor: null }); // Захватываем элемент
+
+        // Преобразуем canvas в Blob и сохраняем
+        canvas.toBlob(async (blob) => {
+            const file = new File([blob], "border-crossing-info.jpg", { type: "image/jpeg" });
+
+            if (isIOS()) {
+                await navigator.share({
+                    title: 'Очереди на границах',
+                    text: 'Очереди на границах: @bordercrossingsbot',
+                    files: [file]
+                });
+            } else {
+                const formData = new FormData();
+                formData.append('image', file);
+                await BorderCrossingService.sendPhotoPost(formData);
+            }
+        });
+
+// Восстанавливаем кнопку
+        if (shareButton) {
+            shareButton.style.display = ''; // Восстанавливаем отображение кнопки
+            shareText.style.display = 'none'
+        }
+
+    };
+
 
     return (
         <AppRoot>
@@ -261,20 +322,40 @@ export default function BorderCrossingInfo() {
                             >
                                 {statisticData ? (
                                     <Placeholder
+                                        id={"statistic-placeholder"}
+                                        className={"statistic-placeholder"}
                                         header={<>
-                                            <Text weight="3" style={{fontSize: "calc(var(--tgui--text--font_size) - 10%)"}}>
+                                            <Text weight="3"
+                                                  style={{fontSize: "calc(var(--tgui--text--font_size) - 10%)"}}>
                                                 Прогноз построен на основе отчетов о прохождении пункта пропуска.
                                             </Text>
                                             <br/>
-                                            <Text weight="1" style={{fontSize: "calc(var(--tgui--text--font_size) - 10%)"}}>
+                                            <Text weight="1"
+                                                  style={{fontSize: "calc(var(--tgui--text--font_size) - 10%)"}}>
                                                 Добавляя отчеты, вы значительно улучшаете точность прогноза.
                                             </Text>
-                                        </>}                                    >
-                                        {formatStatistics(statisticData)}
+
+                                            <Button size="m" className="share-button" onClick={captureAndShare}>
+                                                Поделиться прогнозом
+                                            </Button>
+
+                                            <h4 id={"share-text"}
+
+                                                className={"share-text"}>Очереди на границах:
+                                                @bordercrossingsbot</h4>
+
+                                        </>}>
+                                        {
+                                            <div>
+                                                {formatStatistics(statisticData)}
+                                            </div>
+                                        }
 
                                     </Placeholder>
                                 ) : (
                                     <Placeholder
+                                        id={"statistic-placeholder"}
+                                        className={"statistic-placeholder"}
                                         header={<>
                                             <Text weight="3" style={{fontSize: "calc(var(--tgui--text--font_size) - 10%)"}}>
                                                 Прогноз построен на основе отчетов о прохождении пункта пропуска.
@@ -363,57 +444,4 @@ export default function BorderCrossingInfo() {
             </div>
         </AppRoot>
     );
-}
-
-
-/**
- * Функция для склонения слова "час" в зависимости от числа.
- * @param {number} count - Число, для которого нужно склонить слово.
- * @returns {string} - Склоненное слово "час" в зависимости от числа.
- */
-export function declensionHours(count) {
-    const number = Math.abs(count) % 100; // Берем абсолютное значение и последние две цифры
-    const lastDigit = number % 10; // Последняя цифра
-
-    if (number > 10 && number < 20) {
-        // Если число от 11 до 19 включительно
-        return `${count} часов`;
-    }
-
-    switch (lastDigit) {
-        case 1:
-            return `${count} час`;
-        case 2:
-        case 3:
-        case 4:
-            return `${count} часа`;
-        default:
-            return `${count} часов`;
-    }
-}
-
-/**
- * Функция для склонения слова "минута" в зависимости от числа.
- * @param {number} count - Число, для которого нужно склонить слово.
- * @returns {string} - Склоненное слово "минута" в зависимости от числа.
- */
-export function declensionMinutes(count) {
-    const number = Math.abs(count) % 100; // Берем абсолютное значение и последние две цифры
-    const lastDigit = number % 10; // Последняя цифра
-
-    if (number > 10 && number < 20) {
-        // Если число от 11 до 19 включительно
-        return `${count} минут`;
-    }
-
-    switch (lastDigit) {
-        case 1:
-            return `${count} минута`;
-        case 2:
-        case 3:
-        case 4:
-            return `${count} минуты`;
-        default:
-            return `${count} минут`;
-    }
 }

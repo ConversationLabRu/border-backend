@@ -21,7 +21,6 @@ import {useLocation, useNavigate, useParams} from "react-router-dom";
 import { ThreeDots } from "react-loader-spinner";
 import { ServerURL } from "@/API/ServerConst.js";
 import ReportService from "@/API/ReportService.js";
-import {declensionHours, declensionMinutes} from "@/Pages/BorderCrossing/BorderCrossingInfo.jsx";
 import {
     AccordionSummary
 } from "@telegram-apps/telegram-ui/dist/components/Blocks/Accordion/components/AccordionSummary/AccordionSummary.js";
@@ -34,6 +33,9 @@ import {IoBus, IoCar, IoCloseSharp, IoWalk} from "react-icons/io5";
 import {Icon28AddCircle} from "@telegram-apps/telegram-ui/dist/icons/28/add_circle.js";
 import {Icon28Close} from "@telegram-apps/telegram-ui/dist/icons/28/close.js";
 import Icon from "@/Pages/BorderCrossing/Reports/Icon.jsx";
+import html2canvas from "html2canvas";
+import {AiFillMessage} from "react-icons/ai";
+import {Icon28Chat} from "@telegram-apps/telegram-ui/dist/icons/28/chat.js";
 
 export default function ReportsPage() {
     const location = useLocation();
@@ -200,6 +202,61 @@ export default function ReportsPage() {
         setFilteredReports(reports.filter(report => report.transport.name === transportName));
     };
 
+    // Определение iOS и macOS
+    const isIOS = () => {
+        return /iPad|iPhone|iPod/.test(navigator.platform) && !window.MSStream;
+    };
+
+    useEffect(() => {
+        if (isIOS()) {
+            document.documentElement.classList.add('ios');
+        }
+    }, []);
+
+    // Функция для захвата изображения и отправки
+    const captureAndShare = async () => {
+        const shareText = document.querySelector('.share-text');
+
+        if (shareText) {
+            shareText.style.display = 'block'
+
+        }
+
+        const element = document.getElementById('report-section');
+
+        // Задаём фон через CSS перед созданием снимка
+        const root = document.documentElement;
+        const rootStyles = getComputedStyle(root);
+        const backgroundColor = rootStyles.getPropertyValue('--tg-theme-bg-color').trim();
+
+        element.style.backgroundColor = backgroundColor;
+
+        const canvas = await html2canvas(element, { backgroundColor: null }); // Захватываем элемент
+
+        // Преобразуем canvas в Blob и сохраняем
+        canvas.toBlob(async (blob) => {
+            const file = new File([blob], "border-report.jpg", { type: "image/jpeg" });
+
+            if (isIOS()) {
+                await navigator.share({
+                    title: 'Очереди на границах',
+                    text: 'Очереди на границах: @bordercrossingsbot',
+                    files: [file]
+                });
+            } else {
+                const formData = new FormData();
+                formData.append('image', file);
+                await BorderCrossingService.sendPhotoPost(formData);
+            }
+        });
+
+// Восстанавливаем кнопку
+        if (shareText) {
+            shareText.style.display = 'none'
+        }
+
+    };
+
     return (
         <AppRoot>
             <div>
@@ -314,7 +371,7 @@ export default function ReportsPage() {
                                     console.log(report)
 
                                     return (
-                                        <div className={"report-container"}>
+                                        <div className={"report-container report-section"} id={"report-section"}>
                                             <div key={index} className={"title-crossing-container"}>
                                                 <div className={"border-info-container"}>
                                                     <AvatarStack className={"avatar-stack-report"}>
@@ -369,7 +426,7 @@ export default function ReportsPage() {
                                                 ) : null}
                                             </div>
 
-                                            {( (report.checkpoint_queue !== null) && ((!report.is_flipped_direction && directionCrossing?.from_city?.country.name === "Беларусь")
+                                            {((report.checkpoint_queue !== null) && ((!report.is_flipped_direction && directionCrossing?.from_city?.country.name === "Беларусь")
                                                 || (report.is_flipped_direction && directionCrossing?.to_city?.country.name === "Беларусь"))) ? (
                                                 <div>
 
@@ -459,7 +516,7 @@ export default function ReportsPage() {
                                             <hr/>
 
                                             <div className={"time-desc-container"}>
-                                            <Text weight="3">
+                                                <Text weight="3">
                                                     {`Выезд с КПП:`}
                                                 </Text>
 
@@ -484,15 +541,22 @@ export default function ReportsPage() {
                                                                 whiteSpace: 'pre-wrap'  // сохраняет форматирование пробелов и переносов строк
                                                             }}>
                                                                 {report.comment}
-                                                            </Text>                                                        </AccordionContent>
+                                                            </Text> </AccordionContent>
                                                     </Accordion>
                                                 </>
                                             )}
 
+                                            <ButtonCell
+                                                before={<Icon28Chat/>}
+                                                onClick={captureAndShare}
+                                            >
+                                                Поделиться
+                                            </ButtonCell>
+
                                             {((initData.user.id === 747551551 || initData.user.id === 241666959)
                                                 || (report.user_id === initData.user.id && report.is_show_button)) && (
                                                 <ButtonCell
-                                                    before={<Icon28Close />}
+                                                    before={<Icon28Close/>}
                                                     mode="destructive"
                                                     onClick={() => {
                                                         handleDeleteReport(report.id)
@@ -501,6 +565,11 @@ export default function ReportsPage() {
                                                     Удалить
                                                 </ButtonCell>
                                             )}
+
+                                            <h4 id={"share-text"}
+
+                                                className={"share-text"}>Очереди на границах:
+                                                @bordercrossingsbot</h4>
 
                                         </div>
                                     )
