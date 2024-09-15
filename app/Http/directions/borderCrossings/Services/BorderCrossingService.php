@@ -3,6 +3,7 @@
 namespace App\Http\directions\borderCrossings\Services;
 
 use App\Http\directions\borderCrossings\Dto\CacheDTO;
+use App\Http\directions\borderCrossings\Dto\CachePolandDTO;
 use App\Http\directions\borderCrossings\Dto\CityDTO;
 use App\Http\directions\borderCrossings\Dto\CountryDTO;
 use App\Http\directions\borderCrossings\Dto\DirectionCrossingDTO;
@@ -11,6 +12,8 @@ use App\Utils\LogUtils;
 use Carbon\Carbon;
 use DateTime;
 use DateTimeZone;
+use DOMDocument;
+use DOMXPath;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -18,6 +21,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Inertia\Response;
 use Ramsey\Uuid\Type\Integer;
+include("simple_html_dom.php");
 
 class BorderCrossingService
 {
@@ -81,6 +85,13 @@ class BorderCrossingService
                 if ($response !== null) $directionDTO->setCache($response->toArray());
             }
 
+            if ($directionDTO->getFromCity()->getCountry()->getName() == "Польша" || $directionDTO->getToCity()->getCountry()->getName() == "Польша") {
+
+                $response = $this->fetchDataFromPolandApi($directionDTO);
+
+                if ($response !== null) $directionDTO->setCachePolandInfo($response->toArray());
+            }
+
 
 //            return $data; // Return as array
             return $directionDTO->toArray(); // Return as array
@@ -92,7 +103,6 @@ class BorderCrossingService
 
     function fetchDataFromExternalApi(DirectionCrossingDTO $directionDTO) : ?CacheDTO
     {
-
         if ($directionDTO->getFromCity()->getName() == "Каменный Лог" || $directionDTO->getToCity()->getName() == "Каменный Лог") {
             $data = Cache::get("kameni_log");
 
@@ -184,6 +194,183 @@ class BorderCrossingService
             $cacheDTO = new CacheDTO(
                 "0",
                 0
+            );
+            return $cacheDTO;
+        }
+    }
+
+    function fetchDataFromPolandApi(DirectionCrossingDTO $directionDTO)
+    {
+        if ($directionDTO->getFromCity()->getName() == "Terespol" || $directionDTO->getToCity()->getName() == "Terespol")
+        {
+
+            $data = Cache::get("terespol");
+
+            if ($data == null) {
+                // Установка User-Agent для имитации запроса от браузера
+                $options = [
+                    'http' => [
+                        'header' => 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+                    ]
+                ];
+
+                $context = stream_context_create($options);
+
+                $response = file_get_html("https://granica.gov.pl/index_wait.php?p=b&c=t&v=ru&k=w", false, $context);
+
+                // Получаем содержимое ответа
+                $data = $this->convertToCacheObjectPolandTerespolInfo($response);
+                Cache::put('terespol', $data, now()->addMinutes(5));
+            }
+
+            return $data;
+
+        }
+
+        if ($directionDTO->getFromCity()->getName() == "Bezledy" || $directionDTO->getToCity()->getName() == "Bezledy") {
+
+            $data = Cache::get("bezledy");
+
+            if ($data == null) {
+                // Установка User-Agent для имитации запроса от браузера
+                $options = [
+                    'http' => [
+                        'header' => 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+                    ]
+                ];
+
+                $context = stream_context_create($options);
+
+                $response = file_get_html("https://granica.gov.pl/index_wait.php?p=fr&c=t&v=ru&k=w", false, $context);
+
+                // Получаем содержимое ответа
+                $data = $this->convertToCacheObjectPolandBezledyInfo($response);
+                Cache::put('bezledy', $data, now()->addMinutes(5));
+            }
+
+            return $data;
+
+        }
+
+        if ($directionDTO->getFromCity()->getName() == "Grzechotki" || $directionDTO->getToCity()->getName() == "Grzechotki") {
+
+            $data = Cache::get("grzechotki");
+
+            if ($data == null) {
+                // Установка User-Agent для имитации запроса от браузера
+                $options = [
+                    'http' => [
+                        'header' => 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+                    ]
+                ];
+
+                $context = stream_context_create($options);
+
+                $response = file_get_html("https://granica.gov.pl/index_wait.php?p=fr&c=t&v=ru&k=w", false, $context);
+
+                // Получаем содержимое ответа
+                $data = $this->convertToCacheObjectPolandGrzechotkiInfo($response);
+                Cache::put('grzechotki', $data, now()->addMinutes(5));
+            }
+
+            return $data;
+        }
+
+    }
+
+    function convertToCacheObjectPolandGrzechotkiInfo(\simple_html_dom $response) : ?CachePolandDTO
+    {
+        try {
+            Log::info("Информация с Польских границ имеется");
+            Log::info("dadada", ["dasda" => $response->find("td")]);
+
+//            // Выполняем запрос для автобусов
+            $nodes_bus = explode("&", $response->find("td", 14)->text())[0];
+//
+//            // Выполняем запрос для легковых автомобилей
+            $nodes_car = explode("&", $response->find("td", 20)->text())[0];
+//
+            $nodes_query_update_time = $response->find("td", 25)->text();
+
+            $cacheDTO = new CachePolandDTO(
+                $nodes_bus,
+                $nodes_car,
+                $nodes_query_update_time
+            );
+            return $cacheDTO;
+
+        } catch (\Exception $e) {
+            Log::info("Информации с Польских границ нет");
+
+            $cacheDTO = new CachePolandDTO(
+                "0",
+                "0",
+                "0"
+            );
+            return $cacheDTO;
+        }
+    }
+
+    function convertToCacheObjectPolandBezledyInfo(\simple_html_dom $response) : ?CachePolandDTO
+    {
+        try {
+            Log::info("Информация с Польских границ имеется");
+            Log::info("dadada", ["dasda" => $response->find("td")]);
+
+//            // Выполняем запрос для автобусов
+            $nodes_bus = explode("&", $response->find("td", 15)->text())[0];
+//
+//            // Выполняем запрос для легковых автомобилей
+            $nodes_car = explode("&", $response->find("td", 21)->text())[0];
+//
+            $nodes_query_update_time = $response->find("td", 26)->text();
+
+            $cacheDTO = new CachePolandDTO(
+                $nodes_bus,
+                $nodes_car,
+                $nodes_query_update_time
+            );
+            return $cacheDTO;
+
+        } catch (\Exception $e) {
+            Log::info("Информации с Польских границ нет");
+
+            $cacheDTO = new CachePolandDTO(
+                "0",
+                "0",
+                "0"
+            );
+            return $cacheDTO;
+        }
+    }
+
+    function convertToCacheObjectPolandTerespolInfo(\simple_html_dom $response) : ?CachePolandDTO
+    {
+        try {
+            Log::info("Информация с Польских границ имеется");
+
+            // Выполняем запрос для автобусов
+            $nodes_bus = explode("&", $response->find(".dane", 10)->text())[0];
+
+            // Выполняем запрос для легковых автомобилей
+            $nodes_car = explode("&", $response->find(".dane1", 7)->text())[0];
+
+            $nodes_query_update_time = $response->find("td", 35)->text();
+
+            $cacheDTO = new CachePolandDTO(
+                $nodes_bus,
+                $nodes_car,
+                $nodes_query_update_time
+            );
+            return $cacheDTO;
+
+        } catch (\Exception $e) {
+            Log::info("Информации с Польских границ нет");
+
+            $cacheDTO = new CachePolandDTO(
+                "0",
+                "0",
+                "0"
             );
             return $cacheDTO;
         }

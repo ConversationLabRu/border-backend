@@ -20,6 +20,12 @@
     align-items: center;
 }
 
+.stat-container-poland {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly ;
+}
+
 .first-elem-logo {
     margin-left: 2%;
 }
@@ -32,6 +38,17 @@
 .time-container-title {
     display: flex;
     flex-direction: column;
+}
+
+.time-container-title-poland {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.elem-poland-time {
+    display: flex;
+    align-items: center;
 }
 
 .bel-container-inf {

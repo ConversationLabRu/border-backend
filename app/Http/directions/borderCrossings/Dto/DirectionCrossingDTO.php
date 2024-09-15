@@ -14,6 +14,7 @@ class DirectionCrossingDTO
     private bool $is_walking;
     private bool $is_car;
     private $cache;
+    private $cachePolandInfo;
 
     public function __construct(int $id, bool $is_quque, string $header_image, ?CityDTO $from_city, ?CityDTO $to_city, string $url_arcticle, bool $is_bus, bool $is_walking, bool $is_car)
     {
@@ -90,6 +91,23 @@ class DirectionCrossingDTO
         $this->cache = $cache;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getCachePolandInfo()
+    {
+        return $this->cachePolandInfo;
+    }
+
+    /**
+     * @param mixed $cachePolandInfo
+     */
+    public function setCachePolandInfo($cachePolandInfo): void
+    {
+        $this->cachePolandInfo = $cachePolandInfo;
+    }
+
+
 
 
 
@@ -108,6 +126,7 @@ class DirectionCrossingDTO
             'is_bus' => $this->is_bus,
             'is_walking' => $this->is_walking,
             'cache' => $this->cache,
+            'cachePoland' => $this->cachePolandInfo,
         ];
     }
 }

@@ -316,6 +316,30 @@ export default function BorderCrossingInfo() {
                                 </div>
                             )}
 
+                            {(directionCrossing?.from_city?.country.name === "Польша" || directionCrossing?.to_city?.country.name === "Польша") && (
+                                <div className="bel-container-inf report-title">
+                                    <div>
+                                        <Text weight="1" className={""}>
+                                            {`Ожидание въезда на КПП с Польской стороны по информации Погрануправления РП на ${directionCrossing['cachePoland'].timeUpdate}:`}
+                                        </Text>
+                                    </div>
+
+                                    <div className="time-container-title-poland">
+                                        <div className={"report-elem-logo-container stat-container-poland"}>
+                                            <div className={"elem-poland-time"}>
+                                                <IoCar size={28}/>
+                                                {directionCrossing['cachePoland'].timeCarFormatString}
+                                            </div>
+
+                                            <div className={"elem-poland-time"}>
+                                                <IoBus size={28}/>
+                                                {directionCrossing['cachePoland'].timeBusFormatString}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
                             <Modal
                                 header={<ModalHeader>Прогноз прохождения пункта пропуска</ModalHeader>}
                                 trigger={<Button size="m" onClick={handleShowStatistics}>Посмотреть прогноз</Button>}
@@ -335,9 +359,9 @@ export default function BorderCrossingInfo() {
                                                 Добавляя отчеты, вы значительно улучшаете точность прогноза.
                                             </Text>
 
-                                            <Button size="m" className="share-button" onClick={captureAndShare}>
-                                                Поделиться прогнозом
-                                            </Button>
+                                            {/*<Button size="m" className="share-button" onClick={captureAndShare}>*/}
+                                            {/*    Поделиться прогнозом*/}
+                                            {/*</Button>*/}
 
                                             <h4 id={"share-text"}
 

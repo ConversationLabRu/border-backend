@@ -546,12 +546,12 @@ export default function ReportsPage() {
                                                 </>
                                             )}
 
-                                            <ButtonCell
-                                                before={<Icon28Chat/>}
-                                                onClick={captureAndShare}
-                                            >
-                                                Поделиться
-                                            </ButtonCell>
+                                            {/*<ButtonCell*/}
+                                            {/*    before={<Icon28Chat/>}*/}
+                                            {/*    onClick={captureAndShare}*/}
+                                            {/*>*/}
+                                            {/*    Поделиться*/}
+                                            {/*</ButtonCell>*/}
 
                                             {((initData.user.id === 747551551 || initData.user.id === 241666959)
                                                 || (report.user_id === initData.user.id && report.is_show_button)) && (
