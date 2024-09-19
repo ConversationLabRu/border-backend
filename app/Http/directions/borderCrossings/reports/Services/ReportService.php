@@ -9,6 +9,8 @@ use App\Http\directions\borderCrossings\Entities\BorderCrossing;
 use App\Http\directions\borderCrossings\reports\DTO\AllReportDTO;
 use App\Http\directions\borderCrossings\reports\DTO\LastReportDTO;
 use App\Http\directions\borderCrossings\reports\DTO\StatisticDTO;
+use App\Http\directions\borderCrossings\reports\DTO\StatisticGraphDTO;
+use App\Http\directions\borderCrossings\reports\DTO\StatisticGraphTypeDTO;
 use App\Http\directions\borderCrossings\reports\Entities\Report;
 use App\Http\directions\borderCrossings\reports\Exceptions\TimeExpiredDeletedException;
 use App\Http\directions\borderCrossings\reports\transports\DTO\TransportDTO;
@@ -208,6 +210,101 @@ class ReportService
         $minutesDiff = $totalMinutes % 60;
 
         return BorderCrossingService::declensionHours($hoursDiff) . ' ' . BorderCrossingService::declensionMinutes($minutesDiff);
+    }
+
+    public function getStatisticsForGraph(Request $request)
+    {
+        $borderCrossingId = (int) $request->query("borderCrossingId");
+        LogUtils::elasticLog($request, "Запросил статистику по напрвлению " . $borderCrossingId);
+
+        $sevenDaysAgo = Carbon::now()->subDays(7);
+        $currentDate = Carbon::now();
+
+        $averageTimesPerDayCar = Report::where('transport_id', 2)
+            ->where('is_flipped_direction', false)
+            ->where('border_crossing_id', $borderCrossingId)
+            ->whereBetween('checkpoint_exit', [$sevenDaysAgo, $currentDate])
+            ->selectRaw('
+        DATE(checkpoint_exit) as day,
+        AVG(
+            ABS(
+                CASE
+                    WHEN checkpoint_queue IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, checkpoint_queue, checkpoint_exit)
+                    WHEN time_enter_waiting_area IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, time_enter_waiting_area, checkpoint_exit)
+                    ELSE TIMESTAMPDIFF(MINUTE, checkpoint_entry, checkpoint_exit)
+                END
+            )
+        ) as avg_time')
+            ->groupBy('day')
+            ->get()
+            ->toArray();
+
+        $averageTimesPerDayBus = Report::where('transport_id', 3)
+            ->where('is_flipped_direction', false)
+            ->where('border_crossing_id', $borderCrossingId)
+            ->whereBetween('checkpoint_exit', [$sevenDaysAgo, $currentDate])
+            ->selectRaw('
+        DATE(checkpoint_exit) as day,
+        AVG(
+            ABS(
+                CASE
+                    WHEN checkpoint_queue IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, checkpoint_queue, checkpoint_exit)
+                    WHEN time_enter_waiting_area IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, time_enter_waiting_area, checkpoint_exit)
+                    ELSE TIMESTAMPDIFF(MINUTE, checkpoint_entry, checkpoint_exit)
+                END
+            )
+        ) as avg_time')
+            ->groupBy('day')
+            ->get()
+            ->toArray();
+
+
+        $averageTimesPerDayFlippedCar = Report::where('transport_id', 2)
+            ->where('is_flipped_direction', true)
+            ->where('border_crossing_id', $borderCrossingId)
+            ->whereBetween('checkpoint_exit', [$sevenDaysAgo, $currentDate])
+            ->selectRaw('
+        DATE(checkpoint_exit) as day,
+        AVG(
+            ABS(
+                CASE
+                    WHEN checkpoint_queue IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, checkpoint_queue, checkpoint_exit)
+                    WHEN time_enter_waiting_area IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, time_enter_waiting_area, checkpoint_exit)
+                    ELSE TIMESTAMPDIFF(MINUTE, checkpoint_entry, checkpoint_exit)
+                END
+            )
+        ) as avg_time')
+            ->groupBy('day')
+            ->get()
+            ->toArray();
+
+        $averageTimesPerDayFlippedBus = Report::where('transport_id', 3)
+            ->where('is_flipped_direction', true)
+            ->where('border_crossing_id', $borderCrossingId)
+            ->whereBetween('checkpoint_exit', [$sevenDaysAgo, $currentDate])
+            ->selectRaw('
+        DATE(checkpoint_exit) as day,
+        AVG(
+            ABS(
+                CASE
+                    WHEN checkpoint_queue IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, checkpoint_queue, checkpoint_exit)
+                    WHEN time_enter_waiting_area IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, time_enter_waiting_area, checkpoint_exit)
+                    ELSE TIMESTAMPDIFF(MINUTE, checkpoint_entry, checkpoint_exit)
+                END
+            )
+        ) as avg_time')
+            ->groupBy('day')
+            ->get()
+            ->toArray();
+
+        $result = new StatisticGraphDTO(
+            new StatisticGraphTypeDTO($averageTimesPerDayCar, $averageTimesPerDayBus),
+            new StatisticGraphTypeDTO($averageTimesPerDayFlippedCar, $averageTimesPerDayFlippedBus)
+        );
+
+        return $result->toArray();
+
+
     }
 
     public function getStatistics(Request $request)

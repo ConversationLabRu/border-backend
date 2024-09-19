@@ -57,6 +57,32 @@
     align-items: center;
 }
 
+.tgui-96892ceed80c1bf3 {
+    white-space: normal;
+    overflow: visible;
+}
+
+@media (prefers-color-scheme: light) {
+    .graf-container {
+        background-color: white;
+    }
+}
+
+/* Стили для тёмной темы */
+@media (prefers-color-scheme: dark) {
+    .graf-container {
+        background-color: white;
+    }
+
+}
+
+.tab-style {
+    height: 0;
+    white-space: normal;
+    overflow: visible;
+    margin-bottom: 5%;
+}
+
 .report-title {
     align-items: start;
     margin-left: 4%;

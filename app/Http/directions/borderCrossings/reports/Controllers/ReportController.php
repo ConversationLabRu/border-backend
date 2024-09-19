@@ -297,4 +297,13 @@ class ReportController extends Controller
             return response()->json(['message' => $e->getMessage()], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
     }
+
+    public function statisticsGraph(Request $request)
+    {
+        try {
+            return \response()->json($this->reportService->getStatisticsForGraph($request));
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['message' => $e->getMessage()], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+    }
 }

@@ -45,6 +45,7 @@ Route::middleware('auth.api')->group(function () {
         Route::post('/', [ReportController::class, 'store']); // POST /directions/borderCrossing/reports
         Route::delete('/', [ReportController::class, 'destroy']); // Delete /directions/borderCrossing/reports
         Route::get('/statistic', [ReportController::class, 'statistics']); // Get /directions/borderCrossing/reports/statistic
+        Route::get('/statisticGraph', [ReportController::class, 'statisticsGraph']); // Get /directions/borderCrossing/reports/statisticGraph
     });
 
     Route::prefix('directions/borderCrossing/reports')->group(function () {
@@ -52,6 +53,31 @@ Route::middleware('auth.api')->group(function () {
     });
 });
 
+//Route::prefix('directions')->group(function () {
+//    Route::get('/', [DirectionController::class, 'index']); // GET /directions
+//});
+//
+//Route::prefix('directions/borderCrossing')->group(function () {
+//    Route::get('/', [BorderCrossingController::class, 'index']); // GET /directions/borderCrossing
+//    Route::post('/send-photo', [TelegramController::class, 'sendPhotoToChat']);
+//});
+//
+//Route::prefix('directions/borderCrossing')->group(function () {
+//    Route::get('/cameras', [CameraController::class, 'index']); // GET /directions/borderCrossing/cameras
+//});
+//
+//Route::prefix('directions/borderCrossing/reports')->group(function () {
+//    Route::get('/last', [ReportController::class, 'getLastReports']); // GET /directions/borderCrossing/reports/last
+//    Route::get('/', [ReportController::class, 'index']); // GET /directions/borderCrossing/reports
+//    Route::post('/', [ReportController::class, 'store']); // POST /directions/borderCrossing/reports
+//    Route::delete('/', [ReportController::class, 'destroy']); // Delete /directions/borderCrossing/reports
+//    Route::get('/statistic', [ReportController::class, 'statistics']); // Get /directions/borderCrossing/reports/statistic
+//    Route::get('/statisticGraph', [ReportController::class, 'statisticsGraph']); // Get /directions/borderCrossing/reports/statisticGraph
+//});
+//
+//Route::prefix('directions/borderCrossing/reports')->group(function () {
+//    Route::get('/transports', [TransportController::class, 'index']); // GET /directions/borderCrossing/reports/transports
+//});
 
 
 //Route::middleware('auth.api')->group(function () {

@@ -1,6 +1,16 @@
 import './styles.css';
 import './border-info-styles.css';
-import {AppRoot, Avatar, AvatarStack, Button, List, Modal, Placeholder, Text} from "@telegram-apps/telegram-ui";
+import {
+    AppRoot,
+    Avatar,
+    AvatarStack,
+    Button,
+    List,
+    Modal,
+    Placeholder,
+    TabsList,
+    Text
+} from "@telegram-apps/telegram-ui";
 import { InlineButtonsItem } from "@telegram-apps/telegram-ui/dist/components/Blocks/InlineButtons/components/InlineButtonsItem/InlineButtonsItem.js";
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -15,6 +25,9 @@ import {
 } from "@telegram-apps/telegram-ui/dist/components/Overlays/Modal/components/ModalHeader/ModalHeader.js";
 import html2canvas from "html2canvas";
 import BorderCrossingService from "@/API/BorderCrossingService.js";
+import {TabsItem} from "@telegram-apps/telegram-ui/dist/components/Navigation/TabsList/components/TabsItem/TabsItem.js";
+import {LineChart} from "@mui/x-charts";
+import {Switch} from "@mui/material";
 
 
 export default function BorderCrossingInfo() {
@@ -186,6 +199,159 @@ export default function BorderCrossingInfo() {
         ));
     };
 
+    const [jsonData1, setJsonData1] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+
+    // Получение данных с API для первой линии
+    const fetchData1 = () => {
+        const directionIdNumber = Number(id);
+        ReportService.getStatisticGraph(directionIdNumber).then((r) => {
+            if (!(r instanceof Error)) {
+                console.log(r)
+                setJsonData1(r); // Обновить состояние с данными статистики
+            }
+        }).catch((error) => {
+            console.error('Ошибка при получении отчётов:', error);
+        });
+    };
+
+
+
+    useEffect(() => {
+        const fetchData = async () => {
+            await fetchData1();
+            setIsLoading(false);
+        };
+        fetchData();
+    }, []);
+
+// Функция для извлечения часов из строки времени
+    const extractHours = (timeString) => {
+        const match = timeString.match(/(\d{1,2}):\d{2}/);
+        return match ? parseInt(match[1], 10) : null;
+    };
+
+    const endDate = new Date(); // Текущая дата
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - 7); // Начальная дата (7 дней назад)
+
+    const getDatesInRange = (start, end) => {
+        let dates = [];
+        let currentDate = new Date(start);
+
+        while (currentDate < end) {
+            // Используем toLocaleDateString для русского формата даты
+            dates.push(currentDate.toLocaleDateString('ru-RU')); // Формат DD.MM.YYYY
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+
+        return dates;
+    };
+
+    const [isFlippedDirection, setFlippedDirection] = useState(false)
+
+    const formatToRussianDate = (dateString) => {
+        const [year, month, day] = dateString.split('-');
+        return `${day}.${month}.${year}`; // Формат DD.MM.YYYY
+    };
+
+    const  dailyForecast = (data) => {
+
+        if (!data || data.length === 0) return [];
+
+
+
+        // Преобразование данных для графика
+        const xAxisData = getDatesInRange(startDate, endDate);
+        console.log(jsonData1)
+
+        // Преобразуем данные из jsonData1
+        var waitTimeData1;
+        var waitTimeData2;
+
+        if (isFlippedDirection) {
+
+            waitTimeData1 = xAxisData.map(date => {
+                const item = data.timeWeekToFlip.car.find(d => formatToRussianDate(d.day) === date);
+                return item ? parseFloat(item.avg_time) : 0.1; // Используем значение avg_time или 0, если данных нет
+            });
+
+            waitTimeData2 = xAxisData.map(date => {
+                const item = data.timeWeekToFlip.bus.find(d => formatToRussianDate(d.day) === date);
+                return item ? parseFloat(item.avg_time) : 0.1; // Используем значение avg_time или 0, если данных нет
+            });
+
+        } else {
+
+            waitTimeData1 = xAxisData.map(date => {
+                const item = data.timeWeekTo.car.find(d => formatToRussianDate(d.day) === date);
+                return item ? parseFloat(item.avg_time) : 0.1; // Используем значение avg_time или 0, если данных нет
+            });
+
+            waitTimeData2 = xAxisData.map(date => {
+                const item = data.timeWeekTo.bus.find(d => formatToRussianDate(d.day) === date);
+                return item ? parseFloat(item.avg_time) : 0.1; // Используем значение avg_time или 0, если данных нет
+            });
+
+        }
+
+        // Объединяем два массива, убираем дубликаты, сортируем и преобразуем в часы
+        const mergedData = [...waitTimeData1, ...waitTimeData2] // Объединить массивы
+            .filter((value, index, self) => self.indexOf(value) === index) // Удалить дубликаты
+            .filter(value => value !== 0)
+            .sort((a, b) => a - b) // Сортировка по возрастанию
+            .map(minutes => Math.floor(minutes / 60)); // Преобразование минут в часы (без минут)
+
+        console.log(mergedData)
+
+        // Функция для форматирования значений
+        const valueFormatterText = (value) => {
+            return value !== 0.1 ? declensionHours(Math.floor(value / 60)) + " " + declensionMinutes(Math.floor(value % 60)) : 'нет данных';
+        };
+
+        const yAxisFormatter = (value) => {
+            if (value === 0) return ''; // Если значение равно 0, вернуть пустую строку
+            const hours = Math.floor(value / 60);
+            return `${hours}`;
+        };
+
+
+        // Преобразовать данные в массив строк (или отформатировать как нужно)
+        return <div className="graf-container">
+            <React.Fragment>
+                <LineChart
+                    xAxis={[{
+                        scaleType: "band",
+                        data: xAxisData
+                    }]}  // Ось X будет общей для обоих графиков
+                    yAxis={[{
+                        scaleType: "linear",
+                        valueFormatter: yAxisFormatter
+
+                    }]}
+                    series={[
+                        {
+                            curve: "linear",
+                            data: waitTimeData1,  // Время ожидания для первой линии
+                            color: "red",
+                            label: 'Автомобиль',
+                            valueFormatter: valueFormatterText
+                        },
+                        {
+                            curve: "linear",
+                            data: waitTimeData2,  // Время ожидания для первой линии
+                            label: 'Автобус',
+                            valueFormatter: valueFormatterText
+                        },
+                    ]}
+                    width={400}
+                    height={300}
+                />
+            </React.Fragment>
+        </div>
+    };
+
     const [statisticData, setStatisticData] = useState(null); // Добавить состояние для хранения статистики
 
     // Определение iOS и macOS
@@ -246,6 +412,19 @@ export default function BorderCrossingInfo() {
 
     };
 
+    const [activeTab, setActiveTab] = useState('generalForecast');
+
+    // Функция для рендера содержимого на основе активной вкладки
+    const renderContent = () => {
+        return formatStatistics(statisticData);
+
+    };
+
+    // Функция для рендера содержимого на основе активной вкладки
+    const renderContentStat = () => {
+        return dailyForecast(jsonData1);
+
+    };
 
     return (
         <AppRoot>
@@ -269,32 +448,32 @@ export default function BorderCrossingInfo() {
                             <div className="btn-container">
                                 <div
                                     className={'btn-crossing'}
-                                    style={{ width: '35%' }}
+                                    style={{width: '35%'}}
                                     onClick={() => {
                                         navigate(`/borderCrossing/${id}/cameras`, {
-                                            state: { directionCrossing, direction }
+                                            state: {directionCrossing, direction}
                                         });
                                     }}
                                 >
                                     <InlineButtonsItem
-                                        style={{ width: '100%', height: '85%' }}
+                                        style={{width: '100%', height: '85%'}}
                                         mode="gray"
                                         text="Камеры"
                                     >
-                                        <VscDeviceCamera style={{ width: '100%', height: '30%' }} />
+                                        <VscDeviceCamera style={{width: '100%', height: '30%'}}/>
                                     </InlineButtonsItem>
                                 </div>
                                 <div
                                     className={'btn-crossing'}
-                                    style={{ width: '35%' }}
+                                    style={{width: '35%'}}
                                     onClick={() => openUrlInNewTab(directionCrossing.url_arcticle)}
                                 >
                                     <InlineButtonsItem
-                                        style={{ width: '100%', height: '85%' }}
+                                        style={{width: '100%', height: '85%'}}
                                         mode="gray"
                                         text="Информация"
                                     >
-                                        <IoInformation style={{ width: '100%', height: '30%' }} />
+                                        <IoInformation style={{width: '100%', height: '30%'}}/>
                                     </InlineButtonsItem>
                                 </div>
                             </div>
@@ -316,7 +495,9 @@ export default function BorderCrossingInfo() {
                                 </div>
                             )}
 
-                            {(directionCrossing?.from_city?.country.name === "Польша" || directionCrossing?.to_city?.country.name === "Польша") && (
+                            {((directionCrossing?.from_city?.country.name === "Польша" || directionCrossing?.to_city?.country.name === "Польша")
+                                && (directionCrossing['cachePoland'].timeCarFormatString !== ""
+                                    || directionCrossing['cachePoland'].timeBusFormatString !== "")) && (
                                 <div className="bel-container-inf report-title">
                                     <div>
                                         <Text weight="1" className={""}>
@@ -340,63 +521,136 @@ export default function BorderCrossingInfo() {
                                 </div>
                             )}
 
-                            <Modal
-                                header={<ModalHeader>Прогноз прохождения пункта пропуска</ModalHeader>}
-                                trigger={<Button size="m" onClick={handleShowStatistics}>Посмотреть прогноз</Button>}
-                            >
-                                {statisticData ? (
-                                    <Placeholder
-                                        id={"statistic-placeholder"}
-                                        className={"statistic-placeholder"}
-                                        header={<>
-                                            <Text weight="3"
-                                                  style={{fontSize: "calc(var(--tgui--text--font_size) - 10%)"}}>
-                                                Прогноз построен на основе отчетов о прохождении пункта пропуска.
+                            <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', gap: "10px"}}>
+                                <Modal
+                                    header={<ModalHeader>Прогноз прохождения пункта пропуска</ModalHeader>}
+                                    trigger={<Button size="m" style={{width: "50%"}} onClick={handleShowStatistics}>Прогноз</Button>}
+                                >
+                                    {statisticData ? (
+                                        <Placeholder
+                                            id={"statistic-placeholder"}
+                                            className={"statistic-placeholder"}
+                                            header={<>
+                                                {activeTab === "generalForecast" ? (
+                                                    <div>
+                                                        <Text weight="3"
+                                                              style={{fontSize: "calc(var(--tgui--text--font_size) - 10%)"}}>
+                                                            Прогноз построен на основе отчетов о прохождении пункта
+                                                            пропуска.
+                                                        </Text>
+                                                        <br/>
+                                                        <Text weight="1"
+                                                              style={{fontSize: "calc(var(--tgui--text--font_size) - 10%)"}}>
+                                                            Добавляя отчеты, вы значительно улучшаете точность прогноза.
+                                                        </Text>
+                                                    </div>
+                                                ) : (
+                                                    <div>
+                                                        <Text weight="1">
+                                                            В обратном направлении:
+                                                        </Text>
+                                                        <Switch onClick={() => {
+                                                            setFlippedDirection(!isFlippedDirection)
+                                                        }} checked={isFlippedDirection}/>
+                                                        <Text weight="3"
+                                                              style={{fontSize: "calc(var(--tgui--text--font_size) - 10%)"}}>
+                                                            Прогноз времени ожидания въезда на КПП в ближайшие 24 часа
+                                                            по данным Погрануправления РП
+                                                        </Text>
+                                                    </div>
+                                                )}
+                                                <h4 id={"share-text"} className={"share-text"}>Очереди на границах:
+                                                    @bordercrossingsbot</h4>
+                                            </>}>
+                                            {<div>{renderContent()}</div>}
+                                        </Placeholder>
+                                    ) : (
+                                        <Placeholder
+                                            id={"statistic-placeholder"}
+                                            className={"statistic-placeholder"}
+                                            header={<>
+                                                <Text weight="3"
+                                                      style={{fontSize: "calc(var(--tgui--text--font_size) - 10%)"}}>
+                                                    Прогноз построен на основе отчетов о прохождении пункта пропуска.
+                                                </Text>
+                                                <br/>
+                                                <Text weight="1"
+                                                      style={{fontSize: "calc(var(--tgui--text--font_size) - 10%)"}}>
+                                                    Добавляя отчеты, вы значительно улучшаете точность прогноза.
+                                                </Text>
+                                            </>}
+                                        >
+                                            <Text weight="1">
+                                                Нет данных
                                             </Text>
-                                            <br/>
-                                            <Text weight="1"
-                                                  style={{fontSize: "calc(var(--tgui--text--font_size) - 10%)"}}>
-                                                Добавляя отчеты, вы значительно улучшаете точность прогноза.
+                                        </Placeholder>
+                                    )}
+                                </Modal>
+
+                                <Modal
+                                    header={<ModalHeader>Статистика прохождения пункта пропуска</ModalHeader>}
+                                    trigger={<Button size="m" style={{width: "50%"}} onClick={fetchData1}>Статистика</Button>}
+                                >
+                                    {jsonData1 ? (
+                                        <Placeholder
+                                            id={"statistic-placeholder"}
+                                            className={"statistic-placeholder"}
+                                            header={<>
+                                                <div>
+
+                                                    {isFlippedDirection ? (
+                                                        <Text>
+                                                            {directionCrossing.to_city.name} - {directionCrossing.from_city.name}
+                                                        </Text>
+                                                    ) : (
+                                                        <Text>
+                                                            {directionCrossing.from_city.name} - {directionCrossing.to_city.name}
+                                                        </Text>
+                                                    )}
+
+                                                    <Text weight="1" style={{display: "inline-block"}}>
+                                                        В обратном направлении:
+                                                    </Text>
+
+                                                    <Switch onClick={() => {
+                                                        setFlippedDirection(!isFlippedDirection)
+                                                    }} checked={isFlippedDirection}/>
+                                                    <Text weight="3"
+                                                          style={{fontSize: "calc(var(--tgui--text--font_size) - 10%)"}}>
+                                                        Статистика за последние 7 дней на основе отчетов о прохождении пункта пропуска
+                                                    </Text>
+                                                    <br/>
+                                                    <Text weight="1"
+                                                          style={{fontSize: "calc(var(--tgui--text--font_size) - 10%)"}}>
+                                                        Добавляя отчеты, вы значительно улучшаете статистику.
+                                                    </Text>
+                                                </div>
+                                            </>}>
+                                            {<div>{renderContentStat()}</div>}
+                                        </Placeholder>
+                                    ) : (
+                                        <Placeholder
+                                            id={"statistic-placeholder"}
+                                            className={"statistic-placeholder"}
+                                            header={<>
+                                                <Text weight="3"
+                                                      style={{fontSize: "calc(var(--tgui--text--font_size) - 10%)"}}>
+                                                    Прогноз построен на основе отчетов о прохождении пункта пропуска.
+                                                </Text>
+                                                <br/>
+                                                <Text weight="1"
+                                                      style={{fontSize: "calc(var(--tgui--text--font_size) - 10%)"}}>
+                                                    Добавляя отчеты, вы значительно улучшаете точность прогноза.
+                                                </Text>
+                                            </>}
+                                        >
+                                            <Text weight="1">
+                                                Нет данных
                                             </Text>
-
-                                            {/*<Button size="m" className="share-button" onClick={captureAndShare}>*/}
-                                            {/*    Поделиться прогнозом*/}
-                                            {/*</Button>*/}
-
-                                            <h4 id={"share-text"}
-
-                                                className={"share-text"}>Очереди на границах:
-                                                @bordercrossingsbot</h4>
-
-                                        </>}>
-                                        {
-                                            <div>
-                                                {formatStatistics(statisticData)}
-                                            </div>
-                                        }
-
-                                    </Placeholder>
-                                ) : (
-                                    <Placeholder
-                                        id={"statistic-placeholder"}
-                                        className={"statistic-placeholder"}
-                                        header={<>
-                                            <Text weight="3" style={{fontSize: "calc(var(--tgui--text--font_size) - 10%)"}}>
-                                                Прогноз построен на основе отчетов о прохождении пункта пропуска.
-                                            </Text>
-                                            <br/>
-                                            <Text weight="1" style={{fontSize: "calc(var(--tgui--text--font_size) - 10%)"}}>
-                                                Добавляя отчеты, вы значительно улучшаете точность прогноза.
-                                            </Text>
-                                        </>}
-                                    >
-                                        <Text weight="1">
-                                            Нет данных
-                                        </Text>
-                                    </Placeholder>
-                                )}
-                            </Modal>
-
+                                        </Placeholder>
+                                    )}
+                                </Modal>
+                            </div>
 
 
                             <div className="report-container-title">
@@ -405,7 +659,7 @@ export default function BorderCrossingInfo() {
                                 </Text>
                                 <Text weight="1" className={"link-report"} onClick={() => {
                                     navigate(`/borderCrossing/${id}/reports`, {
-                                        state: { directionCrossing, direction }
+                                        state: {directionCrossing, direction}
                                     });
                                 }}>
                                     Смотреть все
@@ -415,7 +669,7 @@ export default function BorderCrossingInfo() {
                             <List
                                 onClick={() => {
                                     navigate(`/borderCrossing/${id}/reports`, {
-                                        state: { directionCrossing, direction }
+                                        state: {directionCrossing, direction}
                                     });
                                 }}
                                 className={"report-list"}
@@ -438,24 +692,30 @@ export default function BorderCrossingInfo() {
                                                     <React.Fragment>
                                                         {!report.is_flipped_direction ? (
                                                             <div className={"report-elem-logo-container"}>
-                                                                <Avatar size={20} src={`/${directionCrossing.from_city.country.logo}`} />
-                                                                <Avatar className={"to-logo-size"} size={20} src={`/to_logo.svg`} />
-                                                                <Avatar size={20} src={`/${directionCrossing.to_city.country.logo}`} />
+                                                                <Avatar size={20}
+                                                                        src={`/${directionCrossing.from_city.country.logo}`}/>
+                                                                <Avatar className={"to-logo-size"} size={20}
+                                                                        src={`/to_logo.svg`}/>
+                                                                <Avatar size={20}
+                                                                        src={`/${directionCrossing.to_city.country.logo}`}/>
                                                             </div>
                                                         ) : (
                                                             <div className={"report-elem-logo-container"}>
-                                                                <Avatar size={20} src={`/${directionCrossing.to_city.country.logo}`} />
-                                                                <Avatar className={"to-logo-size"} size={20} src={`/to_logo.svg`} />
-                                                                <Avatar size={20} src={`/${directionCrossing.from_city.country.logo}`} />
+                                                                <Avatar size={20}
+                                                                        src={`/${directionCrossing.to_city.country.logo}`}/>
+                                                                <Avatar className={"to-logo-size"} size={20}
+                                                                        src={`/to_logo.svg`}/>
+                                                                <Avatar size={20}
+                                                                        src={`/${directionCrossing.from_city.country.logo}`}/>
                                                             </div>
                                                         )}
                                                     </React.Fragment>
                                                 </AvatarStack>
-                                                <Text weight="3" className={"text-card"} style={{ marginTop: "0" }}>
+                                                <Text weight="3" className={"text-card"} style={{marginTop: "0"}}>
                                                     {report.time_difference_text}
                                                 </Text>
                                             </div>
-                                            <Text weight="3" style={{ marginTop: "0" }}>
+                                            <Text weight="3" style={{marginTop: "0"}}>
                                                 {formattedDate}
                                             </Text>
                                         </div>
@@ -464,8 +724,62 @@ export default function BorderCrossingInfo() {
                             </List>
                         </div>
                     </div>
+
+
                 )}
             </div>
         </AppRoot>
     );
+}
+
+/**
+ * Функция для склонения слова "час" в зависимости от числа.
+ * @param {number} count - Число, для которого нужно склонить слово.
+ * @returns {string} - Склоненное слово "час" в зависимости от числа.
+ */
+export function declensionHours(count) {
+    const number = Math.abs(count) % 100; // Берем абсолютное значение и последние две цифры
+    const lastDigit = number % 10; // Последняя цифра
+
+    if (number > 10 && number < 20) {
+        // Если число от 11 до 19 включительно
+        return `${count} часов`;
+    }
+
+    switch (lastDigit) {
+        case 1:
+            return `${count} час`;
+        case 2:
+        case 3:
+        case 4:
+            return `${count} часа`;
+        default:
+            return `${count} часов`;
+    }
+}
+
+/**
+ * Функция для склонения слова "минута" в зависимости от числа.
+ * @param {number} count - Число, для которого нужно склонить слово.
+ * @returns {string} - Склоненное слово "минута" в зависимости от числа.
+ */
+export function declensionMinutes(count) {
+    const number = Math.abs(count) % 100; // Берем абсолютное значение и последние две цифры
+    const lastDigit = number % 10; // Последняя цифра
+
+    if (number > 10 && number < 20) {
+        // Если число от 11 до 19 включительно
+        return `${count} минут`;
+    }
+
+    switch (lastDigit) {
+        case 1:
+            return `${count} минута`;
+        case 2:
+        case 3:
+        case 4:
+            return `${count} минуты`;
+        default:
+            return `${count} минут`;
+    }
 }

@@ -199,6 +199,15 @@ class BorderCrossingService
         }
     }
 
+    private function setPolandCache(CachePolandDTO $data, string $keyName)
+    {
+        if ($data->getTimeBusFormatString() == "" || $data->getTimeAutoFormatString() == "" || $data->getTimeUpdate() == "") {
+            Cache::put($keyName, $data, now()->addMinutes(5));
+        } else {
+            Cache::put($keyName, $data, now()->addMinutes(60));
+        }
+    }
+
     function fetchDataFromPolandApi(DirectionCrossingDTO $directionDTO)
     {
         if ($directionDTO->getFromCity()->getName() == "Terespol" || $directionDTO->getToCity()->getName() == "Terespol")
@@ -220,7 +229,8 @@ class BorderCrossingService
 
                 // Получаем содержимое ответа
                 $data = $this->convertToCacheObjectPolandTerespolInfo($response);
-                Cache::put('terespol', $data, now()->addMinutes(5));
+
+                $this->setPolandCache($data, "terespol");
             }
 
             return $data;
@@ -245,7 +255,8 @@ class BorderCrossingService
 
                 // Получаем содержимое ответа
                 $data = $this->convertToCacheObjectPolandBezledyInfo($response);
-                Cache::put('bezledy', $data, now()->addMinutes(5));
+
+                $this->setPolandCache($data, "bezledy");
             }
 
             return $data;
@@ -270,7 +281,8 @@ class BorderCrossingService
 
                 // Получаем содержимое ответа
                 $data = $this->convertToCacheObjectPolandGrzechotkiInfo($response);
-                Cache::put('grzechotki', $data, now()->addMinutes(5));
+
+                $this->setPolandCache($data, "grzechotki");
             }
 
             return $data;
