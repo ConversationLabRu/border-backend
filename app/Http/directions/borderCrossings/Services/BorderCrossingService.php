@@ -80,14 +80,67 @@ class BorderCrossingService
 
             if ($directionDTO->getFromCity()->getCountry()->getName() == "Беларусь" || $directionDTO->getToCity()->getCountry()->getName() == "Беларусь") {
 
-                $response = $this->fetchDataFromExternalApi($directionDTO);
+//                $response = $this->fetchDataFromExternalApi($directionDTO);
 
+                if ($directionDTO->getFromCity()->getName() == "Каменный Лог" || $directionDTO->getToCity()->getName() == "Каменный Лог") {
+                    $data = Cache::get("kameni_log");
+                } elseif ($directionDTO->getFromCity()->getName() == "Брест" || $directionDTO->getToCity()->getName() == "Брест") {
+                    $data = Cache::get("brest");
+                } else {
+                    $data = Cache::get("benyakoni");
+                }
+//                    $data = Cache::get("kameni_log");
+//
+//                    if ($data == null) {
+//                        $response = Http::get("https://belarusborder.by/info/monitoring-new?token=test&checkpointId=b60677d4-8a00-4f93-a781-e129e1692a03");
+//                        $data = $this->convertToCacheObjectBelarusInfo($response);
+//                        Cache::put('kameni_log', $data, now()->addMinutes(1));
+//                    }
+//
+//                    return $data;
+//                } elseif ($directionDTO->getFromCity()->getName() == "Брест" || $directionDTO->getToCity()->getName() == "Брест") {
+//                    $data = Cache::get("brest");
+//
+//                    if ($data == null) {
+//                        $response = Http::get("https://belarusborder.by/info/monitoring-new?token=test&checkpointId=a9173a85-3fc0-424c-84f0-defa632481e4");
+//                        $data = $this->convertToCacheObjectBelarusInfo($response);
+//                        Cache::put('brest', $data, now()->addMinutes(5));
+//                    }
+//
+//                    return $data;
+//                }
+//
+//                $data = Cache::get("benyakoni");
+//
+//                if ($data == null) {
+//                    $response = Http::get("https://belarusborder.by/info/monitoring-new?token=test&checkpointId=53d94097-2b34-11ec-8467-ac1f6bf889c0");
+//                    $data = $this->convertToCacheObjectBelarusInfo($response);
+//                    Cache::put('benyakoni', $data, now()->addMinutes(5));
+//
+//                }
+//
+//                return $data;
+
+                $response = $data;
                 if ($response !== null) $directionDTO->setCache($response->toArray());
             }
 
             if ($directionDTO->getFromCity()->getCountry()->getName() == "Польша" || $directionDTO->getToCity()->getCountry()->getName() == "Польша") {
 
-                $response = $this->fetchDataFromPolandApi($directionDTO);
+                $response = null;
+
+                if ($directionDTO->getFromCity()->getName() == "Terespol" || $directionDTO->getToCity()->getName() == "Terespol")
+                {
+                    $data = Cache::get("terespol");
+
+                } elseif ($directionDTO->getFromCity()->getName() == "Bezledy" || $directionDTO->getToCity()->getName() == "Bezledy") {
+                    $data = Cache::get("bezledy");
+
+                }else {
+                    $data = Cache::get("grzechotki");
+                }
+
+                $response = $data;
 
                 if ($response !== null) $directionDTO->setCachePolandInfo($response->toArray());
             }
@@ -101,40 +154,52 @@ class BorderCrossingService
         return $result;
     }
 
-    function fetchDataFromExternalApi(DirectionCrossingDTO $directionDTO) : ?CacheDTO
+    function fetchDataFromExternalApi()
     {
-        if ($directionDTO->getFromCity()->getName() == "Каменный Лог" || $directionDTO->getToCity()->getName() == "Каменный Лог") {
-            $data = Cache::get("kameni_log");
+        $response = Http::get("https://belarusborder.by/info/monitoring-new?token=test&checkpointId=b60677d4-8a00-4f93-a781-e129e1692a03");
+        $data = $this->convertToCacheObjectBelarusInfo($response);
+        Cache::put('kameni_log', $data, now()->addHours(48));
 
-            if ($data == null) {
-                $response = Http::get("https://belarusborder.by/info/monitoring-new?token=test&checkpointId=b60677d4-8a00-4f93-a781-e129e1692a03");
-                $data = $this->convertToCacheObjectBelarusInfo($response);
-                Cache::put('kameni_log', $data, now()->addMinutes(1));
-            }
+        $response = Http::get("https://belarusborder.by/info/monitoring-new?token=test&checkpointId=a9173a85-3fc0-424c-84f0-defa632481e4");
+        $data = $this->convertToCacheObjectBelarusInfo($response);
+        Cache::put('brest', $data, now()->addHours(48));
 
-            return $data;
-        } elseif ($directionDTO->getFromCity()->getName() == "Брест" || $directionDTO->getToCity()->getName() == "Брест") {
-            $data = Cache::get("brest");
+        $response = Http::get("https://belarusborder.by/info/monitoring-new?token=test&checkpointId=53d94097-2b34-11ec-8467-ac1f6bf889c0");
+        $data = $this->convertToCacheObjectBelarusInfo($response);
+        Cache::put('benyakoni', $data, now()->addHours(48));
 
-            if ($data == null) {
-                $response = Http::get("https://belarusborder.by/info/monitoring-new?token=test&checkpointId=a9173a85-3fc0-424c-84f0-defa632481e4");
-                $data = $this->convertToCacheObjectBelarusInfo($response);
-                Cache::put('brest', $data, now()->addMinutes(5));
-            }
-
-            return $data;
-        }
-
-        $data = Cache::get("benyakoni");
-
-        if ($data == null) {
-            $response = Http::get("https://belarusborder.by/info/monitoring-new?token=test&checkpointId=53d94097-2b34-11ec-8467-ac1f6bf889c0");
-            $data = $this->convertToCacheObjectBelarusInfo($response);
-            Cache::put('benyakoni', $data, now()->addMinutes(5));
-
-        }
-
-        return $data;
+//        if ($directionDTO->getFromCity()->getName() == "Каменный Лог" || $directionDTO->getToCity()->getName() == "Каменный Лог") {
+//            $data = Cache::get("kameni_log");
+//
+//            if ($data == null) {
+//                $response = Http::get("https://belarusborder.by/info/monitoring-new?token=test&checkpointId=b60677d4-8a00-4f93-a781-e129e1692a03");
+//                $data = $this->convertToCacheObjectBelarusInfo($response);
+//                Cache::put('kameni_log', $data, now()->addMinutes(1));
+//            }
+//
+//            return $data;
+//        } elseif ($directionDTO->getFromCity()->getName() == "Брест" || $directionDTO->getToCity()->getName() == "Брест") {
+//            $data = Cache::get("brest");
+//
+//            if ($data == null) {
+//                $response = Http::get("https://belarusborder.by/info/monitoring-new?token=test&checkpointId=a9173a85-3fc0-424c-84f0-defa632481e4");
+//                $data = $this->convertToCacheObjectBelarusInfo($response);
+//                Cache::put('brest', $data, now()->addMinutes(5));
+//            }
+//
+//            return $data;
+//        }
+//
+//        $data = Cache::get("benyakoni");
+//
+//        if ($data == null) {
+//            $response = Http::get("https://belarusborder.by/info/monitoring-new?token=test&checkpointId=53d94097-2b34-11ec-8467-ac1f6bf889c0");
+//            $data = $this->convertToCacheObjectBelarusInfo($response);
+//            Cache::put('benyakoni', $data, now()->addMinutes(5));
+//
+//        }
+//
+//        return $data;
     }
 
     function convertToCacheObjectBelarusInfo(\Illuminate\Http\Client\Response $response) : ?CacheDTO
@@ -144,10 +209,7 @@ class BorderCrossingService
                 Log::info("Информация о машинах нет");
 
 
-                $cacheDTO = new CacheDTO(
-                    "0",
-                    0
-                );
+                $cacheDTO = new CacheDTO("0", 0);
                 return $cacheDTO;
             };
 
@@ -184,17 +246,11 @@ class BorderCrossingService
                 Log::info("Информация о машинах нет");
 
 
-                $cacheDTO = new CacheDTO(
-                    "0",
-                    0
-                );
+                $cacheDTO = new CacheDTO("0", 0);
                 return $cacheDTO;
             }
         } catch (\Exception $e) {
-            $cacheDTO = new CacheDTO(
-                "0",
-                0
-            );
+            $cacheDTO = new CacheDTO("0", 0);
             return $cacheDTO;
         }
     }
@@ -202,20 +258,20 @@ class BorderCrossingService
     private function setPolandCache(CachePolandDTO $data, string $keyName)
     {
         if ($data->getTimeBusFormatString() == "" || $data->getTimeAutoFormatString() == "" || $data->getTimeUpdate() == "") {
-            Cache::put($keyName, $data, now()->addMinutes(5));
+            Cache::put($keyName, $data, now()->addHours(48));
         } else {
-            Cache::put($keyName, $data, now()->addMinutes(60));
+            Cache::put($keyName, $data, now()->addHours(48));
         }
     }
 
-    function fetchDataFromPolandApi(DirectionCrossingDTO $directionDTO)
+    function fetchDataFromPolandApi()
     {
-        if ($directionDTO->getFromCity()->getName() == "Terespol" || $directionDTO->getToCity()->getName() == "Terespol")
-        {
-
-            $data = Cache::get("terespol");
-
-            if ($data == null) {
+//        if ($directionDTO->getFromCity()->getName() == "Terespol" || $directionDTO->getToCity()->getName() == "Terespol")
+//        {
+//
+//            $data = Cache::get("terespol");
+//
+//            if ($data == null) {
                 // Установка User-Agent для имитации запроса от браузера
                 $options = [
                     'http' => [
@@ -231,23 +287,18 @@ class BorderCrossingService
                 $data = $this->convertToCacheObjectPolandTerespolInfo($response);
 
                 $this->setPolandCache($data, "terespol");
-            }
-
-            return $data;
-
-        }
-
-        if ($directionDTO->getFromCity()->getName() == "Bezledy" || $directionDTO->getToCity()->getName() == "Bezledy") {
-
-            $data = Cache::get("bezledy");
-
-            if ($data == null) {
+//            }
+//
+//            return $data;
+//
+//        }
+//
+//        if ($directionDTO->getFromCity()->getName() == "Bezledy" || $directionDTO->getToCity()->getName() == "Bezledy") {
+//
+//            $data = Cache::get("bezledy");
+//
+//            if ($data == null) {
                 // Установка User-Agent для имитации запроса от браузера
-                $options = [
-                    'http' => [
-                        'header' => 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-                    ]
-                ];
 
                 $context = stream_context_create($options);
 
@@ -257,24 +308,24 @@ class BorderCrossingService
                 $data = $this->convertToCacheObjectPolandBezledyInfo($response);
 
                 $this->setPolandCache($data, "bezledy");
-            }
-
-            return $data;
-
-        }
-
-        if ($directionDTO->getFromCity()->getName() == "Grzechotki" || $directionDTO->getToCity()->getName() == "Grzechotki") {
-
-            $data = Cache::get("grzechotki");
-
-            if ($data == null) {
-                // Установка User-Agent для имитации запроса от браузера
-                $options = [
-                    'http' => [
-                        'header' => 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-                    ]
-                ];
-
+//            }
+//
+//            return $data;
+//
+//        }
+//
+//        if ($directionDTO->getFromCity()->getName() == "Grzechotki" || $directionDTO->getToCity()->getName() == "Grzechotki") {
+//
+//            $data = Cache::get("grzechotki");
+//
+//            if ($data == null) {
+//                // Установка User-Agent для имитации запроса от браузера
+//                $options = [
+//                    'http' => [
+//                        'header' => 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+//                    ]
+//                ];
+//
                 $context = stream_context_create($options);
 
                 $response = file_get_html("https://granica.gov.pl/index_wait.php?p=fr&c=t&v=ru&k=w", false, $context);
@@ -283,10 +334,10 @@ class BorderCrossingService
                 $data = $this->convertToCacheObjectPolandGrzechotkiInfo($response);
 
                 $this->setPolandCache($data, "grzechotki");
-            }
-
-            return $data;
-        }
+//            }
+//
+//            return $data;
+//        }
 
     }
 

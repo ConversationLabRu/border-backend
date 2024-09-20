@@ -13,13 +13,13 @@ class CacheDTO
      */
     public function __construct(string $time, int $countCar)
     {
-        $this->time = $time;
+        $this->timeFormatString = $time;
         $this->countCar = $countCar;
     }
 
     public function getTime(): string
     {
-        return $this->time;
+        return $this->timeFormatString;
     }
 
     public function getCountCar(): int
@@ -32,7 +32,7 @@ class CacheDTO
     public function toArray(): array
     {
         return [
-            'time' => $this->time,
+            'time' => $this->timeFormatString,
             'countCar' => $this->countCar,
         ];
     }

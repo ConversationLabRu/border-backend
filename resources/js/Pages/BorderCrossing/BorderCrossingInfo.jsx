@@ -296,24 +296,26 @@ export default function BorderCrossingInfo() {
 
         }
 
-        // Объединяем два массива, убираем дубликаты, сортируем и преобразуем в часы
-        const mergedData = [...waitTimeData1, ...waitTimeData2] // Объединить массивы
-            .filter((value, index, self) => self.indexOf(value) === index) // Удалить дубликаты
-            .filter(value => value !== 0)
-            .sort((a, b) => a - b) // Сортировка по возрастанию
-            .map(minutes => Math.floor(minutes / 60)); // Преобразование минут в часы (без минут)
+        // Преобразование минут в часы (для waitTimeData1 и waitTimeData2)
+        const transformToHours = (data) => data.map(minutes => Math.floor(minutes / 60));
 
-        console.log(mergedData)
+        // Объединяем массивы, фильтруем уникальные значения после преобразования в часы
+        const uniqueYAxisValues = Array.from(
+            new Set(transformToHours([...waitTimeData1, ...waitTimeData2].filter(value => value !== 0 || value !== 0.1))) // фильтруем уникальные значения
+        ).sort((a, b) => a - b); // Сортировка по возрастанию
+
+        console.log(uniqueYAxisValues)
 
         // Функция для форматирования значений
         const valueFormatterText = (value) => {
             return value !== 0.1 ? declensionHours(Math.floor(value / 60)) + " " + declensionMinutes(Math.floor(value % 60)) : 'нет данных';
         };
 
+        // Функция для форматирования значений на оси Y (в часах)
         const yAxisFormatter = (value) => {
             if (value === 0) return ''; // Если значение равно 0, вернуть пустую строку
-            const hours = Math.floor(value / 60);
-            return `${hours}`;
+            const hours = value / 60;  // Оставляем значения в минутах, но делим на 60 для отображения в часах
+            return `${hours.toFixed(1)}`;  // Отображаем часы с одним знаком после запятой
         };
 
 
@@ -328,7 +330,6 @@ export default function BorderCrossingInfo() {
                     yAxis={[{
                         scaleType: "linear",
                         valueFormatter: yAxisFormatter
-
                     }]}
                     series={[
                         {
