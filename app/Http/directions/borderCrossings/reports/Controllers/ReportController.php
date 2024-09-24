@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\directions\borderCrossings\reports\Entities\Report;
 use App\Http\directions\borderCrossings\reports\Exceptions\TimeExpiredDeletedException;
 use App\Http\directions\borderCrossings\reports\Services\ReportService;
+use App\Utils\LogUtils;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Nette\Schema\ValidationException;
@@ -292,7 +293,16 @@ class ReportController extends Controller
     public function statistics(Request $request)
     {
         try {
-            return \response()->json($this->reportService->getStatistics($request));
+
+            $borderCrossingId = (int) $request->query("borderCrossingId");
+
+            LogUtils::elasticLog($request, "Запросил прогноз по погран-переходу: " . $borderCrossingId);
+
+            $result = $this->reportService->getStatistics($borderCrossingId);
+
+            LogUtils::elasticLog($request, "Результат статистики погран перехода " . $borderCrossingId . ": " . $result);
+
+            return \response()->json($result->toArray());
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['message' => $e->getMessage()], Response::HTTP_UNPROCESSABLE_ENTITY);
         }

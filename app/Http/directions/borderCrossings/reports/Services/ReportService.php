@@ -307,11 +307,8 @@ class ReportService
 
     }
 
-    public function getStatistics(Request $request)
+    public function getStatistics(int $borderCrossingId) : StatisticDTO
     {
-        $borderCrossingId = (int) $request->query("borderCrossingId");
-        LogUtils::elasticLog($request, "Запросил прогноз по погран-переходу: " . $borderCrossingId);
-
         $currentDayOfWeek = date('N'); // Получаем текущий день недели (1 = Пн, 7 = Вс)
 
         $transportData = [
@@ -343,10 +340,7 @@ class ReportService
             $results['BusFlipped'] ?? 'Нет информации'
         );
 
-        LogUtils::elasticLog($request, "Результат статистики погран перехода " . $borderCrossingId . ": " . $result);
-
-
-        return $result->toArray();
+        return $result;
     }
 
     private function getReports($borderCrossingId, $transportId, $isFlippedDirection)
