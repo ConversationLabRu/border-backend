@@ -45,7 +45,7 @@ class PublishPostBrest extends Command
 
         // ------------------------------------------------
 
-        if ($result->getTimeCarNotFlipped() != "Нет информации" || $result->getTimeCarNotFlipped() != "Нет информации") $formatedText .= "\n\n🇧🇾➡️🇱🇹";
+        if ($result->getTimeCarNotFlipped() != "Нет информации" || $result->getTimeCarNotFlipped() != "Нет информации") $formatedText .= "\n\n🇧🇾➡️🇵🇱";
 
         if ($result->getTimeCarNotFlipped() != "Нет информации") $formatedText .= "\n🚘: {$result->getTimeCarNotFlipped()}";
 
@@ -53,7 +53,7 @@ class PublishPostBrest extends Command
 
         // -----------------------------------------------
 
-        if ($result->getTimeCarFlipped() != "Нет информации" || $result->getTimeBusFlipped() != "Нет информации") $formatedText .= "\n\n🇱🇹➡️🇧🇾";
+        if ($result->getTimeCarFlipped() != "Нет информации" || $result->getTimeBusFlipped() != "Нет информации") $formatedText .= "\n\n🇵🇱➡️🇧🇾";
 
         if ($result->getTimeCarFlipped() != "Нет информации") $formatedText .= "\n🚘: {$result->getTimeCarFlipped()}";
 

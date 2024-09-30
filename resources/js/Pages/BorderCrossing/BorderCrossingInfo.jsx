@@ -260,8 +260,6 @@ export default function BorderCrossingInfo() {
 
         if (!data || data.length === 0) return [];
 
-
-
         // Преобразование данных для графика
         const xAxisData = getDatesInRange(startDate, endDate);
         console.log(jsonData1)
@@ -480,25 +478,29 @@ export default function BorderCrossingInfo() {
                             </div>
 
                             {(directionCrossing?.from_city?.country.name === "Беларусь" || directionCrossing?.to_city?.country.name === "Беларусь") && (
-                                <div className="bel-container-inf report-title">
-                                    <div>
-                                        <Text weight="1" className={""}>
-                                            {`Текущая очередь в зоне ожидания: ${directionCrossing['cache'].countCar}`}
-                                        </Text>
-                                    </div>
+                                <>
+                                    {(directionCrossing['cache'] != null) && (
+                                        <div className="bel-container-inf report-title">
+                                            <div>
+                                                <Text weight="1" className={""}>
+                                                    {`Текущая очередь в зоне ожидания: ${directionCrossing['cache'].countCar}`}
+                                                </Text>
+                                            </div>
 
-                                    <div className="time-container-title">
-                                        <Text weight="1">
-                                            Предполагаемое время до въезда в ПП:
-                                        </Text>
-                                        {directionCrossing["cache"]["time"]}
-                                    </div>
-                                </div>
+                                            <div className="time-container-title">
+                                                <Text weight="1">
+                                                    Предполагаемое время до въезда в ПП:
+                                                </Text>
+                                                {directionCrossing["cache"]["time"]}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                </>
                             )}
 
-                            {((directionCrossing?.from_city?.country.name === "Польша" || directionCrossing?.to_city?.country.name === "Польша")
-                                && (directionCrossing['cachePoland'].timeCarFormatString !== ""
-                                    || directionCrossing['cachePoland'].timeBusFormatString !== "")) && (
+                            {(directionCrossing?.from_city?.country.name === "Польша" || directionCrossing?.to_city?.country.name === "Польша")
+                                && (directionCrossing['cachePoland'] != null) && (
                                 <div className="bel-container-inf report-title">
                                     <div>
                                         <Text weight="1" className={""}>

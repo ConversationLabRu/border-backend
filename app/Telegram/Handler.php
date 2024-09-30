@@ -20,7 +20,7 @@ class Handler extends WebhookHandler
 
 
         $this->chat->message($this->chat->chat_id) // Убедитесь, что вы используете правильный метод для установки чата
-        ->message('Для продолжения откройте приложение!')
+        ->message('Откройте приложение чтобы продолжить!')
             ->keyboard(Keyboard::make()->buttons([
                 Button::make('ОТКРЫТЬ ПРИЛОЖЕНИЕ')->webApp($webAppUrl),
             ]))
@@ -32,7 +32,7 @@ class Handler extends WebhookHandler
         $webAppUrl = env('WEB_APP_URL', 'default_url_if_not_set'); // 'default_url_if_not_set' используется как запасной вариант на случай, если переменная не установлена
 
         $this->chat->message($this->chat->chat_id) // Убедитесь, что вы используете правильный метод для установки чата
-        ->message('Для продолжения откройте приложение!')
+        ->message('Откройте приложение чтобы продолжить!')
             ->keyboard(Keyboard::make()->buttons([
                 Button::make('ОТКРЫТЬ ПРИЛОЖЕНИЕ')->webApp($webAppUrl),
             ]))
@@ -45,7 +45,7 @@ class Handler extends WebhookHandler
 
 
         $this->chat->message($this->chat->chat_id) // Убедитесь, что вы используете правильный метод для установки чата
-        ->message('Для продолжения откройте приложение!')
+        ->message('Откройте приложение чтобы продолжить!')
             ->keyboard(Keyboard::make()->buttons([
                 Button::make('ОТКРЫТЬ ПРИЛОЖЕНИЕ')->webApp($webAppUrl),
             ]))

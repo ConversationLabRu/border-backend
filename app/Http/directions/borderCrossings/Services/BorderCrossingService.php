@@ -25,6 +25,46 @@ include("simple_html_dom.php");
 
 class BorderCrossingService
 {
+    public static function getBorderCrossingById(int $id)
+    {
+        $direction = BorderCrossing::with('fromCity.country', 'toCity.country')
+            ->where("id", $id)
+            ->first();
+
+        $fromCity = $direction->fromCity;
+        $toCity = $direction->toCity;
+
+        $fromCityDTO = $fromCity ? new CityDTO(
+            $fromCity->name,
+            $fromCity->country ? new CountryDTO(
+                $fromCity->country->name,
+                $fromCity->country->logo
+            ) : null
+        ) : null;
+
+        $toCityDTO = $toCity ? new CityDTO(
+            $toCity->name,
+            $toCity->country ? new CountryDTO(
+                $toCity->country->name,
+                $toCity->country->logo
+            ) : null
+        ) : null;
+
+        $directionDTO = new DirectionCrossingDTO(
+            $direction->id,
+            $direction->is_quque,
+            $direction->header_image,
+            $fromCityDTO,
+            $toCityDTO,
+            $direction->url_arcticle,
+            $direction->is_bus,
+            $direction->is_walking,
+            $direction->is_car
+        );
+
+        return $directionDTO;
+    }
+
     public function getAllBorderCrossings(Request $request)
     {
         $directionId = (int) $request->query('directionId');

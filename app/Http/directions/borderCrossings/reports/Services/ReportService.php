@@ -16,16 +16,29 @@ use App\Http\directions\borderCrossings\reports\Exceptions\TimeExpiredDeletedExc
 use App\Http\directions\borderCrossings\reports\transports\DTO\TransportDTO;
 use App\Http\directions\borderCrossings\Services\BorderCrossingService;
 use App\Utils\LogUtils;
+use App\Utils\TextFormaterUtils;
 use Carbon\Carbon;
 use DateTime;
 use DateTimeZone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Nette\Schema\ValidationException;
 
 class ReportService
 {
+    private BorderCrossingService $borderCrossingService;
+
+    /**
+     * @param BorderCrossingService $borderCrossingService
+     */
+    public function __construct(BorderCrossingService $borderCrossingService)
+    {
+        $this->borderCrossingService = $borderCrossingService;
+    }
+
+
     public function getLastReportByBorderCrossing(Request $request)
     {
         $borderCrossingId = (int) $request->query("borderCrossingId");
@@ -181,6 +194,114 @@ class ReportService
         return $report;
     }
 
+    public function sendReportPostText(Request $request)
+    {
+        if ($request->get("user_id") == 241666959) return;
+
+        $borderCrossing = BorderCrossingService::getBorderCrossingById($request->get("border_crossing_id"));
+
+        $resultText = "Отчет о прохождении пограничного перехода *{$borderCrossing->getFromCity()->getName()} \\- {$borderCrossing->getToCity()->getName()}*\n\n";
+
+        Log::info($borderCrossing->getToCity()->getCountry()->getName());
+        Log::info($borderCrossing->getFromCity()->getCountry()->getName());
+
+        if ($request->get("is_flipped_direction")) {
+            $resultText .= TextFormaterUtils::countryToFlag($borderCrossing->getToCity()->getCountry()->getName())
+            . " ➡️ " . TextFormaterUtils::countryToFlag($borderCrossing->getFromCity()->getCountry()->getName());
+        } else {
+            $resultText .= TextFormaterUtils::countryToFlag($borderCrossing->getFromCity()->getCountry()->getName())
+            . " ➡️ " . TextFormaterUtils::countryToFlag($borderCrossing->getToCity()->getCountry()->getName());
+        }
+
+        $resultText .= "\nТранспорт: " . TextFormaterUtils::transportToEmoji($request->get("transport_id")) . "\n\n";
+
+        if ($request->get("checkpoint_queue") != null) {
+            $resultText .= "Очередь в зону ожидания: " . date("d/m в H:i", strtotime($request->get("checkpoint_queue"))) . "\n";
+        }
+
+        if ($request->get("time_enter_waiting_area") != null) {
+            $resultText .= "Въезд в зону ожидания: " . date("d/m в H:i", strtotime($request->get("time_enter_waiting_area"))) . "\n";
+        }
+
+        if ($request->get("checkpoint_entry") != null) {
+            $resultText .= "Въезд на КПП: " . date("d/m в H:i", strtotime($request->get("checkpoint_entry"))) . "\n";
+        }
+
+        if ($request->get("checkpoint_exit") != null) {
+            $resultText .= "Выезд с КПП: " . date("d/m в H:i", strtotime($request->get("checkpoint_exit"))) . "\n";
+        }
+
+        $report = new Report();
+        // Заполнение модели данными из запроса
+        $report->fill($request->only([
+            'border_crossing_id',
+            'transport_id',
+            'user_id',
+            'checkpoint_queue',
+            'checkpoint_entry',
+            'checkpoint_exit',
+            'comment',
+            'is_flipped_direction',
+            'time_enter_waiting_area'
+        ]));
+
+        $resultText .= "\n⏳ Общее время прохождения границы: " . $this->convertDiffTimeToText($report) . "\n\n";
+
+        $resultText .= "[❗️Посмотреть очереди на границах](http://t.me/bordercrossingsbot/app)";
+
+        $forwardText = str_replace("\\", "", $resultText);
+        $forwardText = str_replace("*", "", $forwardText);
+        $forwardText = str_replace("[", "", $forwardText);
+        $forwardText = str_replace("]", " ", $forwardText);
+
+        $words = explode(" ", $forwardText);
+
+        $newText = "";
+        $firstWord = true; // флаг для первого слова
+        foreach ($words as $word) {
+            // добавление перехода на новую строку после первого слова
+            if ($firstWord) {
+                $newText .= PHP_EOL;
+            }
+
+            // добавление эмодзи в начале новой строки
+            if ($firstWord) {
+                $newText .= "📑" . " " . $word . " ";
+                $firstWord = false;
+            } else {
+                $newText .= $word . " ";
+            }
+        }
+
+        // Замена исходной переменной
+        $forwardText = $newText;
+
+        $body = [
+            'chat_id' => $request->get("user_id"),
+            'text' => $resultText,
+            'parse_mode' => 'MarkdownV2',
+            'reply_markup' => json_encode([
+                'inline_keyboard' => [
+                    [
+                        [
+                            'text' => 'Поделиться',
+                            'switch_inline_query' => $forwardText
+                        ]
+                    ]
+                ]
+            ])
+        ];
+
+        $response = Http::post("https://api.telegram.org/bot7215428078:AAFY67PRE0nifeLeoISEwznfE2WEiXF6-xU/sendMessage", $body);
+
+        // Обработка ответа
+        if ($response->successful()) {
+            Log::info('Сообщение успешно отправлено в Telegram.');
+        } else {
+            Log::error('Ошибка отправки сообщения: ' . $response->body());
+        }
+    }
+
     public function convertDiffTimeToText(Report $report): string
     {
         $entryTime = new DateTime($report["checkpoint_entry"], new DateTimeZone('Europe/Minsk'));
@@ -211,6 +332,98 @@ class ReportService
 
         return BorderCrossingService::declensionHours($hoursDiff) . ' ' . BorderCrossingService::declensionMinutes($minutesDiff);
     }
+
+    public function getStatForGraphPost(int $borderCrossingId)
+    {
+        $sevenDaysAgo = Carbon::now()->subDays(7);
+        $currentDate = Carbon::now();
+
+        $averageTimesPerDayCar = Report::where('transport_id', 2)
+            ->where('is_flipped_direction', false)
+            ->where('border_crossing_id', $borderCrossingId)
+            ->whereBetween('checkpoint_exit', [$sevenDaysAgo, $currentDate])
+            ->selectRaw('
+        DATE(checkpoint_exit) as day,
+        AVG(
+            ABS(
+                CASE
+                    WHEN checkpoint_queue IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, checkpoint_queue, checkpoint_exit)
+                    WHEN time_enter_waiting_area IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, time_enter_waiting_area, checkpoint_exit)
+                    ELSE TIMESTAMPDIFF(MINUTE, checkpoint_entry, checkpoint_exit)
+                END
+            )
+        ) as avg_time')
+            ->groupBy('day')
+            ->get()
+            ->toArray();
+
+        $averageTimesPerDayBus = Report::where('transport_id', 3)
+            ->where('is_flipped_direction', false)
+            ->where('border_crossing_id', $borderCrossingId)
+            ->whereBetween('checkpoint_exit', [$sevenDaysAgo, $currentDate])
+            ->selectRaw('
+        DATE(checkpoint_exit) as day,
+        AVG(
+            ABS(
+                CASE
+                    WHEN checkpoint_queue IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, checkpoint_queue, checkpoint_exit)
+                    WHEN time_enter_waiting_area IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, time_enter_waiting_area, checkpoint_exit)
+                    ELSE TIMESTAMPDIFF(MINUTE, checkpoint_entry, checkpoint_exit)
+                END
+            )
+        ) as avg_time')
+            ->groupBy('day')
+            ->get()
+            ->toArray();
+
+
+        $averageTimesPerDayFlippedCar = Report::where('transport_id', 2)
+            ->where('is_flipped_direction', true)
+            ->where('border_crossing_id', $borderCrossingId)
+            ->whereBetween('checkpoint_exit', [$sevenDaysAgo, $currentDate])
+            ->selectRaw('
+        DATE(checkpoint_exit) as day,
+        AVG(
+            ABS(
+                CASE
+                    WHEN checkpoint_queue IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, checkpoint_queue, checkpoint_exit)
+                    WHEN time_enter_waiting_area IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, time_enter_waiting_area, checkpoint_exit)
+                    ELSE TIMESTAMPDIFF(MINUTE, checkpoint_entry, checkpoint_exit)
+                END
+            )
+        ) as avg_time')
+            ->groupBy('day')
+            ->get()
+            ->toArray();
+
+        $averageTimesPerDayFlippedBus = Report::where('transport_id', 3)
+            ->where('is_flipped_direction', true)
+            ->where('border_crossing_id', $borderCrossingId)
+            ->whereBetween('checkpoint_exit', [$sevenDaysAgo, $currentDate])
+            ->selectRaw('
+        DATE(checkpoint_exit) as day,
+        AVG(
+            ABS(
+                CASE
+                    WHEN checkpoint_queue IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, checkpoint_queue, checkpoint_exit)
+                    WHEN time_enter_waiting_area IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, time_enter_waiting_area, checkpoint_exit)
+                    ELSE TIMESTAMPDIFF(MINUTE, checkpoint_entry, checkpoint_exit)
+                END
+            )
+        ) as avg_time')
+            ->groupBy('day')
+            ->get()
+            ->toArray();
+
+        $result = new StatisticGraphDTO(
+            new StatisticGraphTypeDTO($averageTimesPerDayCar, $averageTimesPerDayBus),
+            new StatisticGraphTypeDTO($averageTimesPerDayFlippedCar, $averageTimesPerDayFlippedBus)
+        );
+
+        return $result->toArray();
+    }
+
+
 
     public function getStatisticsForGraph(Request $request)
     {

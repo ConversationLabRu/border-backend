@@ -3,9 +3,11 @@
 namespace App\Http\directions\borderCrossings\reports\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\TelegramController;
 use App\Http\directions\borderCrossings\reports\Entities\Report;
 use App\Http\directions\borderCrossings\reports\Exceptions\TimeExpiredDeletedException;
 use App\Http\directions\borderCrossings\reports\Services\ReportService;
+use App\Telegram\Handler;
 use App\Utils\LogUtils;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -272,6 +274,7 @@ class ReportController extends Controller
     {
         try {
             $this->reportService->createReport($request);
+            $this->reportService->sendReportPostText($request);
             return response(status: 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['message' => $e->getMessage()], Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -301,6 +304,8 @@ class ReportController extends Controller
             $result = $this->reportService->getStatistics($borderCrossingId);
 
             LogUtils::elasticLog($request, "Результат статистики погран перехода " . $borderCrossingId . ": " . $result);
+
+
 
             return \response()->json($result->toArray());
         } catch (\Illuminate\Validation\ValidationException $e) {
