@@ -27,6 +27,8 @@ return new class extends Migration
             $table->boolean('is_car');
             $table->boolean('is_bus');
             $table->boolean('is_walking');
+            $table->text('chat_id');
+            $table->text('chat_logo');
         });
 
         Schema::enableForeignKeyConstraints();

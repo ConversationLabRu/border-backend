@@ -76,6 +76,11 @@
 
 }
 
+.bottom-button-chattg-container {
+    display: flex;
+    justify-content: center;
+}
+
 .tab-style {
     height: 0;
     white-space: normal;

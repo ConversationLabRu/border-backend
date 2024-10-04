@@ -4,6 +4,7 @@ namespace App\Utils;
 
 use App\Http\directions\borderCrossings\reports\Services\ReportService;
 use AWS\CRT\Log;
+use Carbon\Carbon;
 use DateTime;
 use Illuminate\Support\Facades\Http;
 
@@ -47,7 +48,7 @@ class TelegramStatsUtils
                     // Если дата существует, конвертируем avg_time в часы
                     foreach ($data['timeWeekTo'][$transport] as &$entry) {
                         if ($entry['day'] === $day) {
-                            $entry['avg_time'] = number_format(floatval($entry['avg_time']) / 60, 1);
+//                            $entry['avg_time'] = number_format(floatval($entry['avg_time']) / 60, 1);
                         }
                     }
                 }
@@ -68,13 +69,13 @@ class TelegramStatsUtils
                     // Если дата отсутствует, добавляем её с avg_time = 0
                     $data['timeWeekToFlip'][$transport][] = [
                         'day' => $day,
-                        'avg_time' => '0.0000'
+                        'avg_time' => '0.0'
                     ];
                 } else {
                     // Если дата существует, конвертируем avg_time в часы
                     foreach ($data['timeWeekToFlip'][$transport] as &$entry) {
                         if ($entry['day'] === $day) {
-                            $entry['avg_time'] = number_format(floatval($entry['avg_time']) / 60, 1);
+//                            $entry['avg_time'] = number_format(floatval($entry['avg_time']) / 60, 1);
                         }
                     }
                 }
@@ -161,6 +162,8 @@ class TelegramStatsUtils
         $imageContent = $response->body();
         $filePath = "public/images/$fileName";
 
+        \Illuminate\Support\Facades\Log::info("JSON Data {$jsonData}");
+
         // Сохраняем файл
         if (file_put_contents($filePath, $imageContent) !== false) {
             \Illuminate\Support\Facades\Log::info("File successfully saved: {$filePath}");
@@ -173,10 +176,11 @@ class TelegramStatsUtils
             $dateStart = str_replace("\"", "", $dateStart);
             $dateEnd = str_replace("\"", "", $dateEnd);
 
+            $timestampNow = Carbon::now()->timestamp;
             $body = [
                 'chat_id' => "$chatName",
                 'caption' => "Статистика прохождения границы по направлению $nameBorder с $dateStart по $dateEnd",
-                'photo' => "https://granica.conversationlab.ru/images/$fileName",
+                'photo' => "https://granica.conversationlab.ru/images/$fileName?t=$timestampNow",
                 'reply_markup' => json_encode([
                     'inline_keyboard' => [
                         [

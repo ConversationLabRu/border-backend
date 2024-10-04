@@ -6,6 +6,7 @@ use App\Http\directions\Controllers\DirectionController;
 use App\Http\directions\borderCrossings\Controllers\BorderCrossingController;
 use App\Http\directions\borderCrossings\cameras\Controllers\CameraController;
 use App\Http\directions\borderCrossings\reports\Controllers\ReportController;
+use App\Utils\LogUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\AuthorizationAPI;
@@ -50,6 +51,12 @@ Route::middleware('auth.api')->group(function () {
 
     Route::prefix('directions/borderCrossing/reports')->group(function () {
         Route::get('/transports', [TransportController::class, 'index']); // GET /directions/borderCrossing/reports/transports
+    });
+
+    Route::post('/log', function (Request $request) {
+        $message = $request->input('message');
+        LogUtils::elasticLog($request, $message);
+        return response()->json(['status' => 'success']);
     });
 });
 

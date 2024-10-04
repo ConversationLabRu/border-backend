@@ -88,10 +88,21 @@ export default function CreateReportPage() {
             if (selectedTransport === "3" && checkpointEntry !== "" && checkpointExit !== "") {
                 mainButton.setText("Отправить данные").setBgColor("#007aff").show().enable();
             } else {
-                if (selectedTransport !== "" && checkpointEntry !== "" && checkpointExit !== "" && timeEnterWaitingArea !== "") {
-                    mainButton.setText("Отправить данные").setBgColor("#007aff").show().enable();
+
+                if ( ( (!isFlippedDirection && directionCrossing?.from_city?.name === "Брест")
+                    || (isFlippedDirection && directionCrossing?.to_city?.name === "Брест") ) ) {
+
+                    if (selectedTransport !== "" && checkpointEntry !== "" && checkpointExit !== "") {
+                        mainButton.setText("Отправить данные").setBgColor("#007aff").show().enable();
+                    } else {
+                        mainButton.setText("Заполните обязательные поля").setBgColor("#808080").show().disable();
+                    }
                 } else {
-                    mainButton.setText("Заполните обязательные поля").setBgColor("#808080").show().disable();
+                    if (selectedTransport !== "" && checkpointEntry !== "" && checkpointExit !== "" && timeEnterWaitingArea !== "") {
+                        mainButton.setText("Отправить данные").setBgColor("#007aff").show().enable();
+                    } else {
+                        mainButton.setText("Заполните обязательные поля").setBgColor("#808080").show().disable();
+                    }
                 }
             }
         } else {
@@ -290,8 +301,32 @@ export default function CreateReportPage() {
 
                             <hr/>
 
+
                             <div className="scrollable">
-                                {(((!isFlippedDirection && directionCrossing?.from_city?.country.name === "Беларусь")
+                                {(((!isFlippedDirection && directionCrossing?.from_city?.name === "Брест")
+                                        || (isFlippedDirection && directionCrossing?.to_city?.name === "Брест"))
+                                    && selectedTransport !== "3") ? (
+                                    <div>
+
+                                        {(isMacOS() || isIOS()) && (
+                                            <>
+                                                <Text>
+                                                    {"Время регистрации в зоне ожидания"}
+                                                </Text>
+                                            </>
+                                        )}
+
+                                        <Input
+                                            className={"datetime-ios"}
+                                            header={"Время регистрации в зоне ожидания"}
+                                            name="checkpointQueue"
+                                            type="datetime-local"
+                                            value={checkpointQueue}
+                                            onChange={(e) => setCheckpointQueue(e.target.value)}
+                                        />
+                                    </div>
+                                ) : (((
+                                            !isFlippedDirection && directionCrossing?.from_city?.country.name === "Беларусь")
                                         || (isFlippedDirection && directionCrossing?.to_city?.country.name === "Беларусь"))
                                     && selectedTransport !== "3") ? (
                                     <div>

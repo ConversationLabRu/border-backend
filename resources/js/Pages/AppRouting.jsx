@@ -20,6 +20,7 @@ import {
     useViewport
 } from "@tma.js/sdk-react";
 import {AppRoot} from "@telegram-apps/telegram-ui";
+import AboutProject from "@/Pages/Directions/AboutProject/AboutProject.jsx";
 
 export const AppRouting = () => {
 
@@ -49,6 +50,7 @@ export const AppRouting = () => {
             <div>
                 <Routes>
                     <Route path="/" element={<Directions/>}/>
+                    <Route path="/aboutProject" element={<AboutProject/>}/>
                     <Route path="/borderCrossing/:id" element={<BorderCrossing/>}/>
                     <Route path="/borderCrossing/info/:id" element={<BorderCrossingInfo/>}/>
                     <Route path="/borderCrossing/:id/info" element={<InformationPage/>}/>

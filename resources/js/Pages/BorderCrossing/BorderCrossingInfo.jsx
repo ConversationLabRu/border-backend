@@ -724,7 +724,23 @@ export default function BorderCrossingInfo() {
                                         </div>
                                     );
                                 })}
+
                             </List>
+
+                            {(directionCrossing.chatId != null) && (
+                                <div className="bottom-button-chattg-container"
+                                     onClick={() => openUrlInNewTab(`https://t.me/${directionCrossing.chatId}`)}>
+                                    <Button
+                                        before={
+                                            <Avatar size={24} src={`/${directionCrossing.chatLogo}`}/>
+                                        }
+                                        mode="filled"
+                                        size="s"
+                                    >
+                                        Перейти в канал
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                     </div>
 

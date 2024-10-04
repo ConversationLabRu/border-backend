@@ -10,6 +10,7 @@ import {ServerURL} from "@/API/ServerConst.js";
 import {Icon20Copy} from "@telegram-apps/telegram-ui/dist/icons/20/copy.js";
 import {ThreeDots} from "react-loader-spinner";
 import {useTWAEvent} from "@tonsolutions/telemetree-react";
+import LogService from "@/API/LogService.js";
 
 export default function Directions() {
     const [directions, setDirections] = useState([]);
@@ -43,7 +44,7 @@ export default function Directions() {
                 {directions.length !== 0 ? (
                     <>
                         <img
-                            src="/bordersmainnew.png"
+                            src="/bordersmainnew2.png"
                             alt={"das"}
                             className="header-image-direction"
                         />
@@ -75,15 +76,16 @@ export default function Directions() {
                             </Section>
 
                             <div className="bottom-button-container"
-                                 onClick={() => openUrlInNewTab("https://t.me/conversationlab")}>
+                                 onClick={() => {
+                                     navigate(`/aboutProject`)
+                                     LogService.sendLog("Перешел на страницу \"О проекте\"")
+                                 }
+                            }>
                                 <Button
-                                    before={
-                                        <Avatar size={24} src={"/images/logo-company.jpg"}/>
-                                    }
                                     mode="filled"
                                     size="s"
                                 >
-                                    Связаться с разработчиками
+                                    О проекте
                                 </Button>
                             </div>
                         </List>

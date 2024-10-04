@@ -430,28 +430,65 @@ export default function ReportsPage() {
                                                 || (report.is_flipped_direction && directionCrossing?.to_city?.country.name === "Беларусь"))) ? (
                                                 <div>
 
-                                                    {report.transport.name === "Car" ? (
-                                                        <div className={"time-desc-container"}>
-                                                            <Text weight="3">
-                                                                {`Очередь в зону ожидания`}
-                                                            </Text>
+                                                    {(((!report.isFlippedDirection && directionCrossing?.from_city?.name === "Брест")
+                                                            || (report.isFlippedDirection && directionCrossing?.to_city?.name === "Брест"))
+                                                        && report.selectedTransport !== "3" && report.create_report_timestamp > "2024-10-04 13:00:00") ? (
+                                                        <>
+                                                            {report.transport.name === "Car" ? (
+                                                                <div className={"time-desc-container"}>
+                                                                    <div style={{display: "flex", flexDirection: "column"}}>
 
-                                                            <Text weight="3">
-                                                                {formattedDate} в {formattedTime}
-                                                            </Text>
-                                                        </div>
+                                                                        <Text weight="3">
+                                                                            {`Время регистрации`}
+                                                                        </Text>
+
+                                                                        <Text weight="3">
+                                                                            {`в зоне ожидания`}
+                                                                        </Text>
+
+                                                                    </div>
+
+                                                                    <Text weight="3">
+                                                                        {formattedDate} в {formattedTime}
+                                                                    </Text>
+                                                                </div>
+                                                            ) : (
+                                                                <div className={"time-desc-container"}>
+                                                                    <Text weight="3">
+                                                                        {`Очередь перед КПП`}
+                                                                    </Text>
+
+                                                                    <Text weight="3">
+                                                                        {formattedDate} в {formattedTime}
+                                                                    </Text>
+                                                                </div>
+                                                            )}
+                                                        </>
                                                     ) : (
-                                                        <div className={"time-desc-container"}>
-                                                            <Text weight="3">
-                                                                {`Очередь перед КПП`}
-                                                            </Text>
+                                                        <div>
+                                                            {report.transport.name === "Car" ? (
+                                                                <div className={"time-desc-container"}>
+                                                                    <Text weight="3">
+                                                                        {`Очередь в зону ожидания`}
+                                                                    </Text>
 
-                                                            <Text weight="3">
-                                                                {formattedDate} в {formattedTime}
-                                                            </Text>
+                                                                    <Text weight="3">
+                                                                        {formattedDate} в {formattedTime}
+                                                                    </Text>
+                                                                </div>
+                                                            ) : (
+                                                                <div className={"time-desc-container"}>
+                                                                    <Text weight="3">
+                                                                        {`Очередь перед КПП`}
+                                                                    </Text>
+
+                                                                    <Text weight="3">
+                                                                        {formattedDate} в {formattedTime}
+                                                                    </Text>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     )}
-
 
                                                     <hr/>
                                                 </div>
@@ -487,17 +524,38 @@ export default function ReportsPage() {
                                             {(((!report.is_flipped_direction && directionCrossing?.from_city?.country.name === "Беларусь")
                                                 || (report.is_flipped_direction && directionCrossing?.to_city?.country.name === "Беларусь")) && report.transport.name !== "Bus") && (
                                                 <div>
-                                                    <div className={"time-desc-container"}>
-                                                        <Text weight="3">
-                                                            {`Въезд в зону ожидания:`}
-                                                        </Text>
 
-                                                        <Text weight="3">
-                                                            {dateEnterWaitingArea} в {timeEnterWaitingArea}
-                                                        </Text>
-                                                    </div>
+                                                    {((((!report.is_flipped_direction && directionCrossing?.from_city?.name === "Брест")
+                                                        || (report.is_flipped_direction && directionCrossing?.to_city?.name === "Брест")) && report.create_report_timestamp < "2024-10-04 13:00:00")) ? (
+                                                        <div>
+                                                            <div className={"time-desc-container"}>
+                                                                <Text weight="3">
+                                                                    {`Въезд в зону ожидания:`}
+                                                                </Text>
 
-                                                    <hr/>
+                                                                <Text weight="3">
+                                                                    {dateEnterWaitingArea} в {timeEnterWaitingArea}
+                                                                </Text>
+                                                            </div>
+
+                                                            <hr/>
+                                                        </div>
+                                                    ) : (((!report.is_flipped_direction && directionCrossing?.from_city?.name !== "Брест")
+                                                        || (report.is_flipped_direction && directionCrossing?.to_city?.name !== "Брест")) && (
+                                                        <div>
+                                                            <div className={"time-desc-container"}>
+                                                                <Text weight="3">
+                                                                    {`Въезд в зону ожидания:`}
+                                                                </Text>
+
+                                                                <Text weight="3">
+                                                                    {dateEnterWaitingArea} в {timeEnterWaitingArea}
+                                                                </Text>
+                                                            </div>
+
+                                                            <hr/>
+                                                        </div>
+                                                    ))}
 
                                                 </div>
                                             )}

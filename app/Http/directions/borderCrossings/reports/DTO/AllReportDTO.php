@@ -4,12 +4,15 @@ namespace App\Http\directions\borderCrossings\reports\DTO;
 
 use App\Http\directions\borderCrossings\reports\transports\DTO\TransportDTO;
 use App\Http\directions\borderCrossings\reports\transports\Entities\Transport;
+use PhpParser\Node\Scalar\String_;
+use Psy\Util\Str;
 
 class AllReportDTO extends LastReportDTO
 {
     private int $id;
     private Transport $transport;
     private bool $isShowButton;
+    private string $createTimestamp;
 
     /**
      * @param int $id
@@ -25,12 +28,14 @@ class AllReportDTO extends LastReportDTO
                                 int $userId,
                                 ?string $timeEnterWaitingArea,
                                 ?string $timeDifferenceText,
-                                bool $isShowButton)
+                                bool $isShowButton,
+                                string $createTimestamp)
     {
-        parent::__construct($checkpointEntry, $checkpointExit, $checkpointQueue, $comment, $isFlippedDirection, $userId, $timeEnterWaitingArea, $timeDifferenceText);
+        parent::__construct($checkpointEntry, $checkpointExit, $checkpointQueue, $comment, $isFlippedDirection, $userId, $timeEnterWaitingArea, $timeDifferenceText, $createTimestamp);
         $this->id = $id;
         $this->transport = $transport;
         $this->isShowButton = $isShowButton;
+        $this->createTimestamp = $createTimestamp;
     }
 
     public function getId(): int
@@ -46,6 +51,11 @@ class AllReportDTO extends LastReportDTO
     public function isShowButton(): bool
     {
         return $this->isShowButton;
+    }
+
+    public function getCreateTimestamp(): string
+    {
+        return $this->createTimestamp;
     }
 
 
@@ -65,7 +75,8 @@ class AllReportDTO extends LastReportDTO
             'transport' => $this->transport->toArray(),
             'time_enter_waiting_area' => $this->getTimeEnterWaitingArea(),
             'time_difference_text' => $this->getTimeDifferenceText(),
-            'is_show_button' => $this->isShowButton()
+            'is_show_button' => $this->isShowButton(),
+            'create_report_timestamp' => $this->createTimestamp
         ];
     }
 }

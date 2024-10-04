@@ -20,7 +20,9 @@ class BorderCrossing extends Model
         'url_arcticle',
         'is_car',
         'is_bus',
-        'is_walking'
+        'is_walking',
+        'chat_id',
+        'chat_logo'
     ];
 
     // Если не используете timestamps, укажите это

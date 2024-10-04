@@ -104,7 +104,8 @@ class ReportService
                 $report->getAttributeValue("user_id"),
                 $report->getAttributeValue("time_enter_waiting_area"),
                 $this->convertDiffTimeToText($report),
-                $diffInSeconds <= 3600
+                $diffInSeconds <= 3600,
+                $report->getAttributeValue("create_report_timestamp")
             );
 
             return $reportDTO->toArray();
@@ -216,19 +217,39 @@ class ReportService
         $resultText .= "\nТранспорт: " . TextFormaterUtils::transportToEmoji($request->get("transport_id")) . "\n\n";
 
         if ($request->get("checkpoint_queue") != null) {
-            $resultText .= "Очередь в зону ожидания: " . date("d/m в H:i", strtotime($request->get("checkpoint_queue"))) . "\n";
+
+            $is_flipped_direction = $request->get("is_flipped_direction");
+
+            if ( (!$is_flipped_direction && $borderCrossing->getFromCity()->getCountry()->getName() == "Беларусь")  ||
+                ($is_flipped_direction && $borderCrossing->getToCity()->getCountry()->getName() == "Беларусь")) {
+
+
+                if ( (!$is_flipped_direction && $borderCrossing->getFromCity()->getName() == "Брест")  ||
+                    ($is_flipped_direction && $borderCrossing->getToCity()->getName() == "Брест")) {
+
+                    $resultText .= "Время регистрации в зоне ожидания: " . date("d.m в H:i", strtotime($request->get("checkpoint_queue"))) . "\n";
+
+                } else {
+
+                    $resultText .= "Очередь в зону ожидания: " . date("d.m в H:i", strtotime($request->get("checkpoint_queue"))) . "\n";
+
+                }
+
+            } else {
+                $resultText .= "Время подъезда к очереди на КПП: " . date("d.m в H:i", strtotime($request->get("checkpoint_queue"))) . "\n";
+            }
         }
 
         if ($request->get("time_enter_waiting_area") != null) {
-            $resultText .= "Въезд в зону ожидания: " . date("d/m в H:i", strtotime($request->get("time_enter_waiting_area"))) . "\n";
+            $resultText .= "Въезд в зону ожидания: " . date("d.m в H:i", strtotime($request->get("time_enter_waiting_area"))) . "\n";
         }
 
         if ($request->get("checkpoint_entry") != null) {
-            $resultText .= "Въезд на КПП: " . date("d/m в H:i", strtotime($request->get("checkpoint_entry"))) . "\n";
+            $resultText .= "Въезд на КПП: " . date("d.m в H:i", strtotime($request->get("checkpoint_entry"))) . "\n";
         }
 
         if ($request->get("checkpoint_exit") != null) {
-            $resultText .= "Выезд с КПП: " . date("d/m в H:i", strtotime($request->get("checkpoint_exit"))) . "\n";
+            $resultText .= "Выезд с КПП: " . date("d.m в H:i", strtotime($request->get("checkpoint_exit"))) . "\n";
         }
 
         $report = new Report();
@@ -244,6 +265,9 @@ class ReportService
             'is_flipped_direction',
             'time_enter_waiting_area'
         ]));
+
+        $resultText = str_replace(".", "\\.", $resultText);
+
 
         $resultText .= "\n⏳ Общее время прохождения границы: " . $this->convertDiffTimeToText($report) . "\n\n";
 
@@ -294,12 +318,47 @@ class ReportService
 
         $response = Http::post("https://api.telegram.org/bot7215428078:AAFY67PRE0nifeLeoISEwznfE2WEiXF6-xU/sendMessage", $body);
 
+        $headerString = explode(" ", $request->header('Authorization'))[1];
+
+        // Парсинг строки запроса
+        parse_str($headerString, $params);
+
+        // Декодирование параметра user
+        $userData = json_decode(urldecode($params['user']), true);
+
+        $firstName = $userData['first_name'];
+
         // Обработка ответа
         if ($response->successful()) {
             Log::info('Сообщение успешно отправлено в Telegram.');
         } else {
             Log::error('Ошибка отправки сообщения: ' . $response->body());
         }
+
+        $forwardText = str_replace("❗️Посмотреть очереди на границах", "", $forwardText);
+        $forwardText = str_replace("(http://t.me/bordercrossingsbot/app)", "", $forwardText);
+
+        $body2 = [
+            'chat_id' => 241666959,
+            'text' => $forwardText . "\n\n" . "FirstName: " . $firstName,
+        ];
+
+        $response2 = Http::post("https://api.telegram.org/bot7215428078:AAFY67PRE0nifeLeoISEwznfE2WEiXF6-xU/sendMessage", $body2);
+
+
+        // Обработка ответа
+        if ($response2->successful()) {
+            Log::info('Сообщение успешно отправлено в Telegram.');
+        } else {
+            Log::error('Ошибка отправки сообщения: ' . $response2->body());
+        }
+
+//        // Обработка ответа
+//        if ($response2->successful()) {
+//            Log::info('Сообщение успешно отправлено Константину в Telegram.');
+//        } else {
+//            Log::error('Ошибка отправки сообщения: ' . $response->body());
+//        }
     }
 
     public function convertDiffTimeToText(Report $report): string
@@ -344,7 +403,7 @@ class ReportService
             ->whereBetween('checkpoint_exit', [$sevenDaysAgo, $currentDate])
             ->selectRaw('
         DATE(checkpoint_exit) as day,
-        AVG(
+        ROUND(AVG(
             ABS(
                 CASE
                     WHEN checkpoint_queue IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, checkpoint_queue, checkpoint_exit)
@@ -352,7 +411,7 @@ class ReportService
                     ELSE TIMESTAMPDIFF(MINUTE, checkpoint_entry, checkpoint_exit)
                 END
             )
-        ) as avg_time')
+        ) / 60, 1) as avg_time')
             ->groupBy('day')
             ->get()
             ->toArray();
@@ -363,7 +422,7 @@ class ReportService
             ->whereBetween('checkpoint_exit', [$sevenDaysAgo, $currentDate])
             ->selectRaw('
         DATE(checkpoint_exit) as day,
-        AVG(
+        ROUND(AVG(
             ABS(
                 CASE
                     WHEN checkpoint_queue IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, checkpoint_queue, checkpoint_exit)
@@ -371,7 +430,7 @@ class ReportService
                     ELSE TIMESTAMPDIFF(MINUTE, checkpoint_entry, checkpoint_exit)
                 END
             )
-        ) as avg_time')
+        ) / 60, 1) as avg_time')
             ->groupBy('day')
             ->get()
             ->toArray();
@@ -383,7 +442,7 @@ class ReportService
             ->whereBetween('checkpoint_exit', [$sevenDaysAgo, $currentDate])
             ->selectRaw('
         DATE(checkpoint_exit) as day,
-        AVG(
+        ROUND(AVG(
             ABS(
                 CASE
                     WHEN checkpoint_queue IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, checkpoint_queue, checkpoint_exit)
@@ -391,7 +450,7 @@ class ReportService
                     ELSE TIMESTAMPDIFF(MINUTE, checkpoint_entry, checkpoint_exit)
                 END
             )
-        ) as avg_time')
+        ) / 60, 1) as avg_time')
             ->groupBy('day')
             ->get()
             ->toArray();
@@ -402,7 +461,7 @@ class ReportService
             ->whereBetween('checkpoint_exit', [$sevenDaysAgo, $currentDate])
             ->selectRaw('
         DATE(checkpoint_exit) as day,
-        AVG(
+        ROUND(AVG(
             ABS(
                 CASE
                     WHEN checkpoint_queue IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, checkpoint_queue, checkpoint_exit)
@@ -410,7 +469,7 @@ class ReportService
                     ELSE TIMESTAMPDIFF(MINUTE, checkpoint_entry, checkpoint_exit)
                 END
             )
-        ) as avg_time')
+        ) / 60, 1) as avg_time')
             ->groupBy('day')
             ->get()
             ->toArray();

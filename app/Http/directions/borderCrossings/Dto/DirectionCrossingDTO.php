@@ -15,8 +15,10 @@ class DirectionCrossingDTO
     private bool $is_car;
     private $cache;
     private $cachePolandInfo;
+    private ?string $chat_id;
+    private ?string $chat_logo;
 
-    public function __construct(int $id, bool $is_quque, string $header_image, ?CityDTO $from_city, ?CityDTO $to_city, string $url_arcticle, bool $is_bus, bool $is_walking, bool $is_car)
+    public function __construct(int $id, bool $is_quque, string $header_image, ?CityDTO $from_city, ?CityDTO $to_city, string $url_arcticle, bool $is_bus, bool $is_walking, bool $is_car, ?string $chat_id, ?string $chat_logo)
     {
         $this->id = $id;
         $this->is_quque = $is_quque;
@@ -27,6 +29,8 @@ class DirectionCrossingDTO
         $this->is_bus = $is_bus;
         $this->is_walking = $is_walking;
         $this->is_car = $is_car;
+        $this->chat_id = $chat_id;
+        $this->chat_logo = $chat_logo;
     }
 
     // Public getter methods
@@ -107,6 +111,16 @@ class DirectionCrossingDTO
         $this->cachePolandInfo = $cachePolandInfo;
     }
 
+    public function getChatId(): string
+    {
+        return $this->chat_id;
+    }
+
+    public function getChatLogo(): string
+    {
+        return $this->chat_logo;
+    }
+
 
 
 
@@ -127,6 +141,8 @@ class DirectionCrossingDTO
             'is_walking' => $this->is_walking,
             'cache' => $this->cache,
             'cachePoland' => $this->cachePolandInfo,
+            'chatId' => $this->chat_id,
+            'chatLogo' => $this->chat_logo,
         ];
     }
 }

@@ -63,6 +63,7 @@
     width: 100%;
     justify-content: space-between;
     margin-bottom: 3%;
+    align-items: center;
 }
 
 .bottom-button-container {

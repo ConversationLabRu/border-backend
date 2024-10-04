@@ -59,7 +59,9 @@ class BorderCrossingService
             $direction->url_arcticle,
             $direction->is_bus,
             $direction->is_walking,
-            $direction->is_car
+            $direction->is_car,
+            null,
+            null
         );
 
         return $directionDTO;
@@ -115,7 +117,9 @@ class BorderCrossingService
                 $direction->url_arcticle,
                 $direction->is_bus,
                 $direction->is_walking,
-                $direction->is_car
+                $direction->is_car,
+                $direction->chat_id,
+                $direction->chat_logo
             );
 
             if ($directionDTO->getFromCity()->getCountry()->getName() == "Беларусь" || $directionDTO->getToCity()->getCountry()->getName() == "Беларусь") {
