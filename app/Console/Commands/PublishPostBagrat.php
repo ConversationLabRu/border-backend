@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Http\directions\borderCrossings\reports\Services\ReportService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class PublishPostBagrat extends Command
 {
@@ -83,5 +84,31 @@ class PublishPostBagrat extends Command
         } else {
             $this->error('Ошибка отправки сообщения: ' . $response->body());
         }
+
+        $body2 = [
+            'chat_id' => '@poputchiki39',
+            'text' => $formatedText,
+            'parse_mode' => 'MarkdownV2',
+            'reply_markup' => json_encode([
+                'inline_keyboard' => [
+                    [
+                        [
+                            'text' => 'Открыть приложение',
+                            'url' => 'https://t.me/bordercrossingsbot/app'
+                        ]
+                    ]
+                ]
+            ])
+        ];
+
+        $response2 = Http::post("https://api.telegram.org/bot7215428078:AAFY67PRE0nifeLeoISEwznfE2WEiXF6-xU/sendMessage", $body2);
+
+        // Обработка ответа
+        if ($response2->successful()) {
+            Log::info('Сообщение успешно отправлено в Telegram.');
+        } else {
+            Log::error('Ошибка отправки сообщения: ' . $response2->body());
+        }
+
     }
 }

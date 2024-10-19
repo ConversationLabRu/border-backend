@@ -8,6 +8,7 @@ use App\Http\directions\borderCrossings\Dto\CityDTO;
 use App\Http\directions\borderCrossings\Dto\CountryDTO;
 use App\Http\directions\borderCrossings\Dto\DirectionCrossingDTO;
 use App\Http\directions\borderCrossings\Entities\BorderCrossing;
+use App\Http\directions\borderCrossings\reports\Services\ReportService;
 use App\Utils\LogUtils;
 use Carbon\Carbon;
 use DateTime;
@@ -25,6 +26,7 @@ include("simple_html_dom.php");
 
 class BorderCrossingService
 {
+
     public static function getBorderCrossingById(int $id)
     {
         $direction = BorderCrossing::with('fromCity.country', 'toCity.country')
@@ -133,37 +135,6 @@ class BorderCrossingService
                 } else {
                     $data = Cache::get("benyakoni");
                 }
-//                    $data = Cache::get("kameni_log");
-//
-//                    if ($data == null) {
-//                        $response = Http::get("https://belarusborder.by/info/monitoring-new?token=test&checkpointId=b60677d4-8a00-4f93-a781-e129e1692a03");
-//                        $data = $this->convertToCacheObjectBelarusInfo($response);
-//                        Cache::put('kameni_log', $data, now()->addMinutes(1));
-//                    }
-//
-//                    return $data;
-//                } elseif ($directionDTO->getFromCity()->getName() == "Брест" || $directionDTO->getToCity()->getName() == "Брест") {
-//                    $data = Cache::get("brest");
-//
-//                    if ($data == null) {
-//                        $response = Http::get("https://belarusborder.by/info/monitoring-new?token=test&checkpointId=a9173a85-3fc0-424c-84f0-defa632481e4");
-//                        $data = $this->convertToCacheObjectBelarusInfo($response);
-//                        Cache::put('brest', $data, now()->addMinutes(5));
-//                    }
-//
-//                    return $data;
-//                }
-//
-//                $data = Cache::get("benyakoni");
-//
-//                if ($data == null) {
-//                    $response = Http::get("https://belarusborder.by/info/monitoring-new?token=test&checkpointId=53d94097-2b34-11ec-8467-ac1f6bf889c0");
-//                    $data = $this->convertToCacheObjectBelarusInfo($response);
-//                    Cache::put('benyakoni', $data, now()->addMinutes(5));
-//
-//                }
-//
-//                return $data;
 
                 $response = $data;
                 if ($response !== null) $directionDTO->setCache($response->toArray());
@@ -279,6 +250,8 @@ class BorderCrossingService
             // Формируем итоговую строку
             if (count($parts) > 0) {
                 Log::info("Информация о машинах есть");
+
+
 
                 $cacheDTO = new CacheDTO(
                     implode(' ', $parts),

@@ -21,6 +21,7 @@ use Carbon\Carbon;
 use DateTime;
 use DateTimeZone;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -601,9 +602,14 @@ class ReportService
             }
 
             $results[$data['label']] = $this->calculateMedian(
-                $reports->map(fn($report) => $this->calculatePassageTime($report))->filter()->toArray()
+                $reports->map(fn($report) => $this->calculatePassageTime($report))->filter()->toArray(), $data['label'], $borderCrossingId
             );
         }
+
+//        $time = explode(" ", $this->reportService->getStatistics($borderCrossing, true));
+//
+//        $hours = $hours + (int)$time[0];
+//        $minutes = $minutes + (int)$time[1];
 
         $result = new StatisticDTO(
             $results['CarNotFlipped'] ?? 'Нет информации',
@@ -643,21 +649,106 @@ class ReportService
 
         $difference = $exitTime->diff($entryTime);
 
-        if (!is_null($report["time_enter_waiting_area"])) {
-            $enterWaitingAreaTime = new DateTime($report["time_enter_waiting_area"], new DateTimeZone('Europe/Minsk'));
-            $difference = $exitTime->diff($enterWaitingAreaTime);
+        if ($report["border_crossing_id"] == 5 || $report["border_crossing_id"] == 6 || $report["border_crossing_id"] == 9) {
+            switch ($report["border_crossing_id"]) {
+                case 5:
+                    $data = Cache::get("kameni_log");
+                    break;
+                case 6:
+                    $data = Cache::get("benyakoni");
+                    break;
+                case 9:
+                    $data = Cache::get("brest");
+                    break;
+            }
+
+            try {
+                $cache = explode(' ', $data->getTime());
+
+                if ($cache[0] == "0" && $cache[2] == 0) {
+                    if (!is_null($report["time_enter_waiting_area"])) {
+                        $enterWaitingAreaTime = new DateTime($report["time_enter_waiting_area"], new DateTimeZone('Europe/Minsk'));
+                        $difference = $exitTime->diff($enterWaitingAreaTime);
+                    }
+
+                    if (!is_null($report["checkpoint_queue"])) {
+                        $queueTime = new DateTime($report["checkpoint_queue"], new DateTimeZone('Europe/Minsk'));
+                        $difference = $exitTime->diff($queueTime);
+                    }
+                }
+
+
+            } catch (\Exception $exception) {
+                Log::error($exception->getMessage());
+            }
         }
 
-        if (!is_null($report["checkpoint_queue"])) {
-            $queueTime = new DateTime($report["checkpoint_queue"], new DateTimeZone('Europe/Minsk'));
-            $difference = $exitTime->diff($queueTime);
+        if ($report["border_crossing_id"] == 7 || $report["border_crossing_id"] == 9 || $report["border_crossing_id"] == 8) {
+            switch ($report["border_crossing_id"]) {
+                case 7:
+                    $data = Cache::get("grzechotki");
+                    break;
+                case 8:
+                    $data = Cache::get("bezledy");
+                    break;
+                case 9:
+                    $data = Cache::get("terespol");
+                    break;
+            }
+
+            try {
+                if ($report["transport_id"] == 2) {
+                    $polandTimeCar = explode(':', $data->getTimeAutoFormatString());
+
+                    if ($polandTimeCar[0] == "0" && $polandTimeCar[1] == "0") {
+                        if (!is_null($report["time_enter_waiting_area"])) {
+                            $enterWaitingAreaTime = new DateTime($report["time_enter_waiting_area"], new DateTimeZone('Europe/Minsk'));
+                            $difference = $exitTime->diff($enterWaitingAreaTime);
+                        }
+
+                        if (!is_null($report["checkpoint_queue"])) {
+                            $queueTime = new DateTime($report["checkpoint_queue"], new DateTimeZone('Europe/Minsk'));
+                            $difference = $exitTime->diff($queueTime);
+                        }
+                    }
+
+                } elseif ($report["transport_id"] == 3) {
+                    $polandTimeBus = explode(':', $data->getTimeBusFormatString());
+
+                    if ($polandTimeBus[0] == "0" && $polandTimeBus[1] == "0") {
+                        if (!is_null($report["time_enter_waiting_area"])) {
+                            $enterWaitingAreaTime = new DateTime($report["time_enter_waiting_area"], new DateTimeZone('Europe/Minsk'));
+                            $difference = $exitTime->diff($enterWaitingAreaTime);
+                        }
+
+                        if (!is_null($report["checkpoint_queue"])) {
+                            $queueTime = new DateTime($report["checkpoint_queue"], new DateTimeZone('Europe/Minsk'));
+                            $difference = $exitTime->diff($queueTime);
+                        }
+                    }
+                } else {
+                    if (!is_null($report["time_enter_waiting_area"])) {
+                        $enterWaitingAreaTime = new DateTime($report["time_enter_waiting_area"], new DateTimeZone('Europe/Minsk'));
+                        $difference = $exitTime->diff($enterWaitingAreaTime);
+                    }
+
+                    if (!is_null($report["checkpoint_queue"])) {
+                        $queueTime = new DateTime($report["checkpoint_queue"], new DateTimeZone('Europe/Minsk'));
+                        $difference = $exitTime->diff($queueTime);
+                    }
+                }
+
+            } catch (\Exception $exception) {
+                Log::error($exception->getMessage());
+            }
         }
+
 
         // Получаем разницу в минутах
         return ($difference->days * 24 * 60) + ($difference->h * 60) + $difference->i;
     }
 
-    private function calculateMedian($times)
+    private function calculateMedian($times, $label, $borderCrossingId)
     {
         if (empty($times)) {
             return "Нет информации";
@@ -675,6 +766,97 @@ class ReportService
 
         $hours = floor($result / 60);
         $minutes = $result % 60;
+
+
+        if ($label == "CarNotFlipped") {
+            if ($borderCrossingId == 5 || $borderCrossingId == 6 || $borderCrossingId == 9) {
+                switch ($borderCrossingId) {
+                    case 5:
+                        $data = Cache::get("kameni_log");
+                        break;
+                    case 6:
+                        $data = Cache::get("benyakoni");
+                        break;
+                    case 9:
+                        $data = Cache::get("brest");
+                        break;
+                }
+
+                try {
+                    $cache = explode(' ', $data->getTime());
+                    $hours = $hours + (int) $cache[0];
+                    $minutes = $minutes + (int) $cache[2];
+
+                    if ($minutes >= 60) {
+                        $hours += (int) ($minutes / 60); // Прибавляем к часам
+                        $minutes = $minutes % 60; // Остаток минут
+                    }
+
+                } catch (\Exception $exception) {
+                    Log::error($exception->getMessage());
+                }
+            }
+        }
+
+        if ($label == "CarFlipped") {
+            if ($borderCrossingId == 7 || $borderCrossingId == 9 || $borderCrossingId == 8) {
+                switch ($borderCrossingId) {
+                    case 7:
+                        $data = Cache::get("grzechotki");
+                        break;
+                    case 8:
+                        $data = Cache::get("bezledy");
+                        break;
+                    case 9:
+                        $data = Cache::get("terespol");
+                        break;
+                }
+
+                try {
+                    $polandTimeCar = explode(':', $data->getTimeAutoFormatString());
+                    $hours = $hours + (int) $polandTimeCar[0];
+                    $minutes = $minutes + (int) $polandTimeCar[1];
+
+                    if ($minutes >= 60) {
+                        $hours += (int) ($minutes / 60); // Прибавляем к часам
+                        $minutes = $minutes % 60; // Остаток минут
+                    }
+
+                } catch (\Exception $exception) {
+                    Log::error($exception->getMessage());
+                }
+            }
+        }
+
+        if ($label == "BusFlipped") {
+            if ($borderCrossingId == 7 || $borderCrossingId == 9 || $borderCrossingId == 8) {
+                switch ($borderCrossingId) {
+                    case 7:
+                        $data = Cache::get("grzechotki");
+                        break;
+                    case 8:
+                        $data = Cache::get("bezledy");
+                        break;
+                    case 9:
+                        $data = Cache::get("terespol");
+                        break;
+                }
+
+                try {
+                    $polandTimeCar = explode(':', $data->getTimeBusFormatString());
+                    $hours = $hours + (int) $polandTimeCar[0];
+                    $minutes = $minutes + (int) $polandTimeCar[1];
+
+                    if ($minutes >= 60) {
+                        $hours += (int) ($minutes / 60); // Прибавляем к часам
+                        $minutes = $minutes % 60; // Остаток минут
+                    }
+
+                } catch (\Exception $exception) {
+                    Log::error($exception->getMessage());
+                }
+            }
+        }
 
         return BorderCrossingService::declensionHours($hours) . ' ' . BorderCrossingService::declensionMinutes($minutes);
     }
