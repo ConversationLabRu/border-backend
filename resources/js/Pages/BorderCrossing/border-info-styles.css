@@ -116,3 +116,24 @@
     font-size: 12px;
 }
 
+.to {
+    display: flex;
+    align-items: center;
+}
+
+.to-reverse {
+    display: flex;
+    align-items: center;
+}
+
+.stat-container-car-queue {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.route-container {
+    display: flex;
+    align-items: center;
+}
+

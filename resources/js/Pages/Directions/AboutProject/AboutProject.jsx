@@ -53,11 +53,12 @@ export default function AboutProject() {
                     <div className={"text-info"} style={{margin: "5%"}}>
                         <Text>
                             <strong>«Очереди на границе»</strong> — совместный проект портала <a style={{color: "cornflowerblue"}} href={"https://kgd.ru/"} target={"_blank"}>Калининград.Ru</a> и компании <a style={{color: "cornflowerblue"}} href={"https://conversationlab.ru/"} target={"_blank"}>Conversation Lab_</a>.<br/>
-                            Прогнозы по времени прохождения контроля, оформление документов, правила и нормы провоза товаров, а также советы по навигации и трансляция с камер в пунктах пропуска — здесь есть всё, что нужно для поездки в Калининград и обратно на автомобиле.
+                            Здесь вы найдёте актуальную информацию о пересечении границы между Россией, Беларусью, Литвой и Польшей. <br/> <br/>
+                            Прогнозы по времени прохождения контроля, оформление документов, правила и нормы провоза товаров, полезные советы по навигации и трансляция с камер в пунктах пропуска — здесь есть всё, что нужно для пересечения пункта пропуска на автомобиле и автобусе.
                         </Text>
                     </div>
 
-                    <div className="bottom-button-container" style={{bottom: "60px"}}
+                    <div className="bottom-button-container-about-project" style={{bottom: "60px"}}
                          onClick={() => openUrlInNewTab("https://t.me/conversationlab")}>
                         <Button
                             before={
@@ -70,7 +71,7 @@ export default function AboutProject() {
                         </Button>
                     </div>
 
-                    <div className="bottom-button-container"
+                    <div className="bottom-button-container-about-project"
                          onClick={() => openUrlInNewTab("https://t.me/kgdrubot")}>
                         <Button
                             before={

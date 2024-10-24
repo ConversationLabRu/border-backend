@@ -49,6 +49,11 @@ Route::middleware('auth.api')->group(function () {
         Route::get('/statisticGraph', [ReportController::class, 'statisticsGraph']); // Get /directions/borderCrossing/reports/statisticGraph
     });
 
+    Route::prefix('directions/borderCrossing/queue')->group(function () {
+        Route::get('/', [\App\Http\directions\borderCrossings\CarsQueue\Controllers\CarsQueueController::class, 'index']); // GET /directions/borderCrossing/queue
+        Route::post('/', [\App\Http\directions\borderCrossings\CarsQueue\Controllers\CarsQueueController::class, 'store']); // POST /directions/borderCrossing/queue
+    });
+
     Route::prefix('directions/borderCrossing/reports')->group(function () {
         Route::get('/transports', [TransportController::class, 'index']); // GET /directions/borderCrossing/reports/transports
     });

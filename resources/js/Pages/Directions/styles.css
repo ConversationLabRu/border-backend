@@ -77,3 +77,9 @@
     width: 100%; /* Для того, чтобы кнопка всегда была в центре */
 }
 
+.bottom-button-container-about-project {
+    z-index: 1000; /* Обеспечивает, что кнопка будет на переднем плане */
+    display: flex;
+    justify-content: center;
+    width: 100%; /* Для того, чтобы кнопка всегда была в центре */
+}

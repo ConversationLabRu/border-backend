@@ -4,10 +4,10 @@ import {
     AppRoot,
     Avatar,
     AvatarStack,
-    Button,
+    Button, Cell, Input,
     List,
     Modal,
-    Placeholder,
+    Placeholder, Radio,
     TabsList,
     Text
 } from "@telegram-apps/telegram-ui";
@@ -16,7 +16,7 @@ import { useState, useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { ThreeDots } from "react-loader-spinner";
 import ReportService from "@/API/ReportService.js";
-import {useBackButton, useMainButton} from "@tma.js/sdk-react";
+import {useBackButton, useMainButton, usePopup} from "@tma.js/sdk-react";
 import {IoBus, IoCar, IoInformation} from "react-icons/io5";
 import { VscDeviceCamera } from "react-icons/vsc";
 import React from 'react';
@@ -28,6 +28,11 @@ import BorderCrossingService from "@/API/BorderCrossingService.js";
 import {TabsItem} from "@telegram-apps/telegram-ui/dist/components/Navigation/TabsList/components/TabsItem/TabsItem.js";
 import {LineChart} from "@mui/x-charts";
 import {Switch} from "@mui/material";
+import CarQueueService from "@/API/CarQueueService.js";
+import {FormInput} from "@telegram-apps/telegram-ui/dist/components/Form/FormInput/FormInput.js";
+import {
+    ModalClose
+} from "@telegram-apps/telegram-ui/dist/components/Overlays/Modal/components/ModalClose/ModalClose.js";
 
 
 export default function BorderCrossingInfo() {
@@ -35,10 +40,14 @@ export default function BorderCrossingInfo() {
     const directionCrossing = location.state?.directionCrossing;
     const direction = location.state?.direction;
     const [reports, setReports] = useState([]);
+    const [carQueue, setCarQueue] = useState([]);
+    const [flagCreateReportButton, setFlagCreateReportButton] = useState(false);
     const { id } = useParams();
     const navigate = useNavigate();
     const backButton = useBackButton();
     const [waitingArea, setWaitingArea] = useState(null);
+
+    const popup = usePopup();
 
     useEffect(() => {
         backButton.show();
@@ -71,26 +80,27 @@ export default function BorderCrossingInfo() {
         mainButton.setText("Добавить отчет").setBgColor("#007aff").show().enable();
     }, []);
 
-    useEffect(() => {
-        const handleMainButtonClick = () => {
-            navigate(`/borderCrossing/${id}/reports/create`,
-                {
-                    state: {
-                        directionCrossing: directionCrossing,
-                        direction: direction
-                    }
+    const handleMainButtonClick = () => {
+        navigate(`/borderCrossing/${id}/reports/create`,
+            {
+                state: {
+                    directionCrossing: directionCrossing,
+                    direction: direction
                 }
-            );
+            }
+        );
 
-            mainButton.hide();
-        };
+        mainButton.hide();
+    };
 
-        mainButton.on("click", handleMainButtonClick);
-
-        return () => {
-            mainButton.off("click", handleMainButtonClick);
-        }
-    }, [mainButton]);
+    // useEffect(() => {
+    //
+    //     mainButton.on("click", handleMainButtonClick);
+    //
+    //     return () => {
+    //         mainButton.off("click", handleMainButtonClick);
+    //     }
+    // }, [mainButton]);
 
     const [countryLogos, setCountryLogos] = useState({
         fromCountryLogo: null,
@@ -117,6 +127,17 @@ export default function BorderCrossingInfo() {
             }
         }).catch((error) => {
             console.error('Ошибка при получении отчётов:', error);
+        });
+    }, [id]);
+
+    useEffect(() => {
+        const directionIdNumber = Number(id);
+        CarQueueService.getLastQueueByBorderCrossing(directionIdNumber).then((r) => {
+            if (!(r instanceof Error)) {
+                setCarQueue(r);
+            }
+        }).catch((error) => {
+            console.error('Ошибка при получении данных о количестве машин до КПП:', error);
         });
     }, [id]);
 
@@ -202,6 +223,9 @@ export default function BorderCrossingInfo() {
     const [jsonData1, setJsonData1] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
+    const [countCar, setCountCar] = useState(0);
+
+
 
     // Получение данных с API для первой линии
     const fetchData1 = () => {
@@ -214,6 +238,15 @@ export default function BorderCrossingInfo() {
         }).catch((error) => {
             console.error('Ошибка при получении отчётов:', error);
         });
+    };
+
+    const setNumber = ({ target }) => {
+        let { value, min, max } = target;
+        value = Math.max(Number(min), Math.min(Number(max), Number(value)));
+
+        if (value )
+
+        setCountCar(value);
     };
 
 
@@ -250,6 +283,66 @@ export default function BorderCrossingInfo() {
     };
 
     const [isFlippedDirection, setFlippedDirection] = useState(false)
+
+    const [isOpen, setIsOpen] = useState(false);
+
+    const handleOpenChange = (isOpen) => {
+        setIsOpen(isOpen);
+        console.log(isOpen ? 'Окно открыто' : 'Окно закрыто');
+
+        if (isOpen) {
+
+            mainButton.setText("Отправить").setBgColor("#007aff").show().enable();
+
+        } else  {
+            mainButton.setText("Добавить отчет").setBgColor("#007aff").show().enable();
+
+        }
+
+    };
+
+    const handleMainButtonClickSend = () => {
+
+        const countCarData = {
+            border_crossing_id: id,
+            count: countCar,  // Adjust according to your user data
+            route_reverse: isReverseRoute
+        };
+
+        CarQueueService.createQueue(countCarData)
+            .then(response => {
+                    if (isReverseRoute) {
+                        carQueue['carCountReverse'] = `${countCar} (0:00) назад`
+                    } else {
+                        carQueue['carCount'] = `${countCar} (0:00) назад`
+                    }
+
+                    popup.open({title: "Успешно", message: "Данные отправлены, обновите страницу", buttons: [{type: "default", text: "Ok"}]});
+                }
+            )
+
+    };
+
+    useEffect(() => {
+
+        if (isOpen) {
+            mainButton.on("click", handleMainButtonClickSend);
+            return () => {
+                mainButton.off("click", handleMainButtonClickSend);
+            };
+        } else  {
+            mainButton.on("click", handleMainButtonClick);
+
+            return () => {
+                mainButton.off("click", handleMainButtonClick);
+            }
+        }
+    }, [isOpen, countCar]); // Зависимость от countCar, чтобы обновлять обработчик при изменении
+
+    // Состояние пути прямой или в обратную сторону
+    const [isReverseRoute, setReverseRoute] = useState((directionCrossing?.from_city?.name === "Мамоново II"
+        || directionCrossing?.from_city?.name === "Багратионовск"
+        || directionCrossing?.from_city?.name === "Чернышевское") ? false : true)
 
     const formatToRussianDate = (dateString) => {
         const [year, month, day] = dateString.split('-');
@@ -356,6 +449,10 @@ export default function BorderCrossingInfo() {
     // Определение iOS и macOS
     const isIOS = () => {
         return /iPad|iPhone|iPod/.test(navigator.platform) && !window.MSStream;
+    };
+
+    const isMacOS = () => {
+        return /Macintosh|MacIntel|MacPPC|Mac68K/.test(navigator.platform) && !isIOS();
     };
 
     useEffect(() => {
@@ -524,10 +621,257 @@ export default function BorderCrossingInfo() {
                                 </div>
                             )}
 
+                            {(directionCrossing?.from_city?.name === "Мамоново II"
+                                || directionCrossing?.from_city?.name === "Багратионовск"
+                                || directionCrossing?.from_city?.name === "Чернышевское") ? (
+                                <div>
+                                    <div className="bel-container-inf report-title">
+                                        <div>
+                                            <Text weight="1" className={""} style={{marginBottom: "3%"}}>
+                                                {`Количество автомобилей в очереди до КПП`}
+                                            </Text>
+                                        </div>
+
+                                        <div className="time-container-title-poland">
+                                            <div className={"report-elem-logo-container stat-container-car-queue"}>
+                                                <div style={{width: "60%"}}>
+                                                    <div className="to">
+                                                        <Avatar size={20}
+                                                                src={`/${directionCrossing.from_city.country.logo}`}/>
+                                                        <Avatar className={"to-logo-size"} size={20}
+                                                                src={`/to_logo.svg`}/>
+                                                        <Avatar size={20}
+                                                                src={`/${directionCrossing.to_city.country.logo}`}/>
+
+                                                        <Text style={{marginLeft: "2%"}}>{carQueue['carCount']}</Text>
+                                                    </div>
+
+                                                    <div className="to-reverse">
+                                                        <Avatar size={20}
+                                                                src={`/${directionCrossing.to_city.country.logo}`}/>
+                                                        <Avatar className={"to-logo-size"} size={20}
+                                                                src={`/to_logo.svg`}/>
+                                                        <Avatar size={20}
+                                                                src={`/${directionCrossing.from_city.country.logo}`}/>
+
+                                                        <Text style={{marginLeft: "2%"}}>{carQueue['carCountReverse']}</Text>
+                                                    </div>
+                                                </div>
+
+                                                <Modal
+                                                    header={<ModalHeader>Количество автомобилей в очереди до КПП</ModalHeader>}
+                                                    trigger={<Button  size="s" style={{width: "40%"}}>Сообщить</Button>}
+                                                    onClose={() => console.log('Окно закрыто')}
+                                                    onOpenChange={handleOpenChange}
+
+                                                >
+                                                    <Placeholder
+                                                        id={"statistic-placeholder"}
+                                                        className={"statistic-placeholder"}
+                                                    >
+                                                        <Text className="choose-direction-title">
+                                                            Выберите направление
+                                                        </Text>
+
+                                                        <form>
+                                                            <div style={{display: "flex", alignItems: "center"}}>
+                                                                <Cell
+                                                                    Component="label"
+                                                                    before={<Radio name="radio" value={`false`}
+                                                                                   checked={!isReverseRoute}/>}
+                                                                    multiline
+                                                                    onChange={() => setReverseRoute(false)}
+                                                                >
+                                                                    <div className={"route-container"}>
+                                                                        <Avatar size={20}
+                                                                                src={`/${directionCrossing.from_city.country.logo}`}/>
+                                                                        <Avatar className={"to-logo-size"} size={20}
+                                                                                src={`/to_logo.svg`}/>
+                                                                        <Avatar size={20}
+                                                                                src={`/${directionCrossing.to_city.country.logo}`}/>
+                                                                    </div>
+                                                                </Cell>
+
+                                                                <Cell
+                                                                    Component="label"
+                                                                    before={<Radio name="radio" value={`true`}
+                                                                                   checked={isReverseRoute}/>}
+                                                                    multiline
+                                                                    onChange={() => setReverseRoute(true)}
+                                                                >
+                                                                    <div className={"route-container"}>
+                                                                        <Avatar size={20}
+                                                                                src={`/${directionCrossing.to_city.country.logo}`}/>
+                                                                        <Avatar className={"to-logo-size"} size={20}
+                                                                                src={`/to_logo.svg`}/>
+                                                                        <Avatar size={20}
+                                                                                src={`/${directionCrossing.from_city.country.logo}`}/>
+                                                                    </div>
+                                                                </Cell>
+
+                                                            </div>
+                                                        </form>
+
+                                                        {(isMacOS() || isIOS()) && (
+                                                            <>
+                                                                <Text >
+                                                                    {"Укажите количество автомобилей в очереди до КПП"}
+                                                                </Text>
+                                                            </>
+                                                        )}
+
+                                                        <Input
+                                                            style={{width: "90%"}}
+                                                            header={"Количество автомобилей в очереди до КПП"}
+                                                            name="countCar"
+                                                            type="number"
+                                                            value={countCar}
+                                                            onChange={(e) => setCountCar(e.target.value)}
+                                                            placeholder="Количество автомобилей в очереди до КПП"
+                                                            defaultValue="0"
+                                                        />
+
+                                                        {/*<Button style={{width: "90%"}} onClick={() => {*/}
+                                                        {/*    const countCarData = {*/}
+                                                        {/*        border_crossing_id: id,*/}
+                                                        {/*        count: countCar,  // Adjust according to your user data*/}
+                                                        {/*        route_reverse: isReverseRoute*/}
+                                                        {/*    };*/}
+
+                                                        {/*    CarQueueService.createQueue(countCarData)*/}
+                                                        {/*        .then(response => {*/}
+                                                        {/*            if (isReverseRoute) {*/}
+                                                        {/*                carQueue['carCountReverse'] = `${countCar} (0:00) назад`*/}
+                                                        {/*            } else {*/}
+                                                        {/*                carQueue['carCount'] = `${countCar} (0:00) назад`*/}
+                                                        {/*            }*/}
+
+                                                        {/*            popup.open({title: "Успешно", message: "Данные отправлены, обновите страницу", buttons: [{type: "default", text: "Ok"}]});*/}
+                                                        {/*        }*/}
+                                                        {/*    )*/}
+                                                        {/*}}>Отправить</Button>*/}
+                                                    </Placeholder>
+                                                </Modal>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (directionCrossing?.from_city?.name !== "Советск" && (
+                                <div>
+
+                                    <div className="bel-container-inf report-title">
+                                        <div>
+                                            <Text weight="1" className={""} style={{marginBottom: "6%"}}>
+                                                {`Количество автомобилей в очереди до КПП`}
+                                            </Text>
+                                        </div>
+
+                                        <div className="time-container-title-poland" style={{marginTop: "5%"}}>
+                                            <div className={"report-elem-logo-container stat-container-car-queue"}>
+                                                <div style={{width: "60%"}}>
+                                                    <div className="to-reverse">
+                                                        <Avatar size={20}
+                                                                src={`/${directionCrossing.to_city.country.logo}`}/>
+                                                        <Avatar className={"to-logo-size"} size={20}
+                                                                src={`/to_logo.svg`}/>
+                                                        <Avatar size={20}
+                                                                src={`/${directionCrossing.from_city.country.logo}`}/>
+
+                                                        <Text
+                                                            style={{marginLeft: "2%"}}>{carQueue['carCountReverse']}</Text>
+                                                    </div>
+                                                </div>
+
+                                                <Modal
+                                                    header={<ModalHeader>Количество автомобилей в очереди до
+                                                        КПП</ModalHeader>}
+                                                    trigger={<Button size="s" style={{width: "40%"}}>Сообщить</Button>}
+                                                    onClose={() => console.log('Окно закрыто')}
+                                                    onOpenChange={handleOpenChange}
+
+                                                >
+                                                    <Placeholder
+                                                        id={"statistic-placeholder"}
+                                                        className={"statistic-placeholder"}
+                                                    >
+                                                        <Text className="choose-direction-title">
+                                                            Выберите направление
+                                                        </Text>
+
+                                                        <form>
+                                                            <div style={{display: "flex", alignItems: "center"}}>
+                                                                <Cell
+                                                                    Component="label"
+                                                                    before={<Radio name="radio" value={`true`}
+                                                                                   checked={isReverseRoute}/>}
+                                                                    multiline
+                                                                    onChange={() => setReverseRoute(true)}
+                                                                >
+                                                                    <div className={"route-container"}>
+                                                                        <Avatar size={20}
+                                                                                src={`/${directionCrossing.to_city.country.logo}`}/>
+                                                                        <Avatar className={"to-logo-size"} size={20}
+                                                                                src={`/to_logo.svg`}/>
+                                                                        <Avatar size={20}
+                                                                                src={`/${directionCrossing.from_city.country.logo}`}/>
+                                                                    </div>
+                                                                </Cell>
+
+                                                            </div>
+                                                        </form>
+
+                                                        {(isMacOS() || isIOS()) && (
+                                                            <>
+                                                                <Text>
+                                                                    {"Укажите количество автомобилей в очереди до КПП"}
+                                                                </Text>
+                                                            </>
+                                                        )}
+
+                                                        <Input
+                                                            style={{width: "90%"}}
+                                                            header={"Количество автомобилей в очереди до КПП"}
+                                                            name="countCar"
+                                                            type="number"
+                                                            value={countCar}
+                                                            onChange={(e) => setCountCar(e.target.value)}
+                                                            placeholder="Количество автомобилей в очереди до КПП"
+                                                            defaultValue="0"
+                                                        />
+
+                                                        {/*<Button style={{width: "90%"}} onClick={() => {*/}
+                                                        {/*    const countCarData = {*/}
+                                                        {/*        border_crossing_id: id,*/}
+                                                        {/*        count: countCar,  // Adjust according to your user data*/}
+                                                        {/*        route_reverse: true*/}
+                                                        {/*    };*/}
+
+                                                        {/*    CarQueueService.createQueue(countCarData)*/}
+                                                        {/*        .then(response => {*/}
+                                                        {/*            if (isReverseRoute) {*/}
+                                                        {/*                carQueue['carCountReverse'] = `${countCar} (0:00) назад`*/}
+                                                        {/*            } else {*/}
+                                                        {/*                carQueue['carCount'] = `${countCar} (0:00) назад`*/}
+                                                        {/*            }*/}
+
+                                                        {/*                popup.open({title: "Успешно", message: "Данные отправлены, обновите страницу", buttons: [{type: "default", text: "Ok"}]});*/}
+                                                        {/*            }*/}
+                                                        {/*        )*/}
+                                                        {/*}}>Отправить</Button>*/}
+                                                    </Placeholder>
+                                                </Modal>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                )
+                            )}
+
                             <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', gap: "10px"}}>
                                 <Modal
                                     header={<ModalHeader>Прогноз прохождения пункта пропуска</ModalHeader>}
-                                    trigger={<Button size="m" style={{width: "50%"}} onClick={handleShowStatistics}>Прогноз</Button>}
+                                    trigger={<Button size="m" style={{width: "50%"}}
+                                                     onClick={handleShowStatistics}>Прогноз</Button>}
                                 >
                                     {statisticData ? (
                                         <Placeholder
@@ -592,7 +936,8 @@ export default function BorderCrossingInfo() {
 
                                 <Modal
                                     header={<ModalHeader>Статистика прохождения пункта пропуска</ModalHeader>}
-                                    trigger={<Button size="m" style={{width: "50%"}} onClick={fetchData1}>Статистика</Button>}
+                                    trigger={<Button size="m" style={{width: "50%"}}
+                                                     onClick={fetchData1}>Статистика</Button>}
                                 >
                                     {jsonData1 ? (
                                         <Placeholder
@@ -620,7 +965,8 @@ export default function BorderCrossingInfo() {
                                                     }} checked={isFlippedDirection}/>
                                                     <Text weight="3"
                                                           style={{fontSize: "calc(var(--tgui--text--font_size) - 10%)"}}>
-                                                        Статистика за последние 7 дней на основе отчетов о прохождении пункта пропуска
+                                                        Статистика за последние 7 дней на основе отчетов о прохождении
+                                                        пункта пропуска
                                                     </Text>
                                                     <br/>
                                                     <Text weight="1"

@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Http;
 
 /**
  * @OA\Schema(
- *     schema="BorderCrossing",
+ *     schema="CarsQueue",
  *     type="object",
  *     required={"id", "name"},
  *     @OA\Property(
@@ -113,14 +113,14 @@ class BorderCrossingController extends Controller
     /**
      * @OA\Get(
      *     path="/api/directions/borderCrossing",
-     *     tags={"BorderCrossing"},
+     *     tags={"CarsQueue"},
      *     summary="Получение всех погран-переходов по направлению",
      *     @OA\Response(
      *       response="200",
      *       description="Request Successful",
      *       @OA\JsonContent(
      *           type="array",
-     *           @OA\Items(ref="#/components/schemas/BorderCrossing")
+     *           @OA\Items(ref="#/components/schemas/CarsQueue")
      *       )
      *     ),
      *     @OA\Response(

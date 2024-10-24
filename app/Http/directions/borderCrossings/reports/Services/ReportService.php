@@ -665,11 +665,13 @@ class ReportService
             try {
                 $cache = explode(' ', $data->getTime());
 
-                if ($cache[0] == "0" && $cache[2] == 0) {
-                    if (!is_null($report["time_enter_waiting_area"])) {
-                        $enterWaitingAreaTime = new DateTime($report["time_enter_waiting_area"], new DateTimeZone('Europe/Minsk'));
-                        $difference = $exitTime->diff($enterWaitingAreaTime);
-                    }
+                if (!is_null($report["time_enter_waiting_area"])) {
+                    $enterWaitingAreaTime = new DateTime($report["time_enter_waiting_area"], new DateTimeZone('Europe/Minsk'));
+                    $difference = $exitTime->diff($enterWaitingAreaTime);
+                }
+
+                if ($cache[0] == "0" && $cache[2] == "0") {
+                    Log::info("CACHE " . $data->getTime());
 
                     if (!is_null($report["checkpoint_queue"])) {
                         $queueTime = new DateTime($report["checkpoint_queue"], new DateTimeZone('Europe/Minsk'));
@@ -678,8 +680,24 @@ class ReportService
                 }
 
 
+                return ($difference->days * 24 * 60) + ($difference->h * 60) + $difference->i;
+
             } catch (\Exception $exception) {
+
+                if (!is_null($report["time_enter_waiting_area"])) {
+                    $enterWaitingAreaTime = new DateTime($report["time_enter_waiting_area"], new DateTimeZone('Europe/Minsk'));
+                    $difference = $exitTime->diff($enterWaitingAreaTime);
+                }
+
+                if (!is_null($report["checkpoint_queue"])) {
+                    $queueTime = new DateTime($report["checkpoint_queue"], new DateTimeZone('Europe/Minsk'));
+                    $difference = $exitTime->diff($queueTime);
+                }
+
                 Log::error($exception->getMessage());
+
+                return ($difference->days * 24 * 60) + ($difference->h * 60) + $difference->i;
+
             }
         }
 

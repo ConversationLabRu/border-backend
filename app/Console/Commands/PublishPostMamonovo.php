@@ -87,7 +87,7 @@ class PublishPostMamonovo extends Command
         }
 
         $body2 = [
-            'chat_id' => '@poputchiki39',
+            'chat_id' => '@poputchikiidom39',
             'text' => $formatedText,
             'parse_mode' => 'MarkdownV2',
             'reply_markup' => json_encode([
